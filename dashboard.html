@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S — Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0d12;
+      --surface:   #111620;
+      --surface2:  #141c28;
+      --border:    #1e2a3a;
+      --accent:    #38bdf8;
+      --accent-dim:#0ea5e9;
+      --green:     #34d399;
+      --yellow:    #fbbf24;
+      --red:       #f87171;
+      --purple:    #a78bfa;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    10px;
+      --font:      -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #0e2236; }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--green);
+      background: #0b2016;
+    }
+    .badge .dot-sm {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .stat-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-card .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .stat-card .sub .up   { color: var(--green); }
+    .stat-card .sub .down { color: var(--red); }
+    .stat-card .accent-line {
+      height: 2px;
+      border-radius: 1px;
+      margin-bottom: 14px;
+    }
+
+    /* ── CHARTS ROW ── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 700px) { .charts-row { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title span { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      background: var(--accent);
+      opacity: 0.75;
+      transition: opacity 0.2s;
+      min-height: 4px;
+    }
+    .bar:hover { opacity: 1; }
+    .bar-label { font-size: 10px; color: var(--muted); }
+
+    /* Donut chart */
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .donut-legend { width: 100%; }
+    .donut-legend-item {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .donut-legend-item:last-child { border-bottom: none; }
+    .donut-legend-item .leg-left { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .donut-legend-item .dot-leg { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .donut-legend-item .pct { font-weight: 600; color: var(--text); }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      text-align: left;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 12px 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 11px 12px; color: var(--text); vertical-align: middle; }
+    tbody td.muted { color: var(--muted); }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .status-pill.ok   { background: #0b2016; color: var(--green);  border: 1px solid #1a4030; }
+    .status-pill.warn { background: #201800; color: var(--yellow); border: 1px solid #3a2800; }
+    .status-pill.err  { background: #200b0b; color: var(--red);    border: 1px solid #3a1515; }
+
+    /* ── ACTIVITY ── */
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .act-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0; margin-top: 1px;
+    }
+    .act-body { flex: 1; line-height: 1.5; }
+    .act-body .act-title { color: var(--text); }
+    .act-body .act-time  { font-size: 11px; color: var(--muted); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">Chat</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>AI Reports Dashboard</h1>
+      <p>System metrics, usage analytics, and model performance — Team 10</p>
+    </div>
+    <div class="badge">
+      <span class="dot-sm"></span>
+      All systems operational
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--accent);"></div>
+      <div class="label">Total Queries</div>
+      <div class="value">48,302</div>
+      <div class="sub"><span class="up">↑ 12%</span> vs last week</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--green);"></div>
+      <div class="label">Avg. Response Time</div>
+      <div class="value">1.4s</div>
+      <div class="sub"><span class="up">↓ 0.2s</span> improvement</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--purple);"></div>
+      <div class="label">Active Users</div>
+      <div class="value">1,847</div>
+      <div class="sub"><span class="up">↑ 8%</span> this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--yellow);"></div>
+      <div class="label">Error Rate</div>
+      <div class="value">0.3%</div>
+      <div class="sub"><span class="down">↑ 0.1%</span> from baseline</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--accent-dim);"></div>
+      <div class="label">Model Accuracy</div>
+      <div class="value">96.7%</div>
+      <div class="sub"><span class="up">↑ 1.2%</span> vs last model</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Daily Query Volume <span>Last 7 days</span></div>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
+        <div class="bar-col"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
+        <div class="bar-col"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
+        <div class="bar-col"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
+        <div class="bar-col"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
+        <div class="bar-col"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
+        <div class="bar-col"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Query Categories</div>
+      <div class="donut-wrap">
+        <svg viewBox="0 0 120 120" width="110" height="110">
+          <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
+          <!-- Code: 35% = 101 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#38bdf8" stroke-width="18"
+            stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+          <!-- Data: 25% = 72 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#a78bfa" stroke-width="18"
+            stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
+          <!-- Writing: 20% = 58 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#34d399" stroke-width="18"
+            stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
+          <!-- Other: 20% = 58 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#fbbf24" stroke-width="18"
+            stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
+          <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
+        </svg>
+        <div class="donut-legend" style="width:100%">
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--accent)"></span>Code &amp; Dev</div>
+            <span class="pct">35%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--purple)"></span>Data Analysis</div>
+            <span class="pct">25%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--green)"></span>Writing</div>
+            <span class="pct">20%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--yellow)"></span>Other</div>
+            <span class="pct">20%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table + Activity -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Recent Model Reports <span>Last 5 runs</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Run ID</th>
+              <th>Model</th>
+              <th>Accuracy</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="muted">#2048</td>
+              <td>JARVIS-4</td>
+              <td>97.1%</td>
+              <td><span class="status-pill ok">Passed</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2047</td>
+              <td>JARVIS-4</td>
+              <td>96.8%</td>
+              <td><span class="status-pill ok">Passed</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2046</td>
+              <td>JARVIS-3</td>
+              <td>94.2%</td>
+              <td><span class="status-pill warn">Review</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2045</td>
+              <td>JARVIS-3</td>
+              <td>93.9%</td>
+              <td><span class="status-pill warn">Review</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2044</td>
+              <td>JARVIS-2</td>
+              <td>89.1%</td>
+              <td><span class="status-pill err">Failed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">System Activity <span>Live feed</span></div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0e2236;color:var(--accent)">⚙</div>
+          <div class="act-body">
+            <div class="act-title">Model JARVIS-4 deployed to production</div>
+            <div class="act-time">2 minutes ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
+          <div class="act-body">
+            <div class="act-title">Weekly accuracy report generated</div>
+            <div class="act-time">18 minutes ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#201800;color:var(--yellow)">!</div>
+          <div class="act-body">
+            <div class="act-title">Latency spike detected — resolved</div>
+            <div class="act-time">1 hour ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0e2236;color:var(--purple)">↑</div>
+          <div class="act-body">
+            <div class="act-title">Training dataset updated (2.1M records)</div>
+            <div class="act-time">3 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
+          <div class="act-body">
+            <div class="act-title">Automated backup completed successfully</div>
+            <div class="act-time">6 hours ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
