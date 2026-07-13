@@ -11,12 +11,12 @@
       --bg:        #0a0d12;
       --surface:   #111620;
       --border:    #1e2a3a;
-      --accent:    #38bdf8;
-      --accent-dim:#0ea5e9;
+      --accent:    #02fdfb;
+      --accent-dim:#22ded8;
       --text:      #e2e8f0;
       --muted:     #64748b;
-      --user-bg:   #0f2a3f;
-      --ai-bg:     #131d2b;
+      --user-bg:   #011f1f;
+      --ai-bg:     #0a1414;
       --radius:    10px;
       --font:      -apple-system, "Segoe UI", system-ui, sans-serif;
     }
@@ -75,7 +75,7 @@
       transition: color 0.2s, background 0.2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #0e2236; }
+    .nav-links a.active { color: var(--accent); background: #011f1f; }
 
     /* ── CHAT LAYOUT ── */
     .chat-wrap {
@@ -112,8 +112,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 13px; font-weight: 700; flex-shrink: 0;
     }
-    .msg.ai   .avatar { background: #0e2236; color: var(--accent); border: 1px solid var(--border); }
-    .msg.user .avatar { background: #1e3a52; color: var(--accent); border: 1px solid var(--border); }
+    .msg.ai   .avatar { background: #011f1f; color: var(--accent); border: 1px solid var(--border); }
+    .msg.user .avatar { background: #011f1f; color: var(--accent); border: 1px solid var(--border); }
 
     .bubble {
       max-width: 72%;
@@ -190,7 +190,7 @@
       display: flex; align-items: center; justify-content: center;
       transition: background 0.2s, transform 0.1s;
     }
-    .send-btn:hover  { background: #7dd3fc; }
+    .send-btn:hover  { background: #5ffaf8; }
     .send-btn:active { transform: scale(0.94); }
     .send-btn svg { width: 16px; height: 16px; }
 

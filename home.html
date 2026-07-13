@@ -11,7 +11,7 @@
       --bg:      #0a0d12;
       --surface: #111620;
       --border:  #1e2a3a;
-      --accent:  #38bdf8;
+      --accent:  #02fdfb;
       --text:    #e2e8f0;
       --muted:   #64748b;
       --radius:  12px;
@@ -82,7 +82,7 @@
       transition: color 0.2s, background 0.2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #0e2236; }
+    .nav-links a.active { color: var(--accent); background: #011f1f; }
 
     /* ── HERO ── */
     .hero {
@@ -117,7 +117,7 @@
       position: absolute;
       inset: 28px;
       border-radius: 50%;
-      background: #0e2236;
+      background: #011f1f;
       border: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -199,7 +199,7 @@
       display: flex; align-items: center; gap: 8px;
       transition: background 0.2s, transform 0.1s;
     }
-    .ask-btn:hover  { background: #7dd3fc; }
+    .ask-btn:hover  { background: #5ffaf8; }
     .ask-btn:active { transform: scale(0.96); }
     .ask-btn svg { width: 14px; height: 14px; }
 
@@ -222,7 +222,7 @@
       transition: color 0.2s, border-color 0.2s, background 0.2s;
       user-select: none;
     }
-    .chip:hover { color: var(--accent); border-color: var(--accent); background: #0e2236; }
+    .chip:hover { color: var(--accent); border-color: var(--accent); background: #011f1f; }
 
     .footer-hint {
       margin-top: 14px;
@@ -269,14 +269,14 @@
       <!-- spinning dashed ring -->
       <g class="ring-spin">
         <circle cx="80" cy="80" r="74" fill="none"
-          stroke="#38bdf8" stroke-width="1.5"
+          stroke="#02fdfb" stroke-width="1.5"
           stroke-dasharray="18 10" stroke-linecap="round" opacity="0.5"/>
       </g>
       <!-- inner static ring -->
       <circle cx="80" cy="80" r="58" fill="none" stroke="#1e2a3a" stroke-width="1"/>
       <!-- accent arc -->
       <circle cx="80" cy="80" r="58" fill="none"
-        stroke="#38bdf8" stroke-width="2"
+        stroke="#02fdfb" stroke-width="2"
         stroke-dasharray="60 305" stroke-dashoffset="-20"
         stroke-linecap="round" opacity="0.8"/>
     </svg>

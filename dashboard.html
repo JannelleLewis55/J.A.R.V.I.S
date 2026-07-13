@@ -77,7 +77,7 @@
       transition: color 0.2s, background 0.2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #0e2236; }
+    .nav-links a.active { color: var(--accent); background: #011f1f; }
 
     /* ── PAGE ── */
     .page {
@@ -113,7 +113,7 @@
       border-radius: 20px;
       border: 1px solid var(--border);
       color: var(--green);
-      background: #0b2016;
+      background: #011200;
     }
     .badge .dot-sm {
       width: 6px; height: 6px;
@@ -240,9 +240,9 @@
       padding: 2px 10px;
       border-radius: 20px;
     }
-    .status-pill.ok   { background: #0b2016; color: var(--green);  border: 1px solid #1a4030; }
-    .status-pill.warn { background: #201800; color: var(--yellow); border: 1px solid #3a2800; }
-    .status-pill.err  { background: #200b0b; color: var(--red);    border: 1px solid #3a1515; }
+    .status-pill.ok   { background: #011200; color: var(--green);  border: 1px solid #023302; }
+    .status-pill.warn { background: #1a1600; color: var(--yellow); border: 1px solid #332b00; }
+    .status-pill.err  { background: #1a0000; color: var(--red);    border: 1px solid #330000; }
 
     /* ── ACTIVITY ── */
     .activity-list { display: flex; flex-direction: column; gap: 0; }
@@ -352,22 +352,22 @@
           <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
           <!-- Code: 35% = 101 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#38bdf8" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#0e7fa8" stroke-width="18"
             stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
           <!-- Data: 25% = 72 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#a78bfa" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#8A00C4" stroke-width="18"
             stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
           <!-- Writing: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#34d399" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#016601" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
           <!-- Other: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#fbbf24" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#b6aa02" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
           <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
         </svg>
         <div class="donut-legend" style="width:100%">
           <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:var(--accent)"></span>Code &amp; Dev</div>
+            <div class="leg-left"><span class="dot-leg" style="background:#0e7fa8"></span>Code &amp; Dev</div>
             <span class="pct">35%</span>
           </div>
           <div class="donut-legend-item">
@@ -441,35 +441,35 @@
       <div class="card-title">System Activity <span>Live feed</span></div>
       <div class="activity-list">
         <div class="activity-item">
-          <div class="act-icon" style="background:#0e2236;color:var(--accent)">⚙</div>
+          <div class="act-icon" style="background:#011f1f;color:var(--accent)">⚙</div>
           <div class="act-body">
             <div class="act-title">Model JARVIS-4 deployed to production</div>
             <div class="act-time">2 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#011200;color:var(--green)">✓</div>
           <div class="act-body">
             <div class="act-title">Weekly accuracy report generated</div>
             <div class="act-time">18 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#201800;color:var(--yellow)">!</div>
+          <div class="act-icon" style="background:#1a1600;color:var(--yellow)">!</div>
           <div class="act-body">
             <div class="act-title">Latency spike detected — resolved</div>
             <div class="act-time">1 hour ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#0e2236;color:var(--purple)">↑</div>
+          <div class="act-icon" style="background:#1a0030;color:var(--purple)">↑</div>
           <div class="act-body">
             <div class="act-title">Training dataset updated (2.1M records)</div>
             <div class="act-time">3 hours ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#011200;color:var(--green)">✓</div>
           <div class="act-body">
             <div class="act-title">Automated backup completed successfully</div>
             <div class="act-time">6 hours ago</div>
