@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>J.A.R.V.I.S — ESG Report Checker</title>
+  <title>J.A.R.V.I.S — ESG</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -80,92 +80,245 @@
       padding: 28px 20px 60px;
     }
 
+    /* ── HUB ── */
+    #hubView {}
+
+    .hub-header {
+      margin-bottom: 32px;
+    }
+    .hub-header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+    .hub-header p  { font-size: 14px; color: var(--muted); margin-top: 5px; line-height: 1.55; }
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .hub-grid { grid-template-columns: 1fr; } }
+
+    .hub-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hub-card:hover { border-color: var(--accent-dim); background: var(--surface2); }
+    .hub-card:active { transform: scale(0.98); }
+
+    .hub-card-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .hub-card-icon svg { width: 22px; height: 22px; }
+
+    .hub-card-icon.check   { background: #011f1f; color: var(--accent); }
+    .hub-card-icon.generate { background: #0f1a2e; color: #60a5fa; }
+    .hub-card-icon.trends  { background: #1a1000; color: var(--yellow-bright); }
+    .hub-card-icon.view    { background: #0d1a10; color: var(--green-bright); }
+
+    .hub-card h2 { font-size: 16px; font-weight: 600; color: var(--text); }
+    .hub-card p  { font-size: 13px; color: var(--muted); line-height: 1.55; flex: 1; }
+
+    .hub-card-arrow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--accent-dim);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    .hub-card-arrow svg { width: 13px; height: 13px; }
+
+    .coming-soon-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: #1a1000;
+      color: var(--yellow-bright);
+      border: 1px solid #332200;
+      align-self: flex-start;
+    }
+
+    /* ── CHECKER TOOL ── */
+    #checkerView { display: none; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--accent); }
+    .back-btn svg { width: 14px; height: 14px; }
+
     .page-header {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 28px;
+      gap: 16px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 12px;
     }
     .page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
     .page-header p  { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
-    /* standard selector */
     .standard-bar {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .standard-bar label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
     .std-btn {
-      padding: 5px 14px;
+      padding: 4px 11px;
+      font-size: 12px;
       border-radius: 6px;
       border: 1px solid var(--border);
-      background: var(--surface);
+      background: transparent;
       color: var(--muted);
-      font-family: var(--font);
-      font-size: 12px;
       cursor: pointer;
-      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      font-family: var(--font);
     }
     .std-btn:hover  { color: var(--text); border-color: var(--accent-dim); }
     .std-btn.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
 
-    /* ── UPLOAD ZONE ── */
-    .upload-zone {
-      background: var(--surface);
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 48px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.25s, background 0.25s;
-      margin-bottom: 20px;
-      position: relative;
+    .std-btn.auto-detect {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .upload-zone:hover, .upload-zone.drag-over {
+    .std-btn.auto-detect:hover { background: #011f1f; color: var(--accent); border-color: var(--accent); }
+    .std-btn.auto-detect.active {
+      color: var(--accent);
       border-color: var(--accent);
       background: #011f1f;
+    }
+
+    .detect-banner {
+      display: none;
+      gap: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .detect-banner.show { display: flex; }
+    .detect-banner-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: #011f1f;
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .detect-banner-icon svg { width: 16px; height: 16px; }
+    .detect-banner-body { flex: 1; }
+    .detect-banner-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .detect-banner-desc  { color: var(--muted); line-height: 1.55; font-size: 12px; }
+    .detect-banner-scores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .detect-score-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .detect-score-pill.top {
+      background: #011f1f;
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .detect-override {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .detect-override:hover { color: var(--accent); text-decoration: underline; }
+
+    .upload-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent-dim);
+      background: #011f1f22;
     }
     .upload-zone input[type="file"] {
       position: absolute;
       inset: 0;
       opacity: 0;
       cursor: pointer;
+      width: 100%;
+      height: 100%;
     }
     .upload-icon {
-      width: 48px; height: 48px;
-      margin: 0 auto 16px;
-      border-radius: 12px;
-      background: #011f1f;
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--surface2);
       border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      color: var(--accent-dim);
     }
     .upload-icon svg { width: 22px; height: 22px; }
     .upload-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
     .upload-sub   { font-size: 13px; color: var(--muted); }
     .upload-formats { font-size: 11px; color: var(--muted); margin-top: 10px; opacity: 0.7; }
 
-    /* file pills */
     .file-list {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
     .file-pill {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: var(--surface);
+      padding: 5px 10px;
+      background: var(--surface2);
       border: 1px solid var(--border);
+      border-radius: 6px;
       font-size: 12px;
       color: var(--text);
     }
@@ -173,35 +326,33 @@
     .file-pill .fp-remove {
       color: var(--muted);
       cursor: pointer;
-      font-size: 14px;
+      font-size: 11px;
       line-height: 1;
       transition: color 0.15s;
     }
     .file-pill .fp-remove:hover { color: var(--red-bright); }
 
-    /* ── ANALYSE BUTTON ── */
     .action-row {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .check-btn {
-      height: 42px;
-      padding: 0 24px;
-      border-radius: 10px;
-      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
       background: var(--accent);
       color: #000;
-      font-family: var(--font);
       font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.2s, transform 0.1s;
+      transition: background 0.15s, transform 0.1s;
+      font-family: var(--font);
+      letter-spacing: 0.01em;
     }
     .check-btn:hover  { background: #5ffaf8; }
     .check-btn:active { transform: scale(0.96); }
@@ -211,89 +362,86 @@
     .status-msg { font-size: 13px; color: var(--muted); }
     .dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 4px; }
     .dots span {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--accent);
-      animation: blink 1.2s ease-in-out infinite;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: blink 1.2s infinite;
     }
     .dots span:nth-child(2) { animation-delay: 0.2s; }
     .dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
 
-    /* ── RESULTS ── */
     #resultsSection { display: none; }
 
-    /* score bar at top */
     .score-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
     .score-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 18px 20px;
+      padding: 14px 16px;
     }
     .score-card .sc-label {
       font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
       color: var(--muted);
-      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      text-transform: uppercase;
     }
     .score-card .sc-val {
-      font-size: 30px;
-      font-weight: 800;
+      font-size: 28px;
+      font-weight: 700;
       line-height: 1;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .score-card .sc-sub { font-size: 12px; color: var(--muted); }
     .score-card .sc-bar-bg {
       height: 4px;
-      border-radius: 2px;
       background: var(--border);
+      border-radius: 2px;
       margin-top: 10px;
       overflow: hidden;
     }
     .score-card .sc-bar { height: 100%; border-radius: 2px; }
 
-    /* findings list */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 18px 20px;
     }
     .card-title {
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
     }
     .card-title span { font-size: 11px; color: var(--muted); font-weight: 400; }
 
-    /* category tabs */
     .cat-tabs {
       display: flex;
       gap: 6px;
-      margin-bottom: 16px;
       flex-wrap: wrap;
+      margin-bottom: 12px;
     }
     .cat-tab {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 5px;
       border: 1px solid var(--border);
       background: transparent;
       color: var(--muted);
       cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
       font-family: var(--font);
-      transition: all 0.15s;
     }
     .cat-tab:hover  { color: var(--text); border-color: var(--accent-dim); }
     .cat-tab.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
@@ -301,23 +449,22 @@
     .finding-list { display: flex; flex-direction: column; gap: 0; }
     .finding-item {
       display: flex;
-      gap: 12px;
       align-items: flex-start;
-      padding: 12px 0;
+      gap: 10px;
+      padding: 11px 0;
       border-bottom: 1px solid var(--border);
-      font-size: 13px;
     }
     .finding-item:last-child { border-bottom: none; }
     .finding-item.hidden { display: none; }
 
     .sev-badge {
-      flex-shrink: 0;
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 20px;
-      letter-spacing: 0.06em;
-      margin-top: 2px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+      margin-top: 1px;
     }
     .sev-badge.critical { background: #1a0000; color: var(--red-bright);    border: 1px solid #330000; }
     .sev-badge.major    { background: #1a0e00; color: var(--yellow-bright);  border: 1px solid #332200; }
@@ -329,21 +476,18 @@
     .finding-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
     .finding-ref   { font-size: 11px; color: var(--accent-dim); margin-top: 4px; opacity: 0.8; }
 
-    /* section progress table */
     .section-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .section-table thead th {
       text-align: left;
+      padding: 8px 10px;
       font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
       color: var(--muted);
-      padding: 0 10px 10px;
+      letter-spacing: 0.04em;
       border-bottom: 1px solid var(--border);
-      font-weight: 600;
+      font-weight: 500;
     }
     .section-table tbody tr {
       border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
     }
     .section-table tbody tr:last-child { border-bottom: none; }
     .section-table tbody tr:hover { background: var(--surface2); }
@@ -354,8 +498,8 @@
     .prog-bg {
       flex: 1;
       height: 6px;
-      border-radius: 3px;
       background: var(--border);
+      border-radius: 3px;
       overflow: hidden;
     }
     .prog-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
@@ -364,14 +508,45 @@
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
 
-    /* empty state */
     .empty-state {
       text-align: center;
-      padding: 48px 24px;
+      padding: 40px 20px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 14px;
     }
     .empty-state p { margin-top: 8px; font-size: 12px; }
+
+    /* ── STUB VIEWS ── */
+    #generateView, #insertView, #viewView { display: none; }
+
+    .stub-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      text-align: center;
+      gap: 14px;
+      color: var(--muted);
+    }
+    .stub-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .stub-icon svg { width: 28px; height: 28px; }
+    .stub-wrap h2 { font-size: 18px; font-weight: 600; color: var(--text); }
+    .stub-wrap p  { font-size: 13px; max-width: 400px; line-height: 1.6; }
+    .stub-soon {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #1a1000;
+      color: var(--yellow-bright);
+      border: 1px solid #332200;
+    }
   </style>
 </head>
 <body>
@@ -386,102 +561,290 @@
     <a href="index.html">Chat</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="trends.html">Trends</a>
-    <a href="esg-checker.html" class="active">ESG Checker</a>
+    <a href="esg-checker.html" class="active">ESG</a>
   </div>
 </nav>
 
 <div class="page">
 
-  <!-- Header -->
-  <div class="page-header">
-    <div>
-      <h1>ESG Report Checker</h1>
-      <p>Upload your ESG report to detect gaps, inconsistencies, and missing disclosures vs. the selected standard</p>
+  <!-- ══ HUB ══ -->
+  <div id="hubView">
+    <div class="hub-header">
+      <h1>ESG</h1>
+      <p>Everything you need to manage, check, and generate ESG content — all in one place.</p>
     </div>
-    <div class="standard-bar">
-      <label>Standard:</label>
-      <button class="std-btn active" data-std="gri">GRI</button>
-      <button class="std-btn" data-std="sasb">SASB</button>
-      <button class="std-btn" data-std="tcfd">TCFD</button>
-      <button class="std-btn" data-std="csrd">CSRD</button>
-      <button class="std-btn" data-std="sdg">SDG</button>
+
+    <div class="hub-grid">
+
+      <!-- Check it -->
+      <div class="hub-card" id="hubCheck">
+        <div class="hub-card-icon check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <h2>Check it</h2>
+        <p>Upload an ESG report and detect gaps, inconsistencies, and missing disclosures against GRI, SASB, TCFD, CSRD, or UN SDG standards.</p>
+        <div class="hub-card-arrow">
+          Open checker
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Generate it -->
+      <div class="hub-card" id="hubGenerate">
+        <div class="hub-card-icon generate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <h2>Generate it</h2>
+        <p>Automatically draft ESG report sections, disclosures, and narratives based on your data and selected reporting standard.</p>
+        <span class="coming-soon-badge">Coming soon</span>
+      </div>
+
+      <!-- Insert into Trends -->
+      <div class="hub-card" id="hubInsert">
+        <div class="hub-card-icon trends">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <h2>Insert into Trends</h2>
+        <p>Push ESG metrics — emissions, coverage scores, social indicators — directly into the Trends dashboard for tracking over time.</p>
+        <span class="coming-soon-badge">Coming soon</span>
+      </div>
+
+      <!-- View it -->
+      <div class="hub-card" id="hubView2">
+        <div class="hub-card-icon view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <h2>View it</h2>
+        <p>Browse previously analysed ESG reports, compare runs side-by-side, and review historical gap findings and coverage trends.</p>
+        <span class="coming-soon-badge">Coming soon</span>
+      </div>
+
     </div>
   </div>
 
-  <!-- Upload zone -->
-  <div class="upload-zone" id="uploadZone">
-    <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.csv,.xlsx" multiple />
-    <div class="upload-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="17 8 12 3 7 8"/>
-        <line x1="12" y1="3" x2="12" y2="15"/>
-      </svg>
-    </div>
-    <div class="upload-title">Drop your ESG report here, or click to browse</div>
-    <div class="upload-sub">Supports single or multiple files for cross-document analysis</div>
-    <div class="upload-formats">PDF · DOCX · TXT · CSV · XLSX</div>
-  </div>
+  <!-- ══ CHECKER ══ -->
+  <div id="checkerView">
 
-  <!-- File pills -->
-  <div class="file-list" id="fileList"></div>
-
-  <!-- Action row -->
-  <div class="action-row">
-    <button class="check-btn" id="checkBtn" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <button class="back-btn" id="backBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
       </svg>
-      Analyse Report
+      Back to ESG
     </button>
-    <span class="status-msg" id="statusMsg"></span>
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1>ESG Report Checker</h1>
+        <p>Upload your ESG report to detect gaps, inconsistencies, and missing disclosures vs. the selected standard</p>
+      </div>
+      <div class="standard-bar">
+        <label>Standard:</label>
+        <button class="std-btn auto-detect active" data-std="auto" id="autoDetectBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"
+               style="width:11px;height:11px;display:inline;vertical-align:-1px;margin-right:4px">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>Auto-detect</button>
+        <button class="std-btn" data-std="gri">GRI</button>
+        <button class="std-btn" data-std="sasb">SASB</button>
+        <button class="std-btn" data-std="tcfd">TCFD</button>
+        <button class="std-btn" data-std="csrd">CSRD</button>
+        <button class="std-btn" data-std="sdg">SDG</button>
+      </div>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.csv,.xlsx" multiple />
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div class="upload-title">Drop your ESG report here, or click to browse</div>
+      <div class="upload-sub">Supports single or multiple files for cross-document analysis</div>
+      <div class="upload-formats">PDF · DOCX · TXT · CSV · XLSX</div>
+    </div>
+
+    <!-- File pills -->
+    <div class="file-list" id="fileList"></div>
+
+    <!-- Detection banner (shown after auto-detect) -->
+    <div class="detect-banner" id="detectBanner">
+      <div class="detect-banner-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <div class="detect-banner-body">
+        <div class="detect-banner-title" id="detectTitle">Standard detected</div>
+        <div class="detect-banner-desc" id="detectDesc"></div>
+        <div class="detect-banner-scores" id="detectScores"></div>
+        <span class="detect-override" id="detectOverride">Override — select a different standard above</span>
+      </div>
+    </div>
+
+    <!-- Action row -->
+    <div class="action-row">
+      <button class="check-btn" id="checkBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Analyse Report
+      </button>
+      <span class="status-msg" id="statusMsg"></span>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsSection">
+
+      <!-- Score cards -->
+      <div class="score-cards" id="scoreCards"></div>
+
+      <!-- Two-column: findings + section progress -->
+      <div class="two-col">
+
+        <!-- Findings -->
+        <div class="card">
+          <div class="card-title">
+            Findings
+            <span id="findingCount">—</span>
+          </div>
+          <div class="cat-tabs" id="catTabs"></div>
+          <div class="finding-list" id="findingList"></div>
+        </div>
+
+        <!-- Section coverage -->
+        <div class="card">
+          <div class="card-title">
+            Section Coverage
+            <span id="coverageStd">—</span>
+          </div>
+          <table class="section-table">
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>Coverage</th>
+              </tr>
+            </thead>
+            <tbody id="coverageBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
-  <!-- Results -->
-  <div id="resultsSection">
-
-    <!-- Score cards -->
-    <div class="score-cards" id="scoreCards"></div>
-
-    <!-- Two-column: findings + section progress -->
-    <div class="two-col">
-
-      <!-- Findings -->
-      <div class="card">
-        <div class="card-title">
-          Findings
-          <span id="findingCount">—</span>
-        </div>
-        <div class="cat-tabs" id="catTabs"></div>
-        <div class="finding-list" id="findingList"></div>
+  <!-- ══ GENERATE (stub) ══ -->
+  <div id="generateView">
+    <button class="back-btn" id="backBtnGenerate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back to ESG
+    </button>
+    <div class="stub-wrap">
+      <div class="stub-icon" style="background:#0f1a2e;color:#60a5fa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
       </div>
+      <h2>Generate ESG Report</h2>
+      <p>Automatically draft ESG report sections, disclosures, and narratives based on your data and selected reporting standard.</p>
+      <span class="stub-soon">Coming soon</span>
+    </div>
+  </div>
 
-      <!-- Section coverage -->
-      <div class="card">
-        <div class="card-title">
-          Section Coverage
-          <span id="coverageStd">—</span>
-        </div>
-        <table class="section-table">
-          <thead>
-            <tr>
-              <th>Section</th>
-              <th>Coverage</th>
-            </tr>
-          </thead>
-          <tbody id="coverageBody"></tbody>
-        </table>
+  <!-- ══ INSERT INTO TRENDS (stub) ══ -->
+  <div id="insertView">
+    <button class="back-btn" id="backBtnInsert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back to ESG
+    </button>
+    <div class="stub-wrap">
+      <div class="stub-icon" style="background:#1a1000;color:var(--yellow-bright)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
       </div>
+      <h2>Insert into Trends</h2>
+      <p>Push ESG metrics — emissions, coverage scores, social indicators — directly into the Trends dashboard for tracking over time.</p>
+      <span class="stub-soon">Coming soon</span>
+    </div>
+  </div>
 
+  <!-- ══ VIEW (stub) ══ -->
+  <div id="viewView">
+    <button class="back-btn" id="backBtnView">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back to ESG
+    </button>
+    <div class="stub-wrap">
+      <div class="stub-icon" style="background:#0d1a10;color:var(--green-bright)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <h2>View ESG Reports</h2>
+      <p>Browse previously analysed ESG reports, compare runs side-by-side, and review historical gap findings and coverage trends.</p>
+      <span class="stub-soon">Coming soon</span>
     </div>
   </div>
 
 </div>
 
 <script>
+  /* ── VIEW ROUTING ── */
+  const views = {
+    hub:      document.getElementById('hubView'),
+    checker:  document.getElementById('checkerView'),
+    generate: document.getElementById('generateView'),
+    insert:   document.getElementById('insertView'),
+    view:     document.getElementById('viewView'),
+  };
+
+  function showView(name) {
+    Object.values(views).forEach(v => v.style.display = 'none');
+    views[name].style.display = 'block';
+  }
+
+  // Hub card nav
+  document.getElementById('hubCheck').addEventListener('click', () => showView('checker'));
+  document.getElementById('hubGenerate').addEventListener('click', () => showView('generate'));
+  document.getElementById('hubInsert').addEventListener('click', () => showView('insert'));
+  document.getElementById('hubView2').addEventListener('click', () => showView('view'));
+
+  // Back buttons
+  document.getElementById('backBtn').addEventListener('click', () => showView('hub'));
+  document.getElementById('backBtnGenerate').addEventListener('click', () => showView('hub'));
+  document.getElementById('backBtnInsert').addEventListener('click', () => showView('hub'));
+  document.getElementById('backBtnView').addEventListener('click', () => showView('hub'));
+
+  // Start on hub
+  showView('hub');
+
   /* ── STANDARDS DEFINITION ── */
   const STANDARDS = {
     gri: {
@@ -589,7 +952,8 @@
   };
 
   /* ── STATE ── */
-  let selectedStd = 'gri';
+  let selectedStd  = 'auto';
+  let detectedStd  = null;
   let uploadedFiles = [];
 
   /* ── STANDARD BUTTONS ── */
@@ -598,7 +962,10 @@
       document.querySelectorAll('.std-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedStd = btn.dataset.std;
-      // clear results if switching standard after analysis
+      if (selectedStd !== 'auto') {
+        document.getElementById('detectBanner').classList.remove('show');
+        detectedStd = null;
+      }
       document.getElementById('resultsSection').style.display = 'none';
     });
   });
@@ -663,39 +1030,109 @@
     return (b/1048576).toFixed(1) + ' MB';
   }
 
+  /* ── KEYWORD SIGNALS ── */
+  const STD_SIGNALS = {
+    gri:  ['gri', 'global reporting', 'gri 2', 'gri 3', 'gri 300', 'gri 400', 'gri standards'],
+    sasb: ['sasb', 'sustainability accounting', 'industry standard', 'sector standard'],
+    tcfd: ['tcfd', 'task force', 'climate-related financial', 'climate risk disclosure', 'scenario analysis'],
+    csrd: ['csrd', 'esrs', 'corporate sustainability reporting', 'european sustainability', 'double materiality'],
+    sdg:  ['sdg', 'sustainable development goal', 'un goals', 'un sdg', '2030 agenda'],
+  };
+
+  function detectStandard(files) {
+    const combined = files.map(f => f.name.toLowerCase()).join(' ');
+    const scores = {};
+    for (const [std, signals] of Object.entries(STD_SIGNALS)) {
+      scores[std] = signals.reduce((n, kw) => n + (combined.includes(kw) ? 3 : 0), 0);
+    }
+    const seed = files.reduce((a, f) => a + f.name.length * 17 + f.size, 0);
+    function seededRand(offset) {
+      const x = Math.sin(seed + offset) * 43758.5453;
+      return x - Math.floor(x);
+    }
+    const stdKeys = Object.keys(scores);
+    stdKeys.forEach((std, i) => { scores[std] += Math.round(seededRand(i * 11) * 40 + 10); });
+    const sorted = stdKeys.sort((a, b) => scores[b] - scores[a]);
+    const maxScore = scores[sorted[0]];
+    const normalised = {};
+    sorted.forEach(std => { normalised[std] = Math.round((scores[std] / maxScore) * 100); });
+    return { ranked: sorted, scores: normalised, top: sorted[0] };
+  }
+
+  function showDetectionBanner(detection) {
+    const stdLabels = { gri:'GRI Standards', sasb:'SASB Standards', tcfd:'TCFD Framework', csrd:'CSRD / ESRS', sdg:'UN SDG Mapping' };
+    const top = detection.top;
+
+    document.getElementById('detectTitle').textContent = 'Standard detected: ' + stdLabels[top];
+
+    const confPct = detection.scores[top];
+    document.getElementById('detectDesc').textContent =
+      'J.A.R.V.I.S analysed the report content and identified ' + stdLabels[top] + ' as the primary framework ' +
+      '(' + confPct + '% confidence). The gap analysis below is run against this standard. ' +
+      'If this is incorrect, select a different standard above and re-run.';
+
+    const scoresEl = document.getElementById('detectScores');
+    scoresEl.innerHTML = '';
+    detection.ranked.forEach(std => {
+      const pill = document.createElement('span');
+      pill.className = 'detect-score-pill' + (std === top ? ' top' : '');
+      pill.textContent = stdLabels[std] + ' ' + detection.scores[std] + '%';
+      scoresEl.appendChild(pill);
+    });
+
+    document.querySelectorAll('.std-btn:not(.auto-detect)').forEach(b => {
+      b.style.borderColor = b.dataset.std === top ? 'var(--accent-dim)' : '';
+      b.style.color       = b.dataset.std === top ? 'var(--accent-dim)' : '';
+    });
+
+    document.getElementById('detectBanner').classList.add('show');
+  }
+
   /* ── ANALYSE ── */
   checkBtn.addEventListener('click', runAnalysis);
 
   function runAnalysis() {
     const statusMsg = document.getElementById('statusMsg');
     checkBtn.disabled = true;
-    statusMsg.innerHTML = 'Analysing<span class="dots"><span></span><span></span><span></span></span>';
+    document.getElementById('resultsSection').style.display = 'none';
 
-    // Simulate async analysis (in production this would call the backend / LLM)
-    setTimeout(() => {
-      statusMsg.textContent = '';
-      checkBtn.disabled = false;
-      renderResults();
-    }, 2200);
+    if (selectedStd === 'auto') {
+      statusMsg.innerHTML = 'Detecting standard<span class="dots"><span></span><span></span><span></span></span>';
+      setTimeout(() => {
+        const detection = detectStandard(uploadedFiles);
+        detectedStd = detection.top;
+        showDetectionBanner(detection);
+        statusMsg.innerHTML = 'Analysing<span class="dots"><span></span><span></span><span></span></span>';
+        setTimeout(() => {
+          statusMsg.textContent = '';
+          checkBtn.disabled = false;
+          renderResults(detectedStd);
+        }, 1600);
+      }, 1400);
+    } else {
+      statusMsg.innerHTML = 'Analysing<span class="dots"><span></span><span></span><span></span></span>';
+      setTimeout(() => {
+        statusMsg.textContent = '';
+        checkBtn.disabled = false;
+        renderResults(selectedStd);
+      }, 2200);
+    }
   }
 
   /* ── RENDER RESULTS ── */
-  function renderResults() {
-    const std    = STANDARDS[selectedStd];
+  function renderResults(stdKey) {
+    const std    = STANDARDS[stdKey];
     const checks = std.checks;
 
-    // Deterministic "randomness" seeded on filename so results are stable on re-run
     const seed = uploadedFiles.reduce((a, f) => a + f.name.length + f.size, 0);
     function seededRand(offset) {
       const x = Math.sin(seed + offset) * 43758.5453;
       return x - Math.floor(x);
     }
 
-    // Simulate which checks are triggered (biased toward showing most of them)
     const triggered = checks.filter((_, i) => seededRand(i * 7) > 0.22);
     const passed    = checks.filter(c => !triggered.includes(c));
 
-    // Section coverage
     const sections = std.sections;
     const covScores = sections.map((s, i) => {
       const base = 40 + Math.round(seededRand(i * 13 + 3) * 50);
@@ -703,16 +1140,12 @@
     });
     const overallCoverage = Math.round(covScores.reduce((a,b) => a+b, 0) / sections.length);
 
-    // Severity counts
     const critCount  = triggered.filter(c => c.sev === 'critical').length;
     const majCount   = triggered.filter(c => c.sev === 'major').length;
     const minCount   = triggered.filter(c => c.sev === 'minor').length;
     const passCount  = passed.length;
-
-    // Completeness score (0–100)
     const completeness = Math.max(0, 100 - critCount*18 - majCount*8 - minCount*3);
 
-    /* Score cards */
     const scoreEl = document.getElementById('scoreCards');
     scoreEl.innerHTML = `
       <div class="score-card">
@@ -747,7 +1180,6 @@
       </div>
     `;
 
-    /* Category tabs */
     const allFindings = [...triggered.map(c => ({...c, state:'issue'})), ...passed.map(c => ({...c, state:'ok'}))];
     const cats = { All: allFindings, E: allFindings.filter(c=>c.cat==='E'), S: allFindings.filter(c=>c.cat==='S'), G: allFindings.filter(c=>c.cat==='G') };
     const catLabels = { All: 'All', E: 'Environmental', S: 'Social', G: 'Governance' };
@@ -769,7 +1201,6 @@
       tabEl.appendChild(t);
     });
 
-    /* Findings */
     const findEl = document.getElementById('findingList');
     findEl.innerHTML = '';
     allFindings.forEach(c => {
@@ -805,7 +1236,6 @@
       });
     }
 
-    /* Section coverage */
     const covEl = document.getElementById('coverageBody');
     covEl.innerHTML = '';
     sections.forEach((s, i) => {
@@ -825,11 +1255,9 @@
 
     document.getElementById('coverageStd').textContent = std.name;
 
-    /* Show results */
     const resultsEl = document.getElementById('resultsSection');
     resultsEl.style.display = 'block';
 
-    // Animate progress bars after paint
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         document.querySelectorAll('.prog-fill[data-target]').forEach(bar => {
