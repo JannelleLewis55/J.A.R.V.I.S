@@ -345,6 +345,7 @@
       <button class="ds-btn" data-ds="accuracy">Model Accuracy</button>
       <button class="ds-btn" data-ds="latency">Response Latency</button>
       <button class="ds-btn" data-ds="users">Active Users</button>
+      <button class="ds-btn" data-ds="reports" id="reportsDsBtn" style="display:none">Reports</button>
     </div>
   </div>
 
@@ -536,6 +537,20 @@ const DATASETS = {
     ],
   },
 };
+
+// ── LOAD REPORT DATASET FROM DASHBOARD ───────────────────────────────────────
+(function () {
+  try {
+    const raw = localStorage.getItem('jarvis_report_dataset');
+    if (raw) {
+      const ds = JSON.parse(raw);
+      if (ds && Array.isArray(ds.history)) {
+        DATASETS.reports = ds;
+        document.getElementById('reportsDsBtn').style.display = '';
+      }
+    }
+  } catch (_) {}
+})();
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let currentDs = 'queries';
@@ -788,7 +803,27 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
 });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-renderAll(currentDs, false);
+// If navigated here from dashboard via #reports hash, auto-select that dataset
+// and immediately run AI analysis
+(function () {
+  const hash = window.location.hash.slice(1);
+  if (hash === 'reports' && DATASETS.reports) {
+    currentDs = 'reports';
+    window.history.replaceState(null, '', window.location.pathname);
+    // highlight the Reports button, clear other actives
+    document.querySelectorAll('.ds-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.ds === 'reports');
+    });
+    renderAll(currentDs, true); // render with insights immediately
+    // simulate the "Analyze" status
+    const status = document.getElementById('analyzeStatus');
+    status.innerHTML = 'Report analysis complete — insights loaded.';
+    status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 4000);
+  } else {
+    renderAll(currentDs, false);
+  }
+})();
 </script>
 
 </body>

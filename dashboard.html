@@ -266,6 +266,49 @@
 
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
     @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── ANALYZE ROW ── */
+    .analyze-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .analyze-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 20px;
+      border-radius: 9px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .analyze-btn:hover  { background: #5ffaf8; }
+    .analyze-btn:active { transform: scale(0.96); }
+    .analyze-btn svg { width: 14px; height: 14px; }
+    .analyze-status {
+      font-size: 13px;
+      color: var(--muted);
+      display: none;
+    }
+    .analyze-status.show { display: block; }
+    .dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 4px; }
+    .dots span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent);
+      animation: blink 1.2s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
   </style>
 </head>
 <body>
@@ -285,6 +328,18 @@
 </nav>
 
 <div class="page">
+
+  <!-- Analyze Reports -->
+  <div class="analyze-row">
+    <button class="analyze-btn" id="analyzeBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      Analyze &amp; Predict Reports
+    </button>
+    <span class="analyze-status" id="analyzeStatus"></span>
+  </div>
 
   <!-- Header -->
   <div class="page-header">
@@ -482,6 +537,104 @@
   </div>
 
 </div>
+
+<script>
+  // ── REPORT DATA (mirrors the table in this page) ──────────────────────────
+  const REPORT_RUNS = [
+    { id: '#2048', model: 'JARVIS-4', accuracy: 97.1 },
+    { id: '#2047', model: 'JARVIS-4', accuracy: 96.8 },
+    { id: '#2046', model: 'JARVIS-3', accuracy: 94.2 },
+    { id: '#2045', model: 'JARVIS-3', accuracy: 93.9 },
+    { id: '#2044', model: 'JARVIS-2', accuracy: 89.1 },
+  ];
+
+  document.getElementById('analyzeBtn').addEventListener('click', () => {
+    const btn    = document.getElementById('analyzeBtn');
+    const status = document.getElementById('analyzeStatus');
+
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    status.innerHTML = 'Preparing report data<span class="dots"><span></span><span></span><span></span></span>';
+    status.classList.add('show');
+
+    // Build a time-series of accuracy values from oldest → newest run
+    const history = [...REPORT_RUNS].reverse().map(r => r.accuracy);
+
+    // Simple linear extrapolation for forecast
+    const n = history.length;
+    const slope = (history[n - 1] - history[0]) / (n - 1);
+    const forecast = [1, 2, 3, 4].map(i =>
+      parseFloat((history[n - 1] + slope * i).toFixed(2))
+    );
+    const confMargin = [0.5, 0.8, 1.1, 1.5];
+    const confLow  = forecast.map((v, i) => parseFloat((v - confMargin[i]).toFixed(2)));
+    const confHigh = forecast.map((v, i) => parseFloat((v + confMargin[i]).toFixed(2)));
+
+    const labels = [...REPORT_RUNS].reverse().map(r => r.id);
+
+    // Derive insights from the data
+    const avgAccuracy = history.reduce((a, b) => a + b, 0) / n;
+    const totalGain   = history[n - 1] - history[0];
+    const trend       = slope > 0 ? 'upward' : slope < 0 ? 'downward' : 'flat';
+    const trendLabel  = slope > 0 ? 'Improving ↑' : slope < 0 ? 'Declining ↓' : 'Stable →';
+
+    const insights = [
+      {
+        icon: slope > 0 ? '↑' : slope < 0 ? '↓' : '→',
+        bg: slope > 0 ? '#011200' : slope < 0 ? '#1a0000' : '#011f1f',
+        col: slope > 0 ? 'var(--green)' : slope < 0 ? 'var(--red)' : 'var(--accent)',
+        title: `Overall Accuracy ${slope > 0 ? 'Improving' : slope < 0 ? 'Declining' : 'Stable'}`,
+        desc: `Across ${n} report runs, accuracy moved from ${history[0]}% to ${history[n-1]}% — a ${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)} pp change. ${Math.abs(slope).toFixed(2)} pp per run on average.`,
+      },
+      {
+        icon: '◈',
+        bg: '#011f1f',
+        col: 'var(--accent)',
+        title: `Average Run Accuracy: ${avgAccuracy.toFixed(1)}%`,
+        desc: `The mean accuracy across all ${n} report runs is ${avgAccuracy.toFixed(2)}%. Runs on JARVIS-4 lead the pack; JARVIS-2 remains below the 90% baseline.`,
+      },
+      {
+        icon: '!',
+        bg: '#1a1600',
+        col: 'var(--yellow)',
+        title: 'Model Transition Gap',
+        desc: 'There is a visible accuracy drop at the JARVIS-2 → JARVIS-3 boundary (89.1% → 93.9%). Monitoring accuracy across model rollouts is recommended.',
+      },
+      {
+        icon: '✓',
+        bg: '#011200',
+        col: 'var(--green)',
+        title: `4-Run Forecast: ${forecast[forecast.length - 1]}%`,
+        desc: `Based on the current trajectory, accuracy is projected to reach ${forecast[forecast.length - 1]}% in 4 runs. Forecast confidence decreases at the 3–4 run horizon.`,
+      },
+    ];
+
+    const payload = {
+      label: 'Report Accuracy',
+      unit: '% accuracy',
+      chartTitle: 'Model Report Accuracy — Run History + 4-Run Forecast',
+      history,
+      weeks: labels,
+      forecast,
+      confLow,
+      confHigh,
+      stats: [
+        { label: 'Latest Run',      val: `${history[n-1]}%`, sub: REPORT_RUNS[0].id },
+        { label: '4-Run Forecast',  val: `${forecast[3]}%`,  sub: 'projected',    cls: 'pred' },
+        { label: 'Total Change',    val: `${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)}pp`, sub: `across ${n} runs`, cls: totalGain >= 0 ? 'up' : 'down' },
+        { label: 'Trend Signal',    val: trendLabel,          sub: trend + ' trend', cls: totalGain >= 0 ? 'up' : 'down' },
+      ],
+      insights,
+      fromReports: true,
+    };
+
+    try { localStorage.setItem('jarvis_report_dataset', JSON.stringify(payload)); } catch (_) {}
+
+    setTimeout(() => {
+      window.location.href = 'trends.html#reports';
+    }, 900);
+  });
+</script>
 
 </body>
 </html>
