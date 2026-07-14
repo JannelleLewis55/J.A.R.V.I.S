@@ -256,6 +256,7 @@
     <a href="home.html" class="active">Home</a>
     <a href="index.html">Chat</a>
     <a href="dashboard.html">Dashboard</a>
+    <a href="trends.html">Trends</a>
   </div>
 </nav>
 
@@ -311,6 +312,7 @@
       <span class="chip" data-q="Help me write code">Help me write code</span>
       <span class="chip" data-q="Analyze this dataset">Analyze a dataset</span>
       <span class="chip" data-q="What can you do?">What can you do?</span>
+      <span class="chip" data-href="trends.html">Analyze &amp; predict trends</span>
     </div>
 
     <p class="footer-hint">Press Enter to ask &nbsp;·&nbsp; Shift+Enter for new line</p>
@@ -330,9 +332,10 @@
     input.style.height = Math.min(input.scrollHeight, 180) + 'px';
   });
 
-  // chip click → fill input
+  // chip click → fill input, or navigate if data-href is set
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
+      if (chip.dataset.href) { window.location.href = chip.dataset.href; return; }
       input.value = chip.dataset.q;
       input.dispatchEvent(new Event('input'));
       input.focus();
