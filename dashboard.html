@@ -189,17 +189,91 @@
 
     /* Bar chart */
     .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
-    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+    .bar-col {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;
+      cursor: pointer;
+    }
     .bar {
       width: 100%;
       border-radius: 4px 4px 0 0;
       background: var(--accent);
       opacity: 0.75;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, background 0.2s;
       min-height: 4px;
     }
-    .bar:hover { opacity: 1; }
-    .bar-label { font-size: 10px; color: var(--muted); }
+    .bar-col:hover .bar { opacity: 1; }
+    .bar-col.selected .bar { background: #5ffaf8; opacity: 1; }
+    .bar-label { font-size: 10px; color: var(--muted); transition: color 0.2s; }
+    .bar-col.selected .bar-label { color: var(--accent); }
+
+    /* Day detail panel */
+    .day-detail {
+      display: none;
+      margin-top: 18px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .day-detail.open { display: block; }
+    .day-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .day-detail-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .day-detail-count {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .day-detail-count strong { color: var(--accent); }
+    .day-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .day-close:hover { color: var(--text); background: var(--border); }
+    .query-list { display: flex; flex-direction: column; gap: 0; max-height: 260px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .query-list::-webkit-scrollbar { width: 4px; }
+    .query-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .query-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .query-item:last-child { border-bottom: none; }
+    .query-num {
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 22px;
+      padding-top: 1px;
+    }
+    .query-cat {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .query-cat.code    { background: #061822; color: #0e7fa8; border: 1px solid #0e3a50; }
+    .query-cat.data    { background: #1a0030; color: var(--purple); border: 1px solid #3a0060; }
+    .query-cat.writing { background: #011200; color: var(--green);  border: 1px solid #023a00; }
+    .query-cat.other   { background: #1a1600; color: var(--yellow); border: 1px solid #3a2e00; }
+    .query-text { color: var(--text); line-height: 1.45; flex: 1; }
 
     /* Donut chart */
     .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -390,15 +464,26 @@
   <!-- Charts -->
   <div class="charts-row">
     <div class="card">
-      <div class="card-title">Daily Query Volume <span>Last 7 days</span></div>
-      <div class="bar-chart">
-        <div class="bar-col"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
-        <div class="bar-col"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
-        <div class="bar-col"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
-        <div class="bar-col"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
-        <div class="bar-col"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
-        <div class="bar-col"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
-        <div class="bar-col"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
+      <div class="card-title">Daily Query Volume <span>Last 7 days — click a bar to drill in</span></div>
+      <div class="bar-chart" id="barChart">
+        <div class="bar-col" data-day="Mon"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
+        <div class="bar-col" data-day="Tue"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
+        <div class="bar-col" data-day="Wed"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
+        <div class="bar-col" data-day="Thu"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
+        <div class="bar-col" data-day="Fri"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
+        <div class="bar-col" data-day="Sat"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
+        <div class="bar-col" data-day="Sun"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
+      </div>
+      <!-- Day detail panel -->
+      <div class="day-detail" id="dayDetail">
+        <div class="day-detail-header">
+          <div>
+            <div class="day-detail-title" id="dayDetailTitle"></div>
+            <div class="day-detail-count" id="dayDetailCount"></div>
+          </div>
+          <button class="day-close" id="dayClose" title="Close">✕</button>
+        </div>
+        <div class="query-list" id="queryList"></div>
       </div>
     </div>
 
@@ -539,6 +624,162 @@
 </div>
 
 <script>
+  // ── DAILY QUERY DATA ─────────────────────────────────────────────────────
+  const DAILY_QUERIES = {
+    Mon: {
+      count: 6420,
+      queries: [
+        { cat: 'code',    text: 'How do I reverse a linked list in Python?' },
+        { cat: 'data',    text: 'Analyze the sales dataset and show me weekly trends' },
+        { cat: 'writing', text: 'Draft an executive summary for the Q3 report' },
+        { cat: 'code',    text: 'Fix the null pointer exception in my Java service' },
+        { cat: 'other',   text: 'What is the capital of New Zealand?' },
+        { cat: 'data',    text: 'Generate a bar chart from this CSV data' },
+        { cat: 'code',    text: 'Explain the difference between async/await and promises' },
+        { cat: 'writing', text: 'Rewrite this paragraph to sound more professional' },
+        { cat: 'other',   text: 'Summarize the latest AI news' },
+        { cat: 'code',    text: 'Write a SQL query to find duplicate rows' },
+      ],
+    },
+    Tue: {
+      count: 8391,
+      queries: [
+        { cat: 'code',    text: 'Build a REST API endpoint in Node.js for user authentication' },
+        { cat: 'data',    text: 'What are the top 5 products by revenue this quarter?' },
+        { cat: 'code',    text: 'Why is my Docker container crashing on startup?' },
+        { cat: 'writing', text: 'Write a LinkedIn post announcing our product launch' },
+        { cat: 'data',    text: 'Compare model accuracy across the last 5 training runs' },
+        { cat: 'code',    text: 'Implement binary search in TypeScript' },
+        { cat: 'other',   text: 'Translate this email to Spanish' },
+        { cat: 'writing', text: 'Generate meeting notes from this transcript' },
+        { cat: 'code',    text: 'How do I debounce a search input in React?' },
+        { cat: 'data',    text: 'Show me a pivot table of user signups by region' },
+        { cat: 'code',    text: 'Explain SOLID principles with examples' },
+        { cat: 'other',   text: 'What is the weather like in London today?' },
+      ],
+    },
+    Wed: {
+      count: 7532,
+      queries: [
+        { cat: 'data',    text: 'Run anomaly detection on the latency logs' },
+        { cat: 'code',    text: 'Convert this class component to a React hook' },
+        { cat: 'writing', text: 'Create a project status update for stakeholders' },
+        { cat: 'code',    text: 'Set up a CI/CD pipeline with GitHub Actions' },
+        { cat: 'data',    text: 'Cluster these customer records by purchase behaviour' },
+        { cat: 'other',   text: 'What does ESG stand for and why does it matter?' },
+        { cat: 'code',    text: 'Add rate limiting to my Express API' },
+        { cat: 'writing', text: 'Proofread and improve this technical specification' },
+        { cat: 'data',    text: 'Forecast next month\'s server costs based on usage trends' },
+        { cat: 'code',    text: 'Explain the CAP theorem in simple terms' },
+      ],
+    },
+    Thu: {
+      count: 9874,
+      queries: [
+        { cat: 'code',    text: 'Design a microservices architecture for an e-commerce platform' },
+        { cat: 'data',    text: 'Identify which features have the highest correlation with churn' },
+        { cat: 'code',    text: 'Debug this memory leak in my Go service' },
+        { cat: 'writing', text: 'Write a proposal for migrating to a cloud-native stack' },
+        { cat: 'code',    text: 'Implement a JWT refresh token strategy' },
+        { cat: 'data',    text: 'Build a dashboard showing real-time query volume' },
+        { cat: 'other',   text: 'What are the best practices for remote team management?' },
+        { cat: 'code',    text: 'Optimise this slow PostgreSQL query' },
+        { cat: 'data',    text: 'Generate a heatmap of user activity by hour of day' },
+        { cat: 'writing', text: 'Draft an incident post-mortem for the Tuesday outage' },
+        { cat: 'code',    text: 'Add OpenAPI documentation to my Flask endpoints' },
+        { cat: 'data',    text: 'What is the 90th percentile response time this week?' },
+        { cat: 'other',   text: 'Explain transformer architecture for a non-technical audience' },
+      ],
+    },
+    Fri: {
+      count: 9132,
+      queries: [
+        { cat: 'writing', text: 'Write the weekly engineering update email' },
+        { cat: 'code',    text: 'Create a Python script to automate the report generation' },
+        { cat: 'data',    text: 'Compare this week\'s KPIs against last week' },
+        { cat: 'code',    text: 'Fix the race condition in the task queue worker' },
+        { cat: 'other',   text: 'What are some team-building activities for remote teams?' },
+        { cat: 'data',    text: 'Predict weekend traffic based on historical patterns' },
+        { cat: 'code',    text: 'Write unit tests for the authentication module' },
+        { cat: 'writing', text: 'Summarize this research paper on LLM fine-tuning' },
+        { cat: 'data',    text: 'Show error rate breakdown by endpoint for today' },
+        { cat: 'code',    text: 'How do I implement retry logic with exponential backoff?' },
+        { cat: 'other',   text: 'Generate ideas for the Q4 product roadmap' },
+      ],
+    },
+    Sat: {
+      count: 4939,
+      queries: [
+        { cat: 'other',   text: 'What are some weekend side project ideas in AI?' },
+        { cat: 'code',    text: 'Build a simple chatbot with Python and Ollama' },
+        { cat: 'data',    text: 'Explore the open NYC taxi dataset and find patterns' },
+        { cat: 'writing', text: 'Write a blog post about building AI-powered tools' },
+        { cat: 'code',    text: 'How do I deploy a model to Hugging Face Spaces?' },
+        { cat: 'other',   text: 'Recommend books on systems design' },
+        { cat: 'data',    text: 'What machine learning model is best for time-series forecasting?' },
+      ],
+    },
+    Sun: {
+      count: 4314,
+      queries: [
+        { cat: 'other',   text: 'Plan my week using the Eisenhower matrix' },
+        { cat: 'writing', text: 'Write a personal OKR template for Q4' },
+        { cat: 'code',    text: 'Explain how large language models are trained' },
+        { cat: 'data',    text: 'Show a summary of my activity from this week' },
+        { cat: 'other',   text: 'What productivity tools do top engineers recommend?' },
+        { cat: 'code',    text: 'Create a Markdown cheat sheet' },
+      ],
+    },
+  };
+
+  // ── BAR CHART CLICK HANDLER ───────────────────────────────────────────────
+  const detail      = document.getElementById('dayDetail');
+  const detailTitle = document.getElementById('dayDetailTitle');
+  const detailCount = document.getElementById('dayDetailCount');
+  const queryList   = document.getElementById('queryList');
+
+  function openDay(day) {
+    const data = DAILY_QUERIES[day];
+    if (!data) return;
+
+    // Highlight the selected bar
+    document.querySelectorAll('.bar-col').forEach(c =>
+      c.classList.toggle('selected', c.dataset.day === day)
+    );
+
+    detailTitle.textContent = day + ' — Query Breakdown';
+    detailCount.innerHTML   = `<strong>${data.count.toLocaleString()}</strong> queries submitted`;
+
+    queryList.innerHTML = data.queries.map((q, i) => `
+      <div class="query-item">
+        <span class="query-num">${i + 1}.</span>
+        <span class="query-cat ${q.cat}">${q.cat === 'code' ? 'Code & Dev' : q.cat === 'data' ? 'Data' : q.cat === 'writing' ? 'Writing' : 'Other'}</span>
+        <span class="query-text">${q.text}</span>
+      </div>
+    `).join('');
+
+    detail.classList.add('open');
+    // Smooth scroll to the detail panel
+    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.getElementById('barChart').addEventListener('click', e => {
+    const col = e.target.closest('.bar-col');
+    if (!col) return;
+    // If already open and same day clicked, close it
+    if (col.classList.contains('selected') && detail.classList.contains('open')) {
+      detail.classList.remove('open');
+      col.classList.remove('selected');
+    } else {
+      openDay(col.dataset.day);
+    }
+  });
+
+  document.getElementById('dayClose').addEventListener('click', () => {
+    detail.classList.remove('open');
+    document.querySelectorAll('.bar-col').forEach(c => c.classList.remove('selected'));
+  });
+
   // ── REPORT DATA (mirrors the table in this page) ──────────────────────────
   const REPORT_RUNS = [
     { id: '#2048', model: 'JARVIS-4', accuracy: 97.1 },

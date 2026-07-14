@@ -1,14 +1,19 @@
 package jarvis;
 
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jarvis.JarvisData.ActivityItem;
 import jarvis.JarvisData.DailyBar;
+import jarvis.JarvisData.DailyQuery;
+import jarvis.JarvisData.DailyQueryData;
 import jarvis.JarvisData.DonutSlice;
 import jarvis.JarvisData.ModelRun;
+import jarvis.JarvisData.QueryCategory;
 import jarvis.JarvisData.RunStatus;
 import jarvis.JarvisData.StatCard;
 
@@ -21,19 +26,21 @@ import jarvis.JarvisData.StatCard;
  */
 public final class DashboardService {
 
-    private final List<StatCard>    stats;
-    private final List<DailyBar>    dailyBars;
-    private final List<DonutSlice>  categories;
-    private final List<ModelRun>    runs;
-    private final List<ActivityItem> activity;
+    private final List<StatCard>             stats;
+    private final List<DailyBar>             dailyBars;
+    private final Map<String, DailyQueryData> dailyQueryData;
+    private final List<DonutSlice>           categories;
+    private final List<ModelRun>             runs;
+    private final List<ActivityItem>         activity;
 
     /** Constructs a service backed by the canonical UI data. */
     public DashboardService() {
-        this.stats      = JarvisData.dashboardStats();
-        this.dailyBars  = JarvisData.dailyQueryBars();
-        this.categories = JarvisData.queryCategories();
-        this.runs       = JarvisData.recentModelRuns();
-        this.activity   = JarvisData.systemActivity();
+        this.stats          = JarvisData.dashboardStats();
+        this.dailyBars      = JarvisData.dailyQueryBars();
+        this.dailyQueryData = JarvisData.allDailyQueryData();
+        this.categories     = JarvisData.queryCategories();
+        this.runs           = JarvisData.recentModelRuns();
+        this.activity       = JarvisData.systemActivity();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -101,6 +108,67 @@ public final class DashboardService {
                 .mapToInt(b -> b.heightPercent)
                 .average()
                 .orElse(0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DAILY QUERY DRILL-DOWN
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Returns all 7 days of drill-down query data, keyed by day name
+     * ("Mon"–"Sun"). Mirrors the {@code DAILY_QUERIES} constant in dashboard.html.
+     */
+    public Map<String, DailyQueryData> getDailyQueryData() {
+        return dailyQueryData;
+    }
+
+    /**
+     * Returns the drill-down data for a single day.
+     *
+     * @param day day abbreviation, e.g. "Mon", "Thu"
+     * @return the data for that day, or empty if the day is unknown
+     */
+    public Optional<DailyQueryData> queriesForDay(String day) {
+        return Optional.ofNullable(dailyQueryData.get(day));
+    }
+
+    /**
+     * Returns the day with the highest absolute query count.
+     * (Mirrors clicking the tallest bar in dashboard.html.)
+     */
+    public DailyQueryData peakQueryDay() {
+        return dailyQueryData.values().stream()
+                .max(Comparator.comparingInt(d -> d.count))
+                .orElseThrow();
+    }
+
+    /**
+     * Returns queries for a specific day filtered by category.
+     *
+     * @param day      day abbreviation
+     * @param category query category to filter by
+     */
+    public List<DailyQuery> queriesByCategory(String day, QueryCategory category) {
+        return queriesForDay(day)
+                .map(d -> d.queries.stream()
+                        .filter(q -> q.category == category)
+                        .collect(Collectors.toList()))
+                .orElseGet(List::of);
+    }
+
+    /**
+     * Returns a breakdown of query counts per category for the given day.
+     *
+     * @param day day abbreviation
+     * @return map of category → count
+     */
+    public Map<QueryCategory, Long> categorySplitForDay(String day) {
+        return queriesForDay(day)
+                .map(d -> d.queries.stream()
+                        .collect(Collectors.groupingBy(q -> q.category,
+                                () -> new EnumMap<>(QueryCategory.class),
+                                Collectors.counting())))
+                .orElseGet(() -> new EnumMap<>(QueryCategory.class));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -225,7 +293,7 @@ public final class DashboardService {
         println("\n── Daily Query Volume (last 7 days) ────────────────────────");
         dailyBars.forEach(b -> {
             String bar = "█".repeat(b.heightPercent / 5);
-            println(String.format("  %-4s %s %d%%", b.day, bar, b.heightPercent));
+            println(String.format("  %-4s %s %d%%  (%,d queries)", b.day, bar, b.heightPercent, b.queryCount));
         });
         println(String.format("  Peak: %s  |  Avg load: %.0f%%", peakDay().day, averageDailyLoad()));
 
@@ -241,6 +309,28 @@ public final class DashboardService {
         println("\n── System Activity ─────────────────────────────────────────");
         activity.forEach(a -> println("  " + a));
 
+        println("\n═══════════════════════════════════════════════════════════");
+    }
+
+    /**
+     * Prints the full drill-down query list for every day.
+     * Mirrors opening every bar in the dashboard bar chart.
+     */
+    public void printDailyQueryBreakdown() {
+        println("═══════════════════════════════════════════════════════════");
+        println("  J.A.R.V.I.S  —  Daily Query Breakdown (all 7 days)");
+        println("═══════════════════════════════════════════════════════════");
+        for (DailyBar bar : dailyBars) {
+            DailyQueryData d = dailyQueryData.get(bar.day);
+            println(String.format("\n── %s — %,d queries ─────────────────────────────────────", d.day, d.count));
+            d.queries.forEach(q -> println("  " + q));
+            Map<QueryCategory, Long> split = categorySplitForDay(bar.day);
+            println(String.format("  Categories: CODE=%d  DATA=%d  WRITING=%d  OTHER=%d",
+                    split.getOrDefault(QueryCategory.CODE,    0L),
+                    split.getOrDefault(QueryCategory.DATA,    0L),
+                    split.getOrDefault(QueryCategory.WRITING, 0L),
+                    split.getOrDefault(QueryCategory.OTHER,   0L)));
+        }
         println("\n═══════════════════════════════════════════════════════════");
     }
 

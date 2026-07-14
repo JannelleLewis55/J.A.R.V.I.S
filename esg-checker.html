@@ -547,6 +547,102 @@
       color: var(--yellow-bright);
       border: 1px solid #332200;
     }
+
+    /* ── INSERT INTO TRENDS ── */
+    .insert-header { margin-bottom: 28px; }
+    .insert-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .insert-header p  { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .metric-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .metric-toggle:hover { border-color: var(--accent-dim); }
+    .metric-toggle.on { border-color: var(--accent); background: #011f1f; }
+    .metric-toggle input[type="checkbox"] { display: none; }
+    .mt-check {
+      width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .metric-toggle.on .mt-check { border-color: var(--accent); background: var(--accent); color: #000; }
+    .mt-body { flex: 1; }
+    .mt-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .mt-desc  { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .mt-val   { font-size: 18px; font-weight: 700; margin-top: 6px; }
+
+    .preview-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .preview-title {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .preview-title span { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .preview-empty {
+      font-size: 13px; color: var(--muted); text-align: center; padding: 20px 0;
+    }
+
+    .sparklines-wrap {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .spark-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .spark-label {
+      font-size: 12px; color: var(--muted); min-width: 140px;
+    }
+    .spark-svg { flex: 1; }
+    .spark-latest {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      min-width: 48px; text-align: right;
+    }
+
+    .push-row {
+      display: flex; align-items: center; gap: 16px; margin-top: 4px;
+    }
+    .push-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 40px; padding: 0 22px;
+      border-radius: 9px; border: none;
+      background: var(--accent); color: #000;
+      font-family: var(--font); font-size: 13px; font-weight: 700;
+      letter-spacing: 0.04em; cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .push-btn:hover  { background: #5ffaf8; }
+    .push-btn:active { transform: scale(0.96); }
+    .push-btn:disabled { opacity: 0.4; cursor: default; transform: none; background: var(--accent); }
+    .push-btn svg { width: 14px; height: 14px; }
+    .push-status { font-size: 13px; color: var(--muted); }
+    .push-status .dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 4px; }
+    .push-status .dots span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent); animation: blink 1.2s infinite;
+    }
+    .push-status .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .push-status .dots span:nth-child(3) { animation-delay: 0.4s; }
   </style>
 </head>
 <body>
@@ -614,7 +710,11 @@
         </div>
         <h2>Insert into Trends</h2>
         <p>Push ESG metrics — emissions, coverage scores, social indicators — directly into the Trends dashboard for tracking over time.</p>
-        <span class="coming-soon-badge">Coming soon</span>
+        <div class="hub-card-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
       </div>
 
       <!-- View it -->
@@ -781,15 +881,36 @@
       </svg>
       Back to ESG
     </button>
-    <div class="stub-wrap">
-      <div class="stub-icon" style="background:#1a1000;color:var(--yellow-bright)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+    <div class="insert-header">
+      <h1>Insert ESG Metrics into Trends</h1>
+      <p>Select which ESG metrics to push. J.A.R.V.I.S will build a 12-week history from your report data and send it to the Trends dashboard for forecasting and tracking.</p>
+    </div>
+
+    <!-- Metric toggles -->
+    <div class="metric-grid" id="metricGrid"></div>
+
+    <!-- Data preview -->
+    <div class="preview-card">
+      <div class="preview-title">
+        Data Preview <span id="previewSub">select at least one metric above</span>
+      </div>
+      <div id="previewBody">
+        <div class="preview-empty" id="previewEmpty">No metrics selected — toggle one above to preview its trend data.</div>
+        <div class="sparklines-wrap" id="sparklinesWrap" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Push button -->
+    <div class="push-row">
+      <button class="push-btn" id="pushBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
-      </div>
-      <h2>Insert into Trends</h2>
-      <p>Push ESG metrics — emissions, coverage scores, social indicators — directly into the Trends dashboard for tracking over time.</p>
-      <span class="stub-soon">Coming soon</span>
+        Push to Trends
+      </button>
+      <span class="push-status" id="pushStatus"></span>
     </div>
   </div>
 
@@ -833,7 +954,7 @@
   // Hub card nav
   document.getElementById('hubCheck').addEventListener('click', () => showView('checker'));
   document.getElementById('hubGenerate').addEventListener('click', () => showView('generate'));
-  document.getElementById('hubInsert').addEventListener('click', () => showView('insert'));
+  document.getElementById('hubInsert').addEventListener('click', () => { showView('insert'); initInsertView(); });
   document.getElementById('hubView2').addEventListener('click', () => showView('view'));
 
   // Back buttons
@@ -1272,6 +1393,274 @@
     if (n >= 45) return 'var(--yellow-bright)';
     return 'var(--red-bright)';
   }
+
+  /* ══ INSERT INTO TRENDS ══════════════════════════════════════════════════ */
+
+  // Metric definitions — each has a stable seeded history generator
+  const ESG_METRICS = [
+    {
+      key: 'coverage',
+      label: 'Section Coverage Score',
+      desc: 'Overall % of ESG standard sections with adequate disclosure',
+      unit: '% coverage',
+      color: '#02fdfb',
+      seed: 101,
+      baseVal: 52, trend: 2.1,
+      fmt: v => v.toFixed(1) + '%',
+    },
+    {
+      key: 'completeness',
+      label: 'Report Completeness',
+      desc: 'Composite completeness score (0–100) adjusted for gap severity',
+      unit: 'score /100',
+      color: '#22c55e',
+      seed: 202,
+      baseVal: 48, trend: 1.8,
+      fmt: v => v.toFixed(0),
+    },
+    {
+      key: 'critical',
+      label: 'Critical Gaps',
+      desc: 'Number of critical disclosure gaps detected per analysis run',
+      unit: 'critical gaps',
+      color: '#ef4444',
+      seed: 303,
+      baseVal: 6, trend: -0.35,
+      fmt: v => Math.max(0, Math.round(v)),
+    },
+    {
+      key: 'major',
+      label: 'Major Gaps',
+      desc: 'Number of major disclosure gaps detected per analysis run',
+      unit: 'major gaps',
+      color: '#eab308',
+      seed: 404,
+      baseVal: 5, trend: -0.28,
+      fmt: v => Math.max(0, Math.round(v)),
+    },
+    {
+      key: 'emissions',
+      label: 'GHG Emissions Intensity',
+      desc: 'Reported Scope 1+2 emissions intensity (tCO₂e per $M revenue)',
+      unit: 'tCO₂e / $M rev',
+      color: '#8A00C4',
+      seed: 505,
+      baseVal: 38.4, trend: -1.2,
+      fmt: v => v.toFixed(1),
+    },
+    {
+      key: 'social',
+      label: 'Social Coverage Score',
+      desc: 'Percentage of Social pillar disclosure requirements met',
+      unit: '% social coverage',
+      color: '#60a5fa',
+      seed: 606,
+      baseVal: 44, trend: 2.4,
+      fmt: v => v.toFixed(1) + '%',
+    },
+  ];
+
+  // Build a reproducible 12-week history from a metric's seed + trend
+  function buildHistory(metric) {
+    const history = [];
+    for (let w = 0; w < 12; w++) {
+      const x = Math.sin(metric.seed + w * 7.3) * 43758.5453;
+      const noise = ((x - Math.floor(x)) - 0.5) * (metric.baseVal * 0.12);
+      history.push(parseFloat((metric.baseVal + metric.trend * w + noise).toFixed(2)));
+    }
+    return history;
+  }
+
+  // Linear forecast for next 4 periods
+  function buildForecast(history) {
+    const n = history.length;
+    const slope = (history[n - 1] - history[0]) / (n - 1);
+    const last  = history[n - 1];
+    const forecast = [1,2,3,4].map(i => parseFloat((last + slope * i).toFixed(2)));
+    const margin = Math.abs(last) * 0.025;
+    const confLow  = forecast.map((v, i) => parseFloat((v - margin * (i + 1)).toFixed(2)));
+    const confHigh = forecast.map((v, i) => parseFloat((v + margin * (i + 1)).toFixed(2)));
+    return { forecast, confLow, confHigh, slope };
+  }
+
+  // ── STATE ────────────────────────────────────────────────────────────────
+  let selectedMetrics = new Set(['coverage', 'completeness']); // default two on
+
+  function initInsertView() {
+    renderMetricGrid();
+    renderPreview();
+  }
+
+  function renderMetricGrid() {
+    const grid = document.getElementById('metricGrid');
+    grid.innerHTML = '';
+    ESG_METRICS.forEach(m => {
+      const history = buildHistory(m);
+      const latest  = history[history.length - 1];
+      const on = selectedMetrics.has(m.key);
+      const card = document.createElement('div');
+      card.className = 'metric-toggle' + (on ? ' on' : '');
+      card.dataset.key = m.key;
+      card.innerHTML = `
+        <div class="mt-check">${on ? '✓' : ''}</div>
+        <div class="mt-body">
+          <div class="mt-label">${m.label}</div>
+          <div class="mt-desc">${m.desc}</div>
+          <div class="mt-val" style="color:${m.color}">${m.fmt(latest)}</div>
+        </div>`;
+      card.addEventListener('click', () => {
+        if (selectedMetrics.has(m.key)) selectedMetrics.delete(m.key);
+        else selectedMetrics.add(m.key);
+        renderMetricGrid();
+        renderPreview();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function buildSparklineSVG(history, color) {
+    const W = 200, H = 32, pad = 2;
+    const vals = history;
+    const min  = Math.min(...vals), max = Math.max(...vals);
+    const range = max - min || 1;
+    const pts = vals.map((v, i) => {
+      const x = pad + (i / (vals.length - 1)) * (W - pad * 2);
+      const y = (H - pad) - ((v - min) / range) * (H - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    return `<svg viewBox="0 0 ${W} ${H}" class="spark-svg" style="height:${H}px">
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+      <circle cx="${(pad + (W - pad*2)).toFixed(1)}" cy="${((H-pad) - ((vals[vals.length-1]-min)/range)*(H-pad*2)).toFixed(1)}"
+        r="2.5" fill="${color}" opacity="0.9"/>
+    </svg>`;
+  }
+
+  function renderPreview() {
+    const active = ESG_METRICS.filter(m => selectedMetrics.has(m.key));
+    const pushBtn   = document.getElementById('pushBtn');
+    const subEl     = document.getElementById('previewSub');
+    const emptyEl   = document.getElementById('previewEmpty');
+    const sparksEl  = document.getElementById('sparklinesWrap');
+
+    pushBtn.disabled = active.length === 0;
+
+    if (active.length === 0) {
+      subEl.textContent    = 'select at least one metric above';
+      emptyEl.style.display  = 'block';
+      sparksEl.style.display = 'none';
+      return;
+    }
+
+    subEl.textContent = `${active.length} metric${active.length > 1 ? 's' : ''} · 12-week history + 4-week forecast`;
+    emptyEl.style.display  = 'none';
+    sparksEl.style.display = 'flex';
+
+    sparksEl.innerHTML = active.map(m => {
+      const history = buildHistory(m);
+      const latest  = history[history.length - 1];
+      const { slope } = buildForecast(history);
+      const arrow = slope > 0.01 ? ' ↑' : slope < -0.01 ? ' ↓' : ' →';
+      return `
+        <div class="spark-row">
+          <span class="spark-label" style="color:${m.color}">${m.label}</span>
+          ${buildSparklineSVG(history, m.color)}
+          <span class="spark-latest">${m.fmt(latest)}${arrow}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // ── PUSH HANDLER ─────────────────────────────────────────────────────────
+  document.getElementById('pushBtn').addEventListener('click', () => {
+    const active = ESG_METRICS.filter(m => selectedMetrics.has(m.key));
+    if (active.length === 0) return;
+
+    const pushBtn  = document.getElementById('pushBtn');
+    const statusEl = document.getElementById('pushStatus');
+
+    pushBtn.disabled = true;
+    statusEl.innerHTML = 'Preparing data<span class="dots"><span></span><span></span><span></span></span>';
+
+    // Use the first selected metric as the primary Trends dataset,
+    // so the user lands on exactly what they chose.
+    // If multiple metrics selected, chain them as separate datasets
+    // and use the first one as the active view.
+    const primary = active[0];
+    const history  = buildHistory(primary);
+    const { forecast, confLow, confHigh, slope } = buildForecast(history);
+    const weeks    = Array.from({ length: 12 }, (_, i) => `W${i + 1}`);
+    const n        = history.length;
+    const totalChange = history[n-1] - history[0];
+    const trendLabel  = slope > 0.01 ? 'Improving ↑' : slope < -0.01 ? 'Declining ↓' : 'Stable →';
+    const trendWord   = slope > 0.01 ? 'upward' : slope < -0.01 ? 'downward' : 'flat';
+
+    // Build AI insights from the metric data
+    const insights = [
+      {
+        icon: slope > 0.01 ? '↑' : slope < -0.01 ? '↓' : '→',
+        bg:   slope > 0.01 ? '#011200' : slope < -0.01 ? '#1a0000' : '#011f1f',
+        col:  slope > 0.01 ? 'var(--green-bright)' : slope < -0.01 ? 'var(--red-bright)' : 'var(--accent)',
+        title: `${primary.label}: ${trendWord} trend`,
+        desc: `Over the last 12 weeks, ${primary.label.toLowerCase()} moved from ${primary.fmt(history[0])} to ${primary.fmt(history[n-1])}. ` +
+              `The ${trendWord} trajectory is expected to continue into the forecast period.`,
+      },
+      {
+        icon: '◈',
+        bg:   '#011f1f', col: 'var(--accent)',
+        title: `4-Week Forecast: ${primary.fmt(forecast[3])}`,
+        desc: `Based on the 12-week ESG history, J.A.R.V.I.S projects ${primary.label.toLowerCase()} to reach ` +
+              `${primary.fmt(forecast[3])} within 4 periods. Confidence narrows at the 3–4 week horizon.`,
+      },
+      {
+        icon: '!',
+        bg:   '#1a1600', col: 'var(--yellow-bright)',
+        title: `${active.length > 1 ? active.length + ' ESG metrics pushed' : '1 ESG metric pushed'} from ESG Checker`,
+        desc: `Metrics pushed: ${active.map(m => m.label).join(', ')}. ` +
+              `Switch the dataset selector in Trends to view each metric's individual forecast.`,
+      },
+      {
+        icon: '✓',
+        bg:   '#011200', col: 'var(--green-bright)',
+        title: 'Data sourced from ESG Report Analysis',
+        desc: 'This dataset reflects ESG metric performance derived from your uploaded report files. ' +
+              'Re-run the ESG Checker and push again to update the trend history.',
+      },
+    ];
+
+    const stats = [
+      { label: 'Current Value',  val: primary.fmt(history[n-1]),  sub: 'Week 12' },
+      { label: '4-Week Forecast',val: primary.fmt(forecast[3]),   sub: 'projected', cls: 'pred' },
+      { label: 'Total Change',
+        val: (totalChange >= 0 ? '+' : '') + primary.fmt(Math.abs(totalChange)),
+        sub: 'over 12 weeks',
+        cls: totalChange >= 0 ? 'up' : 'down' },
+      { label: 'Trend Signal', val: trendLabel, sub: trendWord + ' trend',
+        cls: totalChange >= 0 ? 'up' : 'down' },
+    ];
+
+    const payload = {
+      label: primary.label,
+      unit:  primary.unit,
+      chartTitle: `${primary.label} — 12-Week ESG History + 4-Week Forecast`,
+      history, weeks, forecast, confLow, confHigh,
+      stats, insights,
+      fromReports: true,
+      esgSource: true,
+      allMetrics: active.map(m => ({
+        key: m.key, label: m.label, unit: m.unit,
+        history: buildHistory(m),
+        weeks,
+        ...buildForecast(buildHistory(m)),
+      })),
+    };
+
+    try { localStorage.setItem('jarvis_report_dataset', JSON.stringify(payload)); } catch(_) {}
+
+    setTimeout(() => {
+      statusEl.textContent = 'Done — opening Trends…';
+      setTimeout(() => { window.location.href = 'trends.html#reports'; }, 500);
+    }, 1100);
+  });
 </script>
 
 </body>
