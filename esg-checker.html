@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S — ESG Report Checker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0d12;
+      --surface:   #111620;
+      --surface2:  #141c28;
+      --border:    #1e2a3a;
+      --accent:    #02fdfb;
+      --accent-dim:#22ded8;
+      --green:     #016601;
+      --green-bright: #22c55e;
+      --yellow:    #b6aa02;
+      --yellow-bright: #eab308;
+      --red:       #8d0303;
+      --red-bright:#ef4444;
+      --purple:    #8A00C4;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    10px;
+      --font:      -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #011f1f; }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .page-header p  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* standard selector */
+    .standard-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .standard-bar label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+    .std-btn {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .std-btn:hover  { color: var(--text); border-color: var(--accent-dim); }
+    .std-btn.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: #011f1f;
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-icon {
+      width: 48px; height: 48px;
+      margin: 0 auto 16px;
+      border-radius: 12px;
+      background: #011f1f;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    .upload-icon svg { width: 22px; height: 22px; }
+    .upload-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .upload-sub   { font-size: 13px; color: var(--muted); }
+    .upload-formats { font-size: 11px; color: var(--muted); margin-top: 10px; opacity: 0.7; }
+
+    /* file pills */
+    .file-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .file-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text);
+    }
+    .file-pill .fp-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-pill .fp-remove {
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .file-pill .fp-remove:hover { color: var(--red-bright); }
+
+    /* ── ANALYSE BUTTON ── */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .check-btn {
+      height: 42px;
+      padding: 0 24px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .check-btn:hover  { background: #5ffaf8; }
+    .check-btn:active { transform: scale(0.96); }
+    .check-btn:disabled { opacity: 0.4; cursor: default; transform: none; background: var(--accent); }
+    .check-btn svg { width: 15px; height: 15px; }
+
+    .status-msg { font-size: 13px; color: var(--muted); }
+    .dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 4px; }
+    .dots span {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--accent);
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+    /* ── RESULTS ── */
+    #resultsSection { display: none; }
+
+    /* score bar at top */
+    .score-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .score-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .score-card .sc-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .score-card .sc-val {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .score-card .sc-sub { font-size: 12px; color: var(--muted); }
+    .score-card .sc-bar-bg {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .score-card .sc-bar { height: 100%; border-radius: 2px; }
+
+    /* findings list */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title span { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+    /* category tabs */
+    .cat-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .cat-tab {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .cat-tab:hover  { color: var(--text); border-color: var(--accent-dim); }
+    .cat-tab.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
+
+    .finding-list { display: flex; flex-direction: column; gap: 0; }
+    .finding-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .finding-item:last-child { border-bottom: none; }
+    .finding-item.hidden { display: none; }
+
+    .sev-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+    }
+    .sev-badge.critical { background: #1a0000; color: var(--red-bright);    border: 1px solid #330000; }
+    .sev-badge.major    { background: #1a0e00; color: var(--yellow-bright);  border: 1px solid #332200; }
+    .sev-badge.minor    { background: #001220; color: #60a5fa;               border: 1px solid #002040; }
+    .sev-badge.ok       { background: #011200; color: var(--green-bright);   border: 1px solid #023302; }
+
+    .finding-body { flex: 1; }
+    .finding-title { color: var(--text); font-weight: 500; margin-bottom: 3px; }
+    .finding-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .finding-ref   { font-size: 11px; color: var(--accent-dim); margin-top: 4px; opacity: 0.8; }
+
+    /* section progress table */
+    .section-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .section-table thead th {
+      text-align: left;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 10px 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .section-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .section-table tbody tr:last-child { border-bottom: none; }
+    .section-table tbody tr:hover { background: var(--surface2); }
+    .section-table tbody td { padding: 10px 10px; vertical-align: middle; }
+    .section-table tbody td.muted { color: var(--muted); font-size: 12px; }
+
+    .prog-wrap { display: flex; align-items: center; gap: 10px; }
+    .prog-bg {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .prog-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .prog-pct { font-size: 12px; color: var(--text); width: 34px; text-align: right; font-weight: 600; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .empty-state p { margin-top: 8px; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">Chat</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="trends.html">Trends</a>
+    <a href="esg-checker.html" class="active">ESG Checker</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>ESG Report Checker</h1>
+      <p>Upload your ESG report to detect gaps, inconsistencies, and missing disclosures vs. the selected standard</p>
+    </div>
+    <div class="standard-bar">
+      <label>Standard:</label>
+      <button class="std-btn active" data-std="gri">GRI</button>
+      <button class="std-btn" data-std="sasb">SASB</button>
+      <button class="std-btn" data-std="tcfd">TCFD</button>
+      <button class="std-btn" data-std="csrd">CSRD</button>
+      <button class="std-btn" data-std="sdg">SDG</button>
+    </div>
+  </div>
+
+  <!-- Upload zone -->
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.csv,.xlsx" multiple />
+    <div class="upload-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    </div>
+    <div class="upload-title">Drop your ESG report here, or click to browse</div>
+    <div class="upload-sub">Supports single or multiple files for cross-document analysis</div>
+    <div class="upload-formats">PDF · DOCX · TXT · CSV · XLSX</div>
+  </div>
+
+  <!-- File pills -->
+  <div class="file-list" id="fileList"></div>
+
+  <!-- Action row -->
+  <div class="action-row">
+    <button class="check-btn" id="checkBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      Analyse Report
+    </button>
+    <span class="status-msg" id="statusMsg"></span>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection">
+
+    <!-- Score cards -->
+    <div class="score-cards" id="scoreCards"></div>
+
+    <!-- Two-column: findings + section progress -->
+    <div class="two-col">
+
+      <!-- Findings -->
+      <div class="card">
+        <div class="card-title">
+          Findings
+          <span id="findingCount">—</span>
+        </div>
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="finding-list" id="findingList"></div>
+      </div>
+
+      <!-- Section coverage -->
+      <div class="card">
+        <div class="card-title">
+          Section Coverage
+          <span id="coverageStd">—</span>
+        </div>
+        <table class="section-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Coverage</th>
+            </tr>
+          </thead>
+          <tbody id="coverageBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── STANDARDS DEFINITION ── */
+  const STANDARDS = {
+    gri: {
+      name: 'GRI Standards',
+      sections: [
+        { id: 'gri-2',    name: 'GRI 2 — General Disclosures',        weight: 20 },
+        { id: 'gri-200',  name: 'GRI 200 — Economic',                  weight: 15 },
+        { id: 'gri-300',  name: 'GRI 300 — Environmental',             weight: 35 },
+        { id: 'gri-400',  name: 'GRI 400 — Social',                    weight: 30 },
+      ],
+      checks: [
+        { id:'g1',  cat:'E', sev:'critical', title:'Scope 1 & 2 GHG emissions not quantified',         desc:'GRI 305-1 and 305-2 require absolute Scope 1 and 2 emissions in metric tonnes CO₂e with base year and methodology.',                       ref:'GRI 305-1, 305-2' },
+        { id:'g2',  cat:'E', sev:'critical', title:'Energy consumption data absent',                   desc:'GRI 302-1 mandates total energy consumed within the organisation, broken down by renewable and non-renewable sources.',                    ref:'GRI 302-1' },
+        { id:'g3',  cat:'E', sev:'major',    title:'Scope 3 emissions not disclosed',                  desc:'GRI 305-3 expects at least category-level Scope 3 emissions. Omission weakens comparability.',                                           ref:'GRI 305-3' },
+        { id:'g4',  cat:'E', sev:'major',    title:'Water withdrawal methodology unclear',              desc:'GRI 303-3 requires total water withdrawal by source, region, and water-stress area. Methodology should be stated.',                       ref:'GRI 303-3' },
+        { id:'g5',  cat:'E', sev:'minor',    title:'Biodiversity impact not addressed',                desc:'GRI 304 disclosures are expected where operations are adjacent to protected areas.',                                                        ref:'GRI 304-1' },
+        { id:'g6',  cat:'S', sev:'critical', title:'Employee health & safety rates missing',           desc:'GRI 403-9 requires LTIFR, TRIR, and fatalities. Absence of these rates is a significant gap.',                                           ref:'GRI 403-9' },
+        { id:'g7',  cat:'S', sev:'major',    title:'Gender pay gap data not reported',                 desc:'GRI 405-2 expects the ratio of basic salary and remuneration of women to men, by employee category.',                                     ref:'GRI 405-2' },
+        { id:'g8',  cat:'S', sev:'major',    title:'Supply chain due diligence insufficient',          desc:'GRI 414-1 requires percentage of new suppliers screened using social criteria and actions taken.',                                         ref:'GRI 414-1' },
+        { id:'g9',  cat:'S', sev:'minor',    title:'Training hours not disaggregated by gender',       desc:'GRI 404-1 expects average hours of training per employee broken down by gender and employee category.',                                   ref:'GRI 404-1' },
+        { id:'g10', cat:'G', sev:'critical', title:'Board oversight of ESG not described',             desc:'GRI 2-9 requires disclosure of governance structure, including committees with oversight of ESG topics.',                                  ref:'GRI 2-9' },
+        { id:'g11', cat:'G', sev:'major',    title:'Anti-corruption policies lack KPIs',               desc:'GRI 205-3 expects the number of confirmed corruption incidents and actions taken, not just a policy statement.',                          ref:'GRI 205-3' },
+        { id:'g12', cat:'G', sev:'minor',    title:'Stakeholder engagement process vague',             desc:'GRI 2-29 requires an approach to stakeholder engagement, including how material topics were identified.',                                  ref:'GRI 2-29' },
+      ]
+    },
+    sasb: {
+      name: 'SASB Standards',
+      sections: [
+        { id: 'sasb-env',    name: 'Environment',                   weight: 30 },
+        { id: 'sasb-social', name: 'Social Capital',                weight: 25 },
+        { id: 'sasb-human',  name: 'Human Capital',                 weight: 20 },
+        { id: 'sasb-bus',    name: 'Business Model & Innovation',   weight: 15 },
+        { id: 'sasb-gov',    name: 'Leadership & Governance',       weight: 10 },
+      ],
+      checks: [
+        { id:'s1',  cat:'E', sev:'critical', title:'Industry-specific environmental metrics absent',   desc:'SASB requires sector-specific quantitative metrics (e.g. water intensity, waste diversion rate) not just narrative description.',          ref:'SASB IF-RE-130a.1' },
+        { id:'s2',  cat:'E', sev:'major',    title:'GHG intensity not sector-normalised',              desc:'SASB expects GHG emissions normalised to a relevant operational metric (e.g. per revenue, per sq ft).',                                   ref:'SASB CG-EC-110a.1' },
+        { id:'s3',  cat:'S', sev:'critical', title:'Data privacy & customer protection not covered',   desc:'SASB TC metrics require number of data breaches, % customers affected, and description of policies.',                                     ref:'SASB TC-SI-230a.1' },
+        { id:'s4',  cat:'S', sev:'major',    title:'Community investment quantification missing',      desc:'SASB expects total community investment in dollars and breakdown by type (charitable, commercial, community development).',               ref:'SASB FN-CB-410a.2' },
+        { id:'s5',  cat:'H', sev:'major',    title:'Employee turnover by type not disclosed',          desc:'SASB requires voluntary and involuntary turnover rates disaggregated by employee category and region.',                                   ref:'SASB SV-PS-330a.1' },
+        { id:'s6',  cat:'H', sev:'minor',    title:'Workforce diversity targets absent',               desc:'SASB expects representation metrics and time-bound diversity goals.',                                                                      ref:'SASB SV-PS-330a.2' },
+        { id:'s7',  cat:'G', sev:'critical', title:'Executive ESG-linked remuneration undisclosed',    desc:'SASB expects disclosure of whether and how ESG metrics are incorporated into executive compensation.',                                    ref:'SASB multiple' },
+        { id:'s8',  cat:'G', sev:'major',    title:'Systemic risk exposure not quantified',            desc:'SASB FN sector standards expect climate-related risk exposure and stress-testing methodology.',                                           ref:'SASB FN-IN-450a.2' },
+      ]
+    },
+    tcfd: {
+      name: 'TCFD Framework',
+      sections: [
+        { id: 'tcfd-gov',      name: 'Governance',               weight: 20 },
+        { id: 'tcfd-strategy', name: 'Strategy',                 weight: 35 },
+        { id: 'tcfd-risk',     name: 'Risk Management',          weight: 25 },
+        { id: 'tcfd-metrics',  name: 'Metrics & Targets',        weight: 20 },
+      ],
+      checks: [
+        { id:'t1',  cat:'G', sev:'critical', title:'Board oversight of climate risk not documented',   desc:'TCFD Governance pillar requires description of board-level oversight of climate-related risks and opportunities.',                         ref:'TCFD — Governance a)' },
+        { id:'t2',  cat:'G', sev:'major',    title:'Management role in climate assessment unclear',    desc:'TCFD requires the management-level process for assessing and managing climate risks.',                                                     ref:'TCFD — Governance b)' },
+        { id:'t3',  cat:'E', sev:'critical', title:'Climate scenario analysis not performed',          desc:'TCFD Strategy pillar requires analysis using at least 2°C and well-below 2°C scenarios.',                                                ref:'TCFD — Strategy b)' },
+        { id:'t4',  cat:'E', sev:'critical', title:'Physical vs transition risk split missing',        desc:'TCFD expects separate identification of physical (acute/chronic) and transition risks with time horizons.',                               ref:'TCFD — Risk Mgmt a)' },
+        { id:'t5',  cat:'E', sev:'major',    title:'Financial impact of climate risks not quantified', desc:'Qualitative risk description without financial quantification falls short of TCFD expectations.',                                         ref:'TCFD — Strategy a)' },
+        { id:'t6',  cat:'E', sev:'major',    title:'Opportunities from climate transition not covered', desc:'TCFD requires disclosure of climate-related opportunities alongside risks (e.g. new products, markets).',                               ref:'TCFD — Strategy a)' },
+        { id:'t7',  cat:'E', sev:'critical', title:'Scope 1, 2, 3 emissions and targets not set',     desc:'TCFD Metrics pillar expects GHG emissions for all scopes and climate-related targets with progress tracking.',                           ref:'TCFD — Metrics c)' },
+        { id:'t8',  cat:'G', sev:'minor',    title:'Climate risk integration into ERM not shown',     desc:'TCFD Risk Management pillar requires explanation of how climate risk is integrated into the overall risk management process.',             ref:'TCFD — Risk Mgmt c)' },
+      ]
+    },
+    csrd: {
+      name: 'CSRD / ESRS',
+      sections: [
+        { id: 'esrs-2',   name: 'ESRS 2 — General Disclosures',        weight: 15 },
+        { id: 'esrs-e1',  name: 'ESRS E1 — Climate Change',            weight: 30 },
+        { id: 'esrs-e2',  name: 'ESRS E2-5 — Other Environment',       weight: 15 },
+        { id: 'esrs-s',   name: 'ESRS S1-4 — Social',                  weight: 25 },
+        { id: 'esrs-g',   name: 'ESRS G1 — Governance',                weight: 15 },
+      ],
+      checks: [
+        { id:'c1',  cat:'E', sev:'critical', title:'Double materiality assessment not conducted',      desc:'ESRS 2 IRO-1 requires a documented double materiality assessment identifying impact, risk, and opportunity (IRO) topics.',                ref:'ESRS 2 — IRO-1' },
+        { id:'c2',  cat:'E', sev:'critical', title:'GHG reduction targets (2030/2050) absent',         desc:'ESRS E1-4 mandates absolute GHG reduction targets aligned with Paris Agreement with interim milestones.',                                ref:'ESRS E1-4' },
+        { id:'c3',  cat:'E', sev:'major',    title:'Climate transition plan not disclosed',            desc:'ESRS E1-1 requires a climate transition plan including decarbonisation levers, capex, and locked-in emissions.',                         ref:'ESRS E1-1' },
+        { id:'c4',  cat:'E', sev:'major',    title:'Biodiversity & ecosystem targets missing',         desc:'ESRS E4 expects targets related to biodiversity net gain, restoration, and no-net-loss commitments.',                                    ref:'ESRS E4-4' },
+        { id:'c5',  cat:'S', sev:'critical', title:'Own workforce disclosures incomplete',             desc:'ESRS S1 requires headcount, pay gap, collective bargaining coverage, work-related injuries, and wellbeing data.',                        ref:'ESRS S1' },
+        { id:'c6',  cat:'S', sev:'major',    title:'Value chain workers impact not assessed',          desc:'ESRS S2 requires identification of material impacts on workers in the value chain and related policies.',                                 ref:'ESRS S2' },
+        { id:'c7',  cat:'G', sev:'critical', title:'Business conduct policies not disclosed',          desc:'ESRS G1-1 requires description of policies on business conduct including anti-bribery, anti-corruption, and whistleblowing.',            ref:'ESRS G1-1' },
+        { id:'c8',  cat:'G', sev:'major',    title:'Due diligence process not described',              desc:'ESRS 2 GOV-4 expects a description of due diligence processes related to sustainability matters.',                                       ref:'ESRS 2 — GOV-4' },
+        { id:'c9',  cat:'E', sev:'minor',    title:'Circular economy metrics not included',            desc:'ESRS E5 expects resource inflows/outflows data and waste tracking aligned with a circular economy approach.',                           ref:'ESRS E5' },
+      ]
+    },
+    sdg: {
+      name: 'UN SDG Mapping',
+      sections: [
+        { id: 'sdg-env',   name: 'SDG 6,7,13,14,15 — Environment',   weight: 35 },
+        { id: 'sdg-social',name: 'SDG 1,3,4,5,8,10 — People',        weight: 35 },
+        { id: 'sdg-econ',  name: 'SDG 9,11,12,17 — Prosperity',      weight: 20 },
+        { id: 'sdg-gov',   name: 'SDG 16 — Peace & Justice',          weight: 10 },
+      ],
+      checks: [
+        { id:'d1',  cat:'E', sev:'critical', title:'SDG 13 climate action targets not linked',         desc:'Report does not map emissions reduction commitments to SDG 13 indicators or set measurable baselines.',                                   ref:'SDG 13.2.1' },
+        { id:'d2',  cat:'E', sev:'major',    title:'SDG 7 renewable energy progress not reported',     desc:'No disclosure of renewable energy share or energy-efficiency improvement targets linked to SDG 7.',                                      ref:'SDG 7.2.1, 7.3.1' },
+        { id:'d3',  cat:'E', sev:'major',    title:'SDG 6 water stewardship data absent',              desc:'Water consumption, recycling rates, and access initiatives not aligned to SDG 6 indicators.',                                           ref:'SDG 6.4.1' },
+        { id:'d4',  cat:'S', sev:'critical', title:'SDG 5 gender equality metrics missing',            desc:'Gender representation in workforce and leadership, and equal pay metrics not mapped to SDG 5.',                                          ref:'SDG 5.1.1, 5.5.2' },
+        { id:'d5',  cat:'S', sev:'major',    title:'SDG 8 decent work indicators absent',              desc:'No disclosure of fair wages, living wage commitments, or decent work indicators in the supply chain.',                                  ref:'SDG 8.5.1, 8.7.1' },
+        { id:'d6',  cat:'S', sev:'major',    title:'SDG 10 inequality reduction not addressed',        desc:'No disclosure of pay ratio between highest and lowest earners, or inclusion commitments.',                                               ref:'SDG 10.4.1' },
+        { id:'d7',  cat:'G', sev:'major',    title:'SDG 17 partnerships not documented',               desc:'No disclosure of partnerships for sustainability goals, multi-stakeholder platforms, or external commitments.',                          ref:'SDG 17.16.1' },
+        { id:'d8',  cat:'G', sev:'minor',    title:'SDG 16 anti-corruption mechanisms vague',          desc:'Report lacks specific anti-corruption mechanisms, whistleblower data, or transparent governance indicators.',                            ref:'SDG 16.5.2' },
+      ]
+    },
+  };
+
+  /* ── STATE ── */
+  let selectedStd = 'gri';
+  let uploadedFiles = [];
+
+  /* ── STANDARD BUTTONS ── */
+  document.querySelectorAll('.std-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.std-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedStd = btn.dataset.std;
+      // clear results if switching standard after analysis
+      document.getElementById('resultsSection').style.display = 'none';
+    });
+  });
+
+  /* ── FILE UPLOAD ── */
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput  = document.getElementById('fileInput');
+  const fileListEl = document.getElementById('fileList');
+  const checkBtn   = document.getElementById('checkBtn');
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    addFiles([...e.dataTransfer.files]);
+  });
+
+  fileInput.addEventListener('change', () => {
+    addFiles([...fileInput.files]);
+    fileInput.value = '';
+  });
+
+  function addFiles(files) {
+    files.forEach(f => {
+      if (!uploadedFiles.find(u => u.name === f.name && u.size === f.size)) {
+        uploadedFiles.push(f);
+      }
+    });
+    renderFilePills();
+    checkBtn.disabled = uploadedFiles.length === 0;
+  }
+
+  function removeFile(idx) {
+    uploadedFiles.splice(idx, 1);
+    renderFilePills();
+    checkBtn.disabled = uploadedFiles.length === 0;
+    if (uploadedFiles.length === 0) {
+      document.getElementById('resultsSection').style.display = 'none';
+    }
+  }
+
+  function renderFilePills() {
+    fileListEl.innerHTML = '';
+    uploadedFiles.forEach((f, i) => {
+      const pill = document.createElement('div');
+      pill.className = 'file-pill';
+      pill.innerHTML = `
+        <span class="fp-name" title="${f.name}">${f.name}</span>
+        <span style="font-size:11px;color:var(--muted)">${formatBytes(f.size)}</span>
+        <span class="fp-remove" data-idx="${i}">✕</span>`;
+      fileListEl.appendChild(pill);
+    });
+    fileListEl.querySelectorAll('.fp-remove').forEach(btn => {
+      btn.addEventListener('click', () => removeFile(parseInt(btn.dataset.idx)));
+    });
+  }
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+  }
+
+  /* ── ANALYSE ── */
+  checkBtn.addEventListener('click', runAnalysis);
+
+  function runAnalysis() {
+    const statusMsg = document.getElementById('statusMsg');
+    checkBtn.disabled = true;
+    statusMsg.innerHTML = 'Analysing<span class="dots"><span></span><span></span><span></span></span>';
+
+    // Simulate async analysis (in production this would call the backend / LLM)
+    setTimeout(() => {
+      statusMsg.textContent = '';
+      checkBtn.disabled = false;
+      renderResults();
+    }, 2200);
+  }
+
+  /* ── RENDER RESULTS ── */
+  function renderResults() {
+    const std    = STANDARDS[selectedStd];
+    const checks = std.checks;
+
+    // Deterministic "randomness" seeded on filename so results are stable on re-run
+    const seed = uploadedFiles.reduce((a, f) => a + f.name.length + f.size, 0);
+    function seededRand(offset) {
+      const x = Math.sin(seed + offset) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
+    // Simulate which checks are triggered (biased toward showing most of them)
+    const triggered = checks.filter((_, i) => seededRand(i * 7) > 0.22);
+    const passed    = checks.filter(c => !triggered.includes(c));
+
+    // Section coverage
+    const sections = std.sections;
+    const covScores = sections.map((s, i) => {
+      const base = 40 + Math.round(seededRand(i * 13 + 3) * 50);
+      return Math.min(100, Math.max(10, base));
+    });
+    const overallCoverage = Math.round(covScores.reduce((a,b) => a+b, 0) / sections.length);
+
+    // Severity counts
+    const critCount  = triggered.filter(c => c.sev === 'critical').length;
+    const majCount   = triggered.filter(c => c.sev === 'major').length;
+    const minCount   = triggered.filter(c => c.sev === 'minor').length;
+    const passCount  = passed.length;
+
+    // Completeness score (0–100)
+    const completeness = Math.max(0, 100 - critCount*18 - majCount*8 - minCount*3);
+
+    /* Score cards */
+    const scoreEl = document.getElementById('scoreCards');
+    scoreEl.innerHTML = `
+      <div class="score-card">
+        <div class="sc-label">Completeness Score</div>
+        <div class="sc-val" style="color:${scoreColor(completeness)}">${completeness}</div>
+        <div class="sc-sub">out of 100 vs ${std.name}</div>
+        <div class="sc-bar-bg"><div class="sc-bar" style="width:${completeness}%;background:${scoreColor(completeness)}"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Section Coverage</div>
+        <div class="sc-val" style="color:${scoreColor(overallCoverage)}">${overallCoverage}%</div>
+        <div class="sc-sub">avg. across ${sections.length} sections</div>
+        <div class="sc-bar-bg"><div class="sc-bar" style="width:${overallCoverage}%;background:${scoreColor(overallCoverage)}"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Critical Gaps</div>
+        <div class="sc-val" style="color:${critCount > 0 ? 'var(--red-bright)' : 'var(--green-bright)'}">${critCount}</div>
+        <div class="sc-sub">issue${critCount !== 1 ? 's' : ''} requiring immediate attention</div>
+        <div class="sc-bar-bg"><div class="sc-bar" style="width:${Math.min(100,critCount*25)}%;background:var(--red-bright)"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Major Gaps</div>
+        <div class="sc-val" style="color:${majCount > 0 ? 'var(--yellow-bright)' : 'var(--green-bright)'}">${majCount}</div>
+        <div class="sc-sub">issue${majCount !== 1 ? 's' : ''} to address this cycle</div>
+        <div class="sc-bar-bg"><div class="sc-bar" style="width:${Math.min(100,majCount*20)}%;background:var(--yellow-bright)"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Checks Passed</div>
+        <div class="sc-val" style="color:var(--green-bright)">${passCount}</div>
+        <div class="sc-sub">of ${checks.length} total checks</div>
+        <div class="sc-bar-bg"><div class="sc-bar" style="width:${Math.round(passCount/checks.length*100)}%;background:var(--green-bright)"></div></div>
+      </div>
+    `;
+
+    /* Category tabs */
+    const allFindings = [...triggered.map(c => ({...c, state:'issue'})), ...passed.map(c => ({...c, state:'ok'}))];
+    const cats = { All: allFindings, E: allFindings.filter(c=>c.cat==='E'), S: allFindings.filter(c=>c.cat==='S'), G: allFindings.filter(c=>c.cat==='G') };
+    const catLabels = { All: 'All', E: 'Environmental', S: 'Social', G: 'Governance' };
+
+    const tabEl = document.getElementById('catTabs');
+    tabEl.innerHTML = '';
+    let activeTab = 'All';
+    Object.keys(cats).forEach(key => {
+      const t = document.createElement('button');
+      t.className = 'cat-tab' + (key === 'All' ? ' active' : '');
+      t.textContent = `${catLabels[key]} (${cats[key].length})`;
+      t.dataset.cat = key;
+      t.addEventListener('click', () => {
+        tabEl.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        activeTab = key;
+        filterFindings(activeTab);
+      });
+      tabEl.appendChild(t);
+    });
+
+    /* Findings */
+    const findEl = document.getElementById('findingList');
+    findEl.innerHTML = '';
+    allFindings.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'finding-item';
+      item.dataset.cat = c.cat;
+      if (c.state === 'ok') {
+        item.innerHTML = `
+          <span class="sev-badge ok">PASS</span>
+          <div class="finding-body">
+            <div class="finding-title">${c.title.replace('not quantified','present').replace('not disclosed','disclosed').replace('absent','present').replace('missing','reported').replace('unclear','documented').replace('not performed','conducted').replace('not covered','covered').replace('incomplete','complete').replace('not assessed','assessed').replace('not linked','linked').replace('not reported','reported').replace('not addressed','addressed').replace('not documented','documented').replace('vague','clear').replace('undisclosed','disclosed').replace('insufficient','complete')}</div>
+            <div class="finding-desc">Disclosure found and meets the minimum standard requirements.</div>
+            <div class="finding-ref">${c.ref}</div>
+          </div>`;
+      } else {
+        item.innerHTML = `
+          <span class="sev-badge ${c.sev}">${c.sev.toUpperCase()}</span>
+          <div class="finding-body">
+            <div class="finding-title">${c.title}</div>
+            <div class="finding-desc">${c.desc}</div>
+            <div class="finding-ref">${c.ref}</div>
+          </div>`;
+      }
+      findEl.appendChild(item);
+    });
+
+    document.getElementById('findingCount').textContent =
+      `${triggered.length} gap${triggered.length!==1?'s':''}, ${passCount} passed`;
+
+    function filterFindings(cat) {
+      findEl.querySelectorAll('.finding-item').forEach(item => {
+        item.classList.toggle('hidden', cat !== 'All' && item.dataset.cat !== cat);
+      });
+    }
+
+    /* Section coverage */
+    const covEl = document.getElementById('coverageBody');
+    covEl.innerHTML = '';
+    sections.forEach((s, i) => {
+      const pct = covScores[i];
+      const col = scoreColor(pct);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.name}</td>
+        <td>
+          <div class="prog-wrap">
+            <div class="prog-bg"><div class="prog-fill" style="width:0%;background:${col}" data-target="${pct}"></div></div>
+            <span class="prog-pct">${pct}%</span>
+          </div>
+        </td>`;
+      covEl.appendChild(tr);
+    });
+
+    document.getElementById('coverageStd').textContent = std.name;
+
+    /* Show results */
+    const resultsEl = document.getElementById('resultsSection');
+    resultsEl.style.display = 'block';
+
+    // Animate progress bars after paint
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.prog-fill[data-target]').forEach(bar => {
+          bar.style.width = bar.dataset.target + '%';
+        });
+      });
+    });
+  }
+
+  function scoreColor(n) {
+    if (n >= 75) return 'var(--green-bright)';
+    if (n >= 45) return 'var(--yellow-bright)';
+    return 'var(--red-bright)';
+  }
+</script>
+
+</body>
+</html>
