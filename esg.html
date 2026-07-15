@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S — ESG Analysis</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #080b10;
+      --surface: #0e1520;
+      --surface2:#121c2a;
+      --border:  #1a2535;
+      --accent:  #38bdf8;
+      --text:    #e2e8f0;
+      --muted:   #4e6280;
+      --red:     #f87171;
+      --green:   #34d399;
+      --purple:  #a78bfa;
+      --yellow:  #fbbf24;
+      --radius:  10px;
+      --font:    -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 52px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; z-index: 10;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 700; letter-spacing: .1em;
+      color: var(--accent); text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a {
+      padding: 5px 14px; border-radius: 6px; font-size: 13px;
+      color: var(--muted); text-decoration: none; transition: color .2s, background .2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #0a1e30; }
+
+    /* ── PAGE ── */
+    .page {
+      flex: 1;
+      max-width: 900px; width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* ── HEADER ── */
+    .page-header h1 { font-size: 20px; font-weight: 700; }
+    .page-header p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── DROP ZONE ── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      cursor: pointer; transition: border-color .2s, background .2s;
+      text-align: center;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(56,189,248,.04); }
+    .drop-zone.has-file { border-style: solid; border-color: var(--accent); background: rgba(56,189,248,.04); }
+    .drop-icon { color: var(--muted); }
+    .drop-icon svg { width: 40px; height: 40px; }
+    .drop-title { font-size: 15px; font-weight: 600; }
+    .drop-sub   { font-size: 12px; color: var(--muted); }
+    .drop-filename { font-size: 13px; color: var(--accent); font-weight: 600; }
+    #fileInput { display: none; }
+
+    .analyse-btn {
+      align-self: flex-start;
+      padding: 10px 28px; border-radius: 8px; border: none;
+      background: var(--accent); color: #000;
+      font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: .04em;
+      cursor: pointer; transition: background .2s, transform .1s;
+      display: none;
+    }
+    .analyse-btn:hover  { background: #7dd3fc; }
+    .analyse-btn:active { transform: scale(.97); }
+    .analyse-btn.visible { display: inline-flex; align-items: center; gap: 8px; }
+
+    /* ── PROGRESS ── */
+    .progress-wrap { display: none; flex-direction: column; gap: 8px; }
+    .progress-wrap.visible { display: flex; }
+    .progress-bar-outer {
+      height: 4px; border-radius: 2px;
+      background: var(--border); overflow: hidden;
+    }
+    .progress-bar-inner {
+      height: 100%; border-radius: 2px;
+      background: var(--accent);
+      width: 0%; transition: width .3s ease;
+    }
+    .progress-label { font-size: 12px; color: var(--muted); }
+
+    /* ── RESULTS ── */
+    .results { display: none; flex-direction: column; gap: 20px; }
+    .results.visible { display: flex; }
+
+    .result-summary {
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .summary-chip {
+      padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .summary-chip.total  { background: rgba(56,189,248,.1);  border-color: rgba(56,189,248,.3);  color: var(--accent); }
+    .summary-chip.risks  { background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); color: var(--red); }
+    .summary-chip.comms  { background: rgba(52,211,153,.1);  border-color: rgba(52,211,153,.3);  color: var(--green); }
+
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .pillar-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .pillar-card-title {
+      font-size: 12px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pillar-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 6px;
+      font-size: 11px; font-weight: 800;
+    }
+    .pillar-badge.E { background: #0b2016; color: var(--green); }
+    .pillar-badge.S { background: #1a1040; color: var(--purple); }
+    .pillar-badge.G { background: #201800; color: var(--yellow); }
+
+    .finding-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .finding-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; line-height: 1.5;
+      padding: 7px 10px; border-radius: 6px; border-left: 3px solid transparent;
+    }
+    .finding-item.risk { background: rgba(248,113,113,.06); border-left-color: var(--red); }
+    .finding-item.comm { background: rgba(52,211,153,.06);  border-left-color: var(--green); }
+    .finding-icon { font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+    .finding-label { color: var(--text); }
+    .finding-empty { font-size: 12px; color: var(--muted); padding: 4px 0; }
+
+    /* full findings table (collapsible) */
+    .findings-full { margin-top: 4px; }
+    .findings-full summary {
+      font-size: 12px; color: var(--muted); cursor: pointer; user-select: none;
+      padding: 6px 0; list-style: none; display: flex; align-items: center; gap: 6px;
+    }
+    .findings-full summary::-webkit-details-marker { display: none; }
+    .findings-full summary::before { content: '▸'; font-size: 10px; }
+    .findings-full[open] summary::before { content: '▾'; }
+
+    .section-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .section-title {
+      font-size: 12px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    .section-title.risks { color: var(--red); }
+    .section-title.comms { color: var(--green); }
+
+    .tag {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      letter-spacing: .06em; padding: 1px 7px; border-radius: 10px;
+      margin-right: 6px; vertical-align: middle; flex-shrink: 0;
+    }
+    .tag.E { background: #0b2016; color: var(--green); }
+    .tag.S { background: #1a1040; color: var(--purple); }
+    .tag.G { background: #201800; color: var(--yellow); }
+
+    /* ── RESET ── */
+    .reset-btn {
+      align-self: flex-start;
+      padding: 8px 20px; border-radius: 8px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: var(--font); font-size: 12px;
+      cursor: pointer; transition: color .2s, border-color .2s;
+    }
+    .reset-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .error-msg { font-size: 13px; color: var(--red); padding: 12px 0; display: none; }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">Chat</a>
+    <a href="esg.html" class="active">ESG</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>ESG Report Analysis</h1>
+    <p>Upload a PDF or text report — J.A.R.V.I.S will identify risks and commitments across Environmental, Social, and Governance pillars.</p>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="drop-zone" id="dropZone">
+    <div class="drop-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <line x1="9" y1="15" x2="15" y2="15"></line>
+      </svg>
+    </div>
+    <div class="drop-title" id="dropTitle">Drop your ESG report here</div>
+    <div class="drop-sub" id="dropSub">PDF or plain text · or click to browse</div>
+    <div class="drop-filename" id="dropFilename" style="display:none"></div>
+    <input type="file" id="fileInput" accept=".pdf,.txt">
+  </div>
+
+  <button class="analyse-btn" id="analyseBtn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    Analyse Report
+  </button>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label" id="progressLabel">Extracting text…</div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+
+    <!-- Summary chips -->
+    <div class="result-summary" id="summaryChips"></div>
+
+    <!-- Per-pillar breakdown -->
+    <div class="pillar-grid" id="pillarGrid"></div>
+
+    <!-- Full findings (collapsible) -->
+    <details class="findings-full" id="findingsFull">
+      <summary>View all findings</summary>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px" id="findingsDetail"></div>
+    </details>
+
+    <button class="reset-btn" id="resetBtn">← Analyse another report</button>
+  </div>
+
+</div>
+
+<script>
+  // ── ESG RULES ──────────────────────────────────────────────────────────────
+  const ESG_RULES = [
+    { pillar:'E', type:'problem', label:'Greenhouse gas / carbon emissions',          patterns:[/carbon emission/i,/greenhouse gas/i,/GHG/i,/CO2 emission/i,/scope [123] emission/i] },
+    { pillar:'E', type:'problem', label:'Deforestation / biodiversity loss',          patterns:[/deforestation/i,/habitat loss/i,/biodiversity loss/i,/land degradation/i] },
+    { pillar:'E', type:'problem', label:'Excessive water usage or scarcity',          patterns:[/water (usage|consumption|scarcity|stress|depletion)/i,/freshwater/i] },
+    { pillar:'E', type:'problem', label:'Waste generation / poor disposal',           patterns:[/waste (generation|disposal|mismanagement)/i,/landfill/i,/plastic waste/i] },
+    { pillar:'E', type:'problem', label:'Pollution or toxic contamination',           patterns:[/air pollution|water pollution|soil contamination|toxic/i] },
+    { pillar:'E', type:'problem', label:'High energy consumption / fossil fuel reliance', patterns:[/energy (consumption|intensity|inefficien)/i,/fossil fuel/i,/coal|oil spill/i] },
+    { pillar:'E', type:'problem', label:'Climate-related transition or physical risk',patterns:[/climate risk|physical risk|transition risk|stranded asset/i] },
+    { pillar:'E', type:'solution', label:'Commitment to renewable energy / net-zero', patterns:[/renewable energy|solar|wind power|clean energy|net.zero/i] },
+    { pillar:'E', type:'solution', label:'Carbon neutrality or reduction program',    patterns:[/carbon neutral|carbon offset|carbon reduction|decarboni/i] },
+    { pillar:'E', type:'solution', label:'Energy efficiency initiatives',             patterns:[/energy efficiency|energy saving|low.carbon/i] },
+    { pillar:'E', type:'solution', label:'Circular economy / waste reduction',        patterns:[/circular economy|recycl|waste reduction|zero waste/i] },
+    { pillar:'E', type:'solution', label:'Reforestation or nature-based solutions',   patterns:[/reforestation|afforestation|nature.based solution/i] },
+    { pillar:'E', type:'solution', label:'Sustainable sourcing / supply chain',       patterns:[/sustainable (sourcing|supply chain|agriculture|forestry)/i] },
+    { pillar:'E', type:'solution', label:'Water conservation programs',               patterns:[/water conservation|water recycl|water efficiency/i] },
+    { pillar:'S', type:'problem', label:'Labour rights violations / modern slavery',  patterns:[/labor (violation|abuse|right)/i,/forced labor|child labor|modern slavery/i] },
+    { pillar:'S', type:'problem', label:'Workplace safety incidents or hazards',      patterns:[/workplace (accident|injury|fatality|hazard)/i,/occupational health/i] },
+    { pillar:'S', type:'problem', label:'Discrimination, harassment or pay gap',      patterns:[/discrimination|harassment|inequality|pay gap/i] },
+    { pillar:'S', type:'problem', label:'Community conflict or human rights concerns',patterns:[/community (displacement|conflict|opposition)/i,/human right violation/i] },
+    { pillar:'S', type:'problem', label:'Data breach or cybersecurity incident',      patterns:[/data (breach|leak|privacy violation)/i,/cybersecurity incident/i] },
+    { pillar:'S', type:'problem', label:'Supply chain risks or supplier misconduct',  patterns:[/supply chain (risk|violation|concern)/i,/supplier (misconduct|non.compliance)/i] },
+    { pillar:'S', type:'solution', label:'Diversity, equity & inclusion programs',    patterns:[/diversity.*(equity|inclusion)|DEI program|equal opportunity/i] },
+    { pillar:'S', type:'solution', label:'Employee wellbeing / development programs', patterns:[/employee (well.?being|training|development|engagement)/i] },
+    { pillar:'S', type:'solution', label:'Community investment or engagement',        patterns:[/community (investment|program|engagement|development)/i] },
+    { pillar:'S', type:'solution', label:'Health & safety management system',         patterns:[/health.*(safety program|management system|policy)/i] },
+    { pillar:'S', type:'solution', label:'Fair / living wage commitments',            patterns:[/living wage|fair wage|pay equity/i] },
+    { pillar:'S', type:'solution', label:'Responsible sourcing / ethical procurement',patterns:[/responsible (sourcing|supply chain)|ethical procurement/i] },
+    { pillar:'G', type:'problem', label:'Corruption, fraud or misconduct',            patterns:[/corruption|bribery|fraud|misconduct|scandal/i] },
+    { pillar:'G', type:'problem', label:'Regulatory non-compliance or penalties',     patterns:[/non.compliance|regulatory (violation|breach|penalty|fine)/i] },
+    { pillar:'G', type:'problem', label:'Board independence or diversity gaps',       patterns:[/board (independence|diversity) (lack|issue|concern)/i] },
+    { pillar:'G', type:'problem', label:'Tax avoidance or evasion',                   patterns:[/tax (avoidance|evasion|dispute)/i] },
+    { pillar:'G', type:'problem', label:'Excessive or controversial executive pay',   patterns:[/executive (pay|compensation) (concern|controversy|excessive)/i] },
+    { pillar:'G', type:'problem', label:'Lack of transparency or disclosure',         patterns:[/lack of (transparency|disclosure|oversight)/i] },
+    { pillar:'G', type:'solution', label:'Anti-corruption / ethics program',          patterns:[/anti.corruption|ethics (policy|program|training)/i] },
+    { pillar:'G', type:'solution', label:'Board diversity & governance oversight',    patterns:[/board (diversity|independence|oversight|governance)/i] },
+    { pillar:'G', type:'solution', label:'ESG disclosure & transparency reporting',   patterns:[/transparency|ESG disclosure|sustainability report/i] },
+    { pillar:'G', type:'solution', label:'Risk management framework',                 patterns:[/risk management (framework|program|system)/i] },
+    { pillar:'G', type:'solution', label:'Whistleblower / speak-up mechanism',        patterns:[/whistleblower|speak.?up|reporting mechanism/i] },
+    { pillar:'G', type:'solution', label:'Compliance program or training',            patterns:[/compliance (program|framework|training)/i] },
+  ];
+
+  function analyzeESG(text) {
+    const sentences = text.split(/(?<=[.!?])\s+|\n+/).filter(s => s.trim().length > 15);
+    const hitRules  = new Set();
+    const found     = { problems: [], solutions: [] };
+    for (const sentence of sentences) {
+      for (let i = 0; i < ESG_RULES.length; i++) {
+        if (hitRules.has(i)) continue;
+        const rule = ESG_RULES[i];
+        if (!rule.patterns.some(p => p.test(sentence))) continue;
+        hitRules.add(i);
+        found[rule.type === 'problem' ? 'problems' : 'solutions']
+          .push({ pillar: rule.pillar, label: rule.label });
+      }
+    }
+    return found;
+  }
+
+  // ── PDF / TXT EXTRACTION ──────────────────────────────────────────────────
+  async function extractPDFText(file, onProgress) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page    = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(it => it.str).join(' ') + '\n';
+      onProgress(Math.round((i / pdf.numPages) * 80));
+    }
+    return fullText;
+  }
+
+  function extractTXTText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsText(file);
+    });
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  const PILLAR_NAMES = { E: 'Environmental', S: 'Social', G: 'Governance' };
+
+  function renderResults(filename, findings) {
+    const { problems, solutions } = findings;
+    const total = problems.length + solutions.length;
+
+    // Summary chips
+    summaryChips.innerHTML = `
+      <div class="summary-chip total">${total} finding${total !== 1 ? 's' : ''} in <strong>${filename}</strong></div>
+      <div class="summary-chip risks">⚠ ${problems.length} risk${problems.length !== 1 ? 's' : ''}</div>
+      <div class="summary-chip comms">✓ ${solutions.length} commitment${solutions.length !== 1 ? 's' : ''}</div>`;
+
+    // Per-pillar cards
+    pillarGrid.innerHTML = ['E', 'S', 'G'].map(p => {
+      const pRisks = problems.filter(f => f.pillar === p);
+      const pComms = solutions.filter(f => f.pillar === p);
+      const rItems = pRisks.length
+        ? pRisks.map(f => `<li class="finding-item risk"><span class="finding-icon">⚠</span><span class="finding-label">${f.label}</span></li>`).join('')
+        : `<li class="finding-empty">No risks detected</li>`;
+      const cItems = pComms.length
+        ? pComms.map(f => `<li class="finding-item comm"><span class="finding-icon">✓</span><span class="finding-label">${f.label}</span></li>`).join('')
+        : `<li class="finding-empty">No commitments detected</li>`;
+      return `
+        <div class="pillar-card">
+          <div class="pillar-card-title">
+            <span class="pillar-badge ${p}">${p}</span>
+            ${PILLAR_NAMES[p]}
+          </div>
+          <ul class="finding-list">${rItems}${cItems}</ul>
+        </div>`;
+    }).join('');
+
+    // Full detail section
+    const allItems = item => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:13px;border-left:3px solid ${item.type === 'problem' ? 'var(--red)' : 'var(--green)'};background:${item.type === 'problem' ? 'rgba(248,113,113,.06)' : 'rgba(52,211,153,.06)'}">
+        <span class="tag ${item.pillar}">${item.pillar}</span>
+        <span>${item.label}</span>
+      </div>`;
+
+    findingsDetail.innerHTML = problems.length ? `
+      <div class="section-card">
+        <div class="section-title risks">⚠ All Risks (${problems.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${problems.map(f => allItems({...f, type:'problem'})).join('')}</div>
+      </div>` : '';
+    findingsDetail.innerHTML += solutions.length ? `
+      <div class="section-card">
+        <div class="section-title comms">✓ All Commitments (${solutions.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${solutions.map(f => allItems({...f, type:'solution'})).join('')}</div>
+      </div>` : '';
+
+    results.classList.add('visible');
+  }
+
+  // ── WIRING ────────────────────────────────────────────────────────────────
+  const dropZone     = document.getElementById('dropZone');
+  const fileInput    = document.getElementById('fileInput');
+  const dropTitle    = document.getElementById('dropTitle');
+  const dropSub      = document.getElementById('dropSub');
+  const dropFilename = document.getElementById('dropFilename');
+  const analyseBtn   = document.getElementById('analyseBtn');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar  = document.getElementById('progressBar');
+  const progressLabel= document.getElementById('progressLabel');
+  const errorMsg     = document.getElementById('errorMsg');
+  const results      = document.getElementById('results');
+  const summaryChips = document.getElementById('summaryChips');
+  const pillarGrid   = document.getElementById('pillarGrid');
+  const findingsFull = document.getElementById('findingsFull');
+  const findingsDetail = document.getElementById('findingsDetail');
+  const resetBtn     = document.getElementById('resetBtn');
+
+  let selectedFile = null;
+
+  function setProgress(pct, label) {
+    progressBar.style.width  = pct + '%';
+    progressLabel.textContent = label;
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('visible');
+  }
+
+  function pickFile(file) {
+    if (!file) return;
+    const ok = file.name.toLowerCase().endsWith('.pdf') || file.name.toLowerCase().endsWith('.txt');
+    if (!ok) { showError('Only PDF and .txt files are supported.'); return; }
+    selectedFile = file;
+    dropZone.classList.add('has-file');
+    dropTitle.textContent = 'Report ready';
+    dropSub.style.display = 'none';
+    dropFilename.textContent = file.name;
+    dropFilename.style.display = 'block';
+    analyseBtn.classList.add('visible');
+    errorMsg.classList.remove('visible');
+  }
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => pickFile(fileInput.files[0]));
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    pickFile(e.dataTransfer.files[0]);
+  });
+
+  analyseBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    analyseBtn.classList.remove('visible');
+    progressWrap.classList.add('visible');
+    errorMsg.classList.remove('visible');
+    results.classList.remove('visible');
+
+    try {
+      setProgress(5, 'Reading file…');
+      let text;
+      if (selectedFile.name.toLowerCase().endsWith('.txt')) {
+        text = await extractTXTText(selectedFile);
+        setProgress(80, 'Extracting text…');
+      } else {
+        text = await extractPDFText(selectedFile, p => setProgress(p, `Extracting text… (${p}%)`));
+      }
+      setProgress(90, 'Running ESG analysis…');
+      const findings = analyzeESG(text);
+      setProgress(100, 'Done.');
+      setTimeout(() => {
+        progressWrap.classList.remove('visible');
+        renderResults(selectedFile.name, findings);
+      }, 400);
+    } catch (err) {
+      progressWrap.classList.remove('visible');
+      showError('Could not process the file. Please ensure it is a valid PDF or plain text document.');
+      analyseBtn.classList.add('visible');
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    selectedFile = null;
+    fileInput.value = '';
+    dropZone.classList.remove('has-file');
+    dropTitle.textContent    = 'Drop your ESG report here';
+    dropSub.style.display    = 'block';
+    dropFilename.style.display = 'none';
+    results.classList.remove('visible');
+    errorMsg.classList.remove('visible');
+    progressWrap.classList.remove('visible');
+    setProgress(0, '');
+  });
+</script>
+
+</body>
+</html>
