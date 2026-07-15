@@ -77,7 +77,7 @@
       transition: color 0.2s, background 0.2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #011f1f; }
+    .nav-links a.active { color: var(--accent); background: #0e2236; }
 
     /* ── PAGE ── */
     .page {
@@ -113,7 +113,7 @@
       border-radius: 20px;
       border: 1px solid var(--border);
       color: var(--green);
-      background: #011200;
+      background: #0b2016;
     }
     .badge .dot-sm {
       width: 6px; height: 6px;
@@ -189,91 +189,17 @@
 
     /* Bar chart */
     .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
-    .bar-col {
-      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;
-      cursor: pointer;
-    }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
     .bar {
       width: 100%;
       border-radius: 4px 4px 0 0;
       background: var(--accent);
       opacity: 0.75;
-      transition: opacity 0.2s, background 0.2s;
+      transition: opacity 0.2s;
       min-height: 4px;
     }
-    .bar-col:hover .bar { opacity: 1; }
-    .bar-col.selected .bar { background: #5ffaf8; opacity: 1; }
-    .bar-label { font-size: 10px; color: var(--muted); transition: color 0.2s; }
-    .bar-col.selected .bar-label { color: var(--accent); }
-
-    /* Day detail panel */
-    .day-detail {
-      display: none;
-      margin-top: 18px;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-    }
-    .day-detail.open { display: block; }
-    .day-detail-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .day-detail-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .day-detail-count {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .day-detail-count strong { color: var(--accent); }
-    .day-close {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 1;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transition: color 0.2s, background 0.2s;
-    }
-    .day-close:hover { color: var(--text); background: var(--border); }
-    .query-list { display: flex; flex-direction: column; gap: 0; max-height: 260px; overflow-y: auto;
-      scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-    .query-list::-webkit-scrollbar { width: 4px; }
-    .query-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    .query-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-    .query-item:last-child { border-bottom: none; }
-    .query-num {
-      font-size: 11px;
-      color: var(--muted);
-      min-width: 22px;
-      padding-top: 1px;
-    }
-    .query-cat {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 10px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .query-cat.code    { background: #061822; color: #0e7fa8; border: 1px solid #0e3a50; }
-    .query-cat.data    { background: #1a0030; color: var(--purple); border: 1px solid #3a0060; }
-    .query-cat.writing { background: #011200; color: var(--green);  border: 1px solid #023a00; }
-    .query-cat.other   { background: #1a1600; color: var(--yellow); border: 1px solid #3a2e00; }
-    .query-text { color: var(--text); line-height: 1.45; flex: 1; }
+    .bar:hover { opacity: 1; }
+    .bar-label { font-size: 10px; color: var(--muted); }
 
     /* Donut chart */
     .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -314,9 +240,9 @@
       padding: 2px 10px;
       border-radius: 20px;
     }
-    .status-pill.ok   { background: #011200; color: var(--green);  border: 1px solid #023302; }
-    .status-pill.warn { background: #1a1600; color: var(--yellow); border: 1px solid #332b00; }
-    .status-pill.err  { background: #1a0000; color: var(--red);    border: 1px solid #330000; }
+    .status-pill.ok   { background: #0b2016; color: var(--green);  border: 1px solid #1a4030; }
+    .status-pill.warn { background: #201800; color: var(--yellow); border: 1px solid #3a2800; }
+    .status-pill.err  { background: #200b0b; color: var(--red);    border: 1px solid #3a1515; }
 
     /* ── ACTIVITY ── */
     .activity-list { display: flex; flex-direction: column; gap: 0; }
@@ -340,49 +266,6 @@
 
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
     @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-
-    /* ── ANALYZE ROW ── */
-    .analyze-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .analyze-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 38px;
-      padding: 0 20px;
-      border-radius: 9px;
-      border: none;
-      background: var(--accent);
-      color: #000;
-      font-family: var(--font);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .analyze-btn:hover  { background: #5ffaf8; }
-    .analyze-btn:active { transform: scale(0.96); }
-    .analyze-btn svg { width: 14px; height: 14px; }
-    .analyze-status {
-      font-size: 13px;
-      color: var(--muted);
-      display: none;
-    }
-    .analyze-status.show { display: block; }
-    .dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 4px; }
-    .dots span {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--accent);
-      animation: blink 1.2s infinite;
-    }
-    .dots span:nth-child(2) { animation-delay: 0.2s; }
-    .dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
   </style>
 </head>
 <body>
@@ -395,25 +278,12 @@
   <div class="nav-links">
     <a href="home.html">Home</a>
     <a href="index.html">Chat</a>
+    <a href="esg.html">ESG</a>
     <a href="dashboard.html" class="active">Dashboard</a>
-    <a href="trends.html">Trends</a>
-    <a href="esg-checker.html">ESG</a>
   </div>
 </nav>
 
 <div class="page">
-
-  <!-- Analyze Reports -->
-  <div class="analyze-row">
-    <button class="analyze-btn" id="analyzeBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      Analyze &amp; Predict Reports
-    </button>
-    <span class="analyze-status" id="analyzeStatus"></span>
-  </div>
 
   <!-- Header -->
   <div class="page-header">
@@ -464,26 +334,15 @@
   <!-- Charts -->
   <div class="charts-row">
     <div class="card">
-      <div class="card-title">Daily Query Volume <span>Last 7 days — click a bar to drill in</span></div>
-      <div class="bar-chart" id="barChart">
-        <div class="bar-col" data-day="Mon"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
-        <div class="bar-col" data-day="Tue"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
-        <div class="bar-col" data-day="Wed"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
-        <div class="bar-col" data-day="Thu"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
-        <div class="bar-col" data-day="Fri"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
-        <div class="bar-col" data-day="Sat"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
-        <div class="bar-col" data-day="Sun"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
-      </div>
-      <!-- Day detail panel -->
-      <div class="day-detail" id="dayDetail">
-        <div class="day-detail-header">
-          <div>
-            <div class="day-detail-title" id="dayDetailTitle"></div>
-            <div class="day-detail-count" id="dayDetailCount"></div>
-          </div>
-          <button class="day-close" id="dayClose" title="Close">✕</button>
-        </div>
-        <div class="query-list" id="queryList"></div>
+      <div class="card-title">Daily Query Volume <span>Last 7 days</span></div>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
+        <div class="bar-col"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
+        <div class="bar-col"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
+        <div class="bar-col"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
+        <div class="bar-col"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
+        <div class="bar-col"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
+        <div class="bar-col"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
       </div>
     </div>
 
@@ -494,22 +353,22 @@
           <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
           <!-- Code: 35% = 101 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#0e7fa8" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#38bdf8" stroke-width="18"
             stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
           <!-- Data: 25% = 72 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#8A00C4" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#a78bfa" stroke-width="18"
             stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
           <!-- Writing: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#016601" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#34d399" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
           <!-- Other: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#b6aa02" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#fbbf24" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
           <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
         </svg>
         <div class="donut-legend" style="width:100%">
           <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:#0e7fa8"></span>Code &amp; Dev</div>
+            <div class="leg-left"><span class="dot-leg" style="background:var(--accent)"></span>Code &amp; Dev</div>
             <span class="pct">35%</span>
           </div>
           <div class="donut-legend-item">
@@ -583,35 +442,35 @@
       <div class="card-title">System Activity <span>Live feed</span></div>
       <div class="activity-list">
         <div class="activity-item">
-          <div class="act-icon" style="background:#011f1f;color:var(--accent)">⚙</div>
+          <div class="act-icon" style="background:#0e2236;color:var(--accent)">⚙</div>
           <div class="act-body">
             <div class="act-title">Model JARVIS-4 deployed to production</div>
             <div class="act-time">2 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#011200;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
           <div class="act-body">
             <div class="act-title">Weekly accuracy report generated</div>
             <div class="act-time">18 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#1a1600;color:var(--yellow)">!</div>
+          <div class="act-icon" style="background:#201800;color:var(--yellow)">!</div>
           <div class="act-body">
             <div class="act-title">Latency spike detected — resolved</div>
             <div class="act-time">1 hour ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#1a0030;color:var(--purple)">↑</div>
+          <div class="act-icon" style="background:#0e2236;color:var(--purple)">↑</div>
           <div class="act-body">
             <div class="act-title">Training dataset updated (2.1M records)</div>
             <div class="act-time">3 hours ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#011200;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
           <div class="act-body">
             <div class="act-title">Automated backup completed successfully</div>
             <div class="act-time">6 hours ago</div>
@@ -622,260 +481,6 @@
   </div>
 
 </div>
-
-<script>
-  // ── DAILY QUERY DATA ─────────────────────────────────────────────────────
-  const DAILY_QUERIES = {
-    Mon: {
-      count: 6420,
-      queries: [
-        { cat: 'code',    text: 'How do I reverse a linked list in Python?' },
-        { cat: 'data',    text: 'Analyze the sales dataset and show me weekly trends' },
-        { cat: 'writing', text: 'Draft an executive summary for the Q3 report' },
-        { cat: 'code',    text: 'Fix the null pointer exception in my Java service' },
-        { cat: 'other',   text: 'What is the capital of New Zealand?' },
-        { cat: 'data',    text: 'Generate a bar chart from this CSV data' },
-        { cat: 'code',    text: 'Explain the difference between async/await and promises' },
-        { cat: 'writing', text: 'Rewrite this paragraph to sound more professional' },
-        { cat: 'other',   text: 'Summarize the latest AI news' },
-        { cat: 'code',    text: 'Write a SQL query to find duplicate rows' },
-      ],
-    },
-    Tue: {
-      count: 8391,
-      queries: [
-        { cat: 'code',    text: 'Build a REST API endpoint in Node.js for user authentication' },
-        { cat: 'data',    text: 'What are the top 5 products by revenue this quarter?' },
-        { cat: 'code',    text: 'Why is my Docker container crashing on startup?' },
-        { cat: 'writing', text: 'Write a LinkedIn post announcing our product launch' },
-        { cat: 'data',    text: 'Compare model accuracy across the last 5 training runs' },
-        { cat: 'code',    text: 'Implement binary search in TypeScript' },
-        { cat: 'other',   text: 'Translate this email to Spanish' },
-        { cat: 'writing', text: 'Generate meeting notes from this transcript' },
-        { cat: 'code',    text: 'How do I debounce a search input in React?' },
-        { cat: 'data',    text: 'Show me a pivot table of user signups by region' },
-        { cat: 'code',    text: 'Explain SOLID principles with examples' },
-        { cat: 'other',   text: 'What is the weather like in London today?' },
-      ],
-    },
-    Wed: {
-      count: 7532,
-      queries: [
-        { cat: 'data',    text: 'Run anomaly detection on the latency logs' },
-        { cat: 'code',    text: 'Convert this class component to a React hook' },
-        { cat: 'writing', text: 'Create a project status update for stakeholders' },
-        { cat: 'code',    text: 'Set up a CI/CD pipeline with GitHub Actions' },
-        { cat: 'data',    text: 'Cluster these customer records by purchase behaviour' },
-        { cat: 'other',   text: 'What does ESG stand for and why does it matter?' },
-        { cat: 'code',    text: 'Add rate limiting to my Express API' },
-        { cat: 'writing', text: 'Proofread and improve this technical specification' },
-        { cat: 'data',    text: 'Forecast next month\'s server costs based on usage trends' },
-        { cat: 'code',    text: 'Explain the CAP theorem in simple terms' },
-      ],
-    },
-    Thu: {
-      count: 9874,
-      queries: [
-        { cat: 'code',    text: 'Design a microservices architecture for an e-commerce platform' },
-        { cat: 'data',    text: 'Identify which features have the highest correlation with churn' },
-        { cat: 'code',    text: 'Debug this memory leak in my Go service' },
-        { cat: 'writing', text: 'Write a proposal for migrating to a cloud-native stack' },
-        { cat: 'code',    text: 'Implement a JWT refresh token strategy' },
-        { cat: 'data',    text: 'Build a dashboard showing real-time query volume' },
-        { cat: 'other',   text: 'What are the best practices for remote team management?' },
-        { cat: 'code',    text: 'Optimise this slow PostgreSQL query' },
-        { cat: 'data',    text: 'Generate a heatmap of user activity by hour of day' },
-        { cat: 'writing', text: 'Draft an incident post-mortem for the Tuesday outage' },
-        { cat: 'code',    text: 'Add OpenAPI documentation to my Flask endpoints' },
-        { cat: 'data',    text: 'What is the 90th percentile response time this week?' },
-        { cat: 'other',   text: 'Explain transformer architecture for a non-technical audience' },
-      ],
-    },
-    Fri: {
-      count: 9132,
-      queries: [
-        { cat: 'writing', text: 'Write the weekly engineering update email' },
-        { cat: 'code',    text: 'Create a Python script to automate the report generation' },
-        { cat: 'data',    text: 'Compare this week\'s KPIs against last week' },
-        { cat: 'code',    text: 'Fix the race condition in the task queue worker' },
-        { cat: 'other',   text: 'What are some team-building activities for remote teams?' },
-        { cat: 'data',    text: 'Predict weekend traffic based on historical patterns' },
-        { cat: 'code',    text: 'Write unit tests for the authentication module' },
-        { cat: 'writing', text: 'Summarize this research paper on LLM fine-tuning' },
-        { cat: 'data',    text: 'Show error rate breakdown by endpoint for today' },
-        { cat: 'code',    text: 'How do I implement retry logic with exponential backoff?' },
-        { cat: 'other',   text: 'Generate ideas for the Q4 product roadmap' },
-      ],
-    },
-    Sat: {
-      count: 4939,
-      queries: [
-        { cat: 'other',   text: 'What are some weekend side project ideas in AI?' },
-        { cat: 'code',    text: 'Build a simple chatbot with Python and Ollama' },
-        { cat: 'data',    text: 'Explore the open NYC taxi dataset and find patterns' },
-        { cat: 'writing', text: 'Write a blog post about building AI-powered tools' },
-        { cat: 'code',    text: 'How do I deploy a model to Hugging Face Spaces?' },
-        { cat: 'other',   text: 'Recommend books on systems design' },
-        { cat: 'data',    text: 'What machine learning model is best for time-series forecasting?' },
-      ],
-    },
-    Sun: {
-      count: 4314,
-      queries: [
-        { cat: 'other',   text: 'Plan my week using the Eisenhower matrix' },
-        { cat: 'writing', text: 'Write a personal OKR template for Q4' },
-        { cat: 'code',    text: 'Explain how large language models are trained' },
-        { cat: 'data',    text: 'Show a summary of my activity from this week' },
-        { cat: 'other',   text: 'What productivity tools do top engineers recommend?' },
-        { cat: 'code',    text: 'Create a Markdown cheat sheet' },
-      ],
-    },
-  };
-
-  // ── BAR CHART CLICK HANDLER ───────────────────────────────────────────────
-  const detail      = document.getElementById('dayDetail');
-  const detailTitle = document.getElementById('dayDetailTitle');
-  const detailCount = document.getElementById('dayDetailCount');
-  const queryList   = document.getElementById('queryList');
-
-  function openDay(day) {
-    const data = DAILY_QUERIES[day];
-    if (!data) return;
-
-    // Highlight the selected bar
-    document.querySelectorAll('.bar-col').forEach(c =>
-      c.classList.toggle('selected', c.dataset.day === day)
-    );
-
-    detailTitle.textContent = day + ' — Query Breakdown';
-    detailCount.innerHTML   = `<strong>${data.count.toLocaleString()}</strong> queries submitted`;
-
-    queryList.innerHTML = data.queries.map((q, i) => `
-      <div class="query-item">
-        <span class="query-num">${i + 1}.</span>
-        <span class="query-cat ${q.cat}">${q.cat === 'code' ? 'Code & Dev' : q.cat === 'data' ? 'Data' : q.cat === 'writing' ? 'Writing' : 'Other'}</span>
-        <span class="query-text">${q.text}</span>
-      </div>
-    `).join('');
-
-    detail.classList.add('open');
-    // Smooth scroll to the detail panel
-    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  document.getElementById('barChart').addEventListener('click', e => {
-    const col = e.target.closest('.bar-col');
-    if (!col) return;
-    // If already open and same day clicked, close it
-    if (col.classList.contains('selected') && detail.classList.contains('open')) {
-      detail.classList.remove('open');
-      col.classList.remove('selected');
-    } else {
-      openDay(col.dataset.day);
-    }
-  });
-
-  document.getElementById('dayClose').addEventListener('click', () => {
-    detail.classList.remove('open');
-    document.querySelectorAll('.bar-col').forEach(c => c.classList.remove('selected'));
-  });
-
-  // ── REPORT DATA (mirrors the table in this page) ──────────────────────────
-  const REPORT_RUNS = [
-    { id: '#2048', model: 'JARVIS-4', accuracy: 97.1 },
-    { id: '#2047', model: 'JARVIS-4', accuracy: 96.8 },
-    { id: '#2046', model: 'JARVIS-3', accuracy: 94.2 },
-    { id: '#2045', model: 'JARVIS-3', accuracy: 93.9 },
-    { id: '#2044', model: 'JARVIS-2', accuracy: 89.1 },
-  ];
-
-  document.getElementById('analyzeBtn').addEventListener('click', () => {
-    const btn    = document.getElementById('analyzeBtn');
-    const status = document.getElementById('analyzeStatus');
-
-    btn.disabled = true;
-    btn.style.opacity = '0.6';
-    status.innerHTML = 'Preparing report data<span class="dots"><span></span><span></span><span></span></span>';
-    status.classList.add('show');
-
-    // Build a time-series of accuracy values from oldest → newest run
-    const history = [...REPORT_RUNS].reverse().map(r => r.accuracy);
-
-    // Simple linear extrapolation for forecast
-    const n = history.length;
-    const slope = (history[n - 1] - history[0]) / (n - 1);
-    const forecast = [1, 2, 3, 4].map(i =>
-      parseFloat((history[n - 1] + slope * i).toFixed(2))
-    );
-    const confMargin = [0.5, 0.8, 1.1, 1.5];
-    const confLow  = forecast.map((v, i) => parseFloat((v - confMargin[i]).toFixed(2)));
-    const confHigh = forecast.map((v, i) => parseFloat((v + confMargin[i]).toFixed(2)));
-
-    const labels = [...REPORT_RUNS].reverse().map(r => r.id);
-
-    // Derive insights from the data
-    const avgAccuracy = history.reduce((a, b) => a + b, 0) / n;
-    const totalGain   = history[n - 1] - history[0];
-    const trend       = slope > 0 ? 'upward' : slope < 0 ? 'downward' : 'flat';
-    const trendLabel  = slope > 0 ? 'Improving ↑' : slope < 0 ? 'Declining ↓' : 'Stable →';
-
-    const insights = [
-      {
-        icon: slope > 0 ? '↑' : slope < 0 ? '↓' : '→',
-        bg: slope > 0 ? '#011200' : slope < 0 ? '#1a0000' : '#011f1f',
-        col: slope > 0 ? 'var(--green)' : slope < 0 ? 'var(--red)' : 'var(--accent)',
-        title: `Overall Accuracy ${slope > 0 ? 'Improving' : slope < 0 ? 'Declining' : 'Stable'}`,
-        desc: `Across ${n} report runs, accuracy moved from ${history[0]}% to ${history[n-1]}% — a ${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)} pp change. ${Math.abs(slope).toFixed(2)} pp per run on average.`,
-      },
-      {
-        icon: '◈',
-        bg: '#011f1f',
-        col: 'var(--accent)',
-        title: `Average Run Accuracy: ${avgAccuracy.toFixed(1)}%`,
-        desc: `The mean accuracy across all ${n} report runs is ${avgAccuracy.toFixed(2)}%. Runs on JARVIS-4 lead the pack; JARVIS-2 remains below the 90% baseline.`,
-      },
-      {
-        icon: '!',
-        bg: '#1a1600',
-        col: 'var(--yellow)',
-        title: 'Model Transition Gap',
-        desc: 'There is a visible accuracy drop at the JARVIS-2 → JARVIS-3 boundary (89.1% → 93.9%). Monitoring accuracy across model rollouts is recommended.',
-      },
-      {
-        icon: '✓',
-        bg: '#011200',
-        col: 'var(--green)',
-        title: `4-Run Forecast: ${forecast[forecast.length - 1]}%`,
-        desc: `Based on the current trajectory, accuracy is projected to reach ${forecast[forecast.length - 1]}% in 4 runs. Forecast confidence decreases at the 3–4 run horizon.`,
-      },
-    ];
-
-    const payload = {
-      label: 'Report Accuracy',
-      unit: '% accuracy',
-      chartTitle: 'Model Report Accuracy — Run History + 4-Run Forecast',
-      history,
-      weeks: labels,
-      forecast,
-      confLow,
-      confHigh,
-      stats: [
-        { label: 'Latest Run',      val: `${history[n-1]}%`, sub: REPORT_RUNS[0].id },
-        { label: '4-Run Forecast',  val: `${forecast[3]}%`,  sub: 'projected',    cls: 'pred' },
-        { label: 'Total Change',    val: `${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)}pp`, sub: `across ${n} runs`, cls: totalGain >= 0 ? 'up' : 'down' },
-        { label: 'Trend Signal',    val: trendLabel,          sub: trend + ' trend', cls: totalGain >= 0 ? 'up' : 'down' },
-      ],
-      insights,
-      fromReports: true,
-    };
-
-    try { localStorage.setItem('jarvis_report_dataset', JSON.stringify(payload)); } catch (_) {}
-
-    setTimeout(() => {
-      window.location.href = 'trends.html#reports';
-    }, 900);
-  });
-</script>
 
 </body>
 </html>
