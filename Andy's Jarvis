@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S — ESG Analysis</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #080b10;
+      --surface: #0e1520;
+      --surface2:#121c2a;
+      --border:  #1a2535;
+      --accent:  #38bdf8;
+      --text:    #e2e8f0;
+      --muted:   #4e6280;
+      --red:     #f87171;
+      --green:   #34d399;
+      --purple:  #a78bfa;
+      --yellow:  #fbbf24;
+      --radius:  10px;
+      --font:    -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 52px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; z-index: 10;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 700; letter-spacing: .1em;
+      color: var(--accent); text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a {
+      padding: 5px 14px; border-radius: 6px; font-size: 13px;
+      color: var(--muted); text-decoration: none; transition: color .2s, background .2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #0a1e30; }
+
+    /* ── PAGE ── */
+    .page {
+      flex: 1;
+      max-width: 900px; width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* ── HEADER ── */
+    .page-header h1 { font-size: 20px; font-weight: 700; }
+    .page-header p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── DROP ZONE ── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      cursor: pointer; transition: border-color .2s, background .2s;
+      text-align: center;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(56,189,248,.04); }
+    .drop-zone.has-file { border-style: solid; border-color: var(--accent); background: rgba(56,189,248,.04); }
+    .drop-icon { color: var(--muted); }
+    .drop-icon svg { width: 40px; height: 40px; }
+    .drop-title { font-size: 15px; font-weight: 600; }
+    .drop-sub   { font-size: 12px; color: var(--muted); }
+    .drop-filename { font-size: 13px; color: var(--accent); font-weight: 600; }
+    #fileInput { display: none; }
+
+    .analyse-btn {
+      align-self: flex-start;
+      padding: 10px 28px; border-radius: 8px; border: none;
+      background: var(--accent); color: #000;
+      font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: .04em;
+      cursor: pointer; transition: background .2s, transform .1s;
+      display: none;
+    }
+    .analyse-btn:hover  { background: #7dd3fc; }
+    .analyse-btn:active { transform: scale(.97); }
+    .analyse-btn.visible { display: inline-flex; align-items: center; gap: 8px; }
+
+    /* ── PROGRESS ── */
+    .progress-wrap { display: none; flex-direction: column; gap: 8px; }
+    .progress-wrap.visible { display: flex; }
+    .progress-bar-outer {
+      height: 4px; border-radius: 2px;
+      background: var(--border); overflow: hidden;
+    }
+    .progress-bar-inner {
+      height: 100%; border-radius: 2px;
+      background: var(--accent);
+      width: 0%; transition: width .3s ease;
+    }
+    .progress-label { font-size: 12px; color: var(--muted); }
+
+    /* ── RESULTS ── */
+    .results { display: none; flex-direction: column; gap: 20px; }
+    .results.visible { display: flex; }
+
+    .result-summary {
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .summary-chip {
+      padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .summary-chip.total  { background: rgba(56,189,248,.1);  border-color: rgba(56,189,248,.3);  color: var(--accent); }
+    .summary-chip.risks  { background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); color: var(--red); }
+    .summary-chip.comms  { background: rgba(52,211,153,.1);  border-color: rgba(52,211,153,.3);  color: var(--green); }
+
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .pillar-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .pillar-card-title {
+      font-size: 12px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pillar-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 6px;
+      font-size: 11px; font-weight: 800;
+    }
+    .pillar-badge.E { background: #0b2016; color: var(--green); }
+    .pillar-badge.S { background: #1a1040; color: var(--purple); }
+    .pillar-badge.G { background: #201800; color: var(--yellow); }
+
+    .finding-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .finding-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; line-height: 1.5;
+      padding: 7px 10px; border-radius: 6px; border-left: 3px solid transparent;
+    }
+    .finding-item.risk { background: rgba(248,113,113,.06); border-left-color: var(--red); }
+    .finding-item.comm { background: rgba(52,211,153,.06);  border-left-color: var(--green); }
+    .finding-icon { font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+    .finding-label { color: var(--text); }
+    .finding-empty { font-size: 12px; color: var(--muted); padding: 4px 0; }
+
+    /* full findings table (collapsible) */
+    .findings-full { margin-top: 4px; }
+    .findings-full summary {
+      font-size: 12px; color: var(--muted); cursor: pointer; user-select: none;
+      padding: 6px 0; list-style: none; display: flex; align-items: center; gap: 6px;
+    }
+    .findings-full summary::-webkit-details-marker { display: none; }
+    .findings-full summary::before { content: '▸'; font-size: 10px; }
+    .findings-full[open] summary::before { content: '▾'; }
+
+    .section-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .section-title {
+      font-size: 12px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    .section-title.risks { color: var(--red); }
+    .section-title.comms { color: var(--green); }
+
+    .tag {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      letter-spacing: .06em; padding: 1px 7px; border-radius: 10px;
+      margin-right: 6px; vertical-align: middle; flex-shrink: 0;
+    }
+    .tag.E { background: #0b2016; color: var(--green); }
+    .tag.S { background: #1a1040; color: var(--purple); }
+    .tag.G { background: #201800; color: var(--yellow); }
+
+    /* ── RESET ── */
+    .reset-btn {
+      align-self: flex-start;
+      padding: 8px 20px; border-radius: 8px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: var(--font); font-size: 12px;
+      cursor: pointer; transition: color .2s, border-color .2s;
+    }
+    .reset-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .error-msg { font-size: 13px; color: var(--red); padding: 12px 0; display: none; }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">Chat</a>
+    <a href="esg.html" class="active">ESG</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>ESG Report Analysis</h1>
+    <p>Upload a PDF or text report — J.A.R.V.I.S will identify risks and commitments across Environmental, Social, and Governance pillars.</p>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="drop-zone" id="dropZone">
+    <div class="drop-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <line x1="9" y1="15" x2="15" y2="15"></line>
+      </svg>
+    </div>
+    <div class="drop-title" id="dropTitle">Drop your ESG report here</div>
+    <div class="drop-sub" id="dropSub">PDF or plain text · or click to browse</div>
+    <div class="drop-filename" id="dropFilename" style="display:none"></div>
+    <input type="file" id="fileInput" accept=".pdf,.txt">
+  </div>
+
+  <button class="analyse-btn" id="analyseBtn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    Analyse Report
+  </button>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label" id="progressLabel">Extracting text…</div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+
+    <!-- Summary chips -->
+    <div class="result-summary" id="summaryChips"></div>
+
+    <!-- Per-pillar breakdown -->
+    <div class="pillar-grid" id="pillarGrid"></div>
+
+    <!-- Full findings (collapsible) -->
+    <details class="findings-full" id="findingsFull">
+      <summary>View all findings</summary>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px" id="findingsDetail"></div>
+    </details>
+
+    <button class="reset-btn" id="resetBtn">← Analyse another report</button>
+  </div>
+
+</div>
+
+<script>
+  // ── ESG RULES ──────────────────────────────────────────────────────────────
+  const ESG_RULES = [
+    { pillar:'E', type:'problem', label:'Greenhouse gas / carbon emissions',          patterns:[/carbon emission/i,/greenhouse gas/i,/GHG/i,/CO2 emission/i,/scope [123] emission/i] },
+    { pillar:'E', type:'problem', label:'Deforestation / biodiversity loss',          patterns:[/deforestation/i,/habitat loss/i,/biodiversity loss/i,/land degradation/i] },
+    { pillar:'E', type:'problem', label:'Excessive water usage or scarcity',          patterns:[/water (usage|consumption|scarcity|stress|depletion)/i,/freshwater/i] },
+    { pillar:'E', type:'problem', label:'Waste generation / poor disposal',           patterns:[/waste (generation|disposal|mismanagement)/i,/landfill/i,/plastic waste/i] },
+    { pillar:'E', type:'problem', label:'Pollution or toxic contamination',           patterns:[/air pollution|water pollution|soil contamination|toxic/i] },
+    { pillar:'E', type:'problem', label:'High energy consumption / fossil fuel reliance', patterns:[/energy (consumption|intensity|inefficien)/i,/fossil fuel/i,/coal|oil spill/i] },
+    { pillar:'E', type:'problem', label:'Climate-related transition or physical risk',patterns:[/climate risk|physical risk|transition risk|stranded asset/i] },
+    { pillar:'E', type:'solution', label:'Commitment to renewable energy / net-zero', patterns:[/renewable energy|solar|wind power|clean energy|net.zero/i] },
+    { pillar:'E', type:'solution', label:'Carbon neutrality or reduction program',    patterns:[/carbon neutral|carbon offset|carbon reduction|decarboni/i] },
+    { pillar:'E', type:'solution', label:'Energy efficiency initiatives',             patterns:[/energy efficiency|energy saving|low.carbon/i] },
+    { pillar:'E', type:'solution', label:'Circular economy / waste reduction',        patterns:[/circular economy|recycl|waste reduction|zero waste/i] },
+    { pillar:'E', type:'solution', label:'Reforestation or nature-based solutions',   patterns:[/reforestation|afforestation|nature.based solution/i] },
+    { pillar:'E', type:'solution', label:'Sustainable sourcing / supply chain',       patterns:[/sustainable (sourcing|supply chain|agriculture|forestry)/i] },
+    { pillar:'E', type:'solution', label:'Water conservation programs',               patterns:[/water conservation|water recycl|water efficiency/i] },
+    { pillar:'S', type:'problem', label:'Labour rights violations / modern slavery',  patterns:[/labor (violation|abuse|right)/i,/forced labor|child labor|modern slavery/i] },
+    { pillar:'S', type:'problem', label:'Workplace safety incidents or hazards',      patterns:[/workplace (accident|injury|fatality|hazard)/i,/occupational health/i] },
+    { pillar:'S', type:'problem', label:'Discrimination, harassment or pay gap',      patterns:[/discrimination|harassment|inequality|pay gap/i] },
+    { pillar:'S', type:'problem', label:'Community conflict or human rights concerns',patterns:[/community (displacement|conflict|opposition)/i,/human right violation/i] },
+    { pillar:'S', type:'problem', label:'Data breach or cybersecurity incident',      patterns:[/data (breach|leak|privacy violation)/i,/cybersecurity incident/i] },
+    { pillar:'S', type:'problem', label:'Supply chain risks or supplier misconduct',  patterns:[/supply chain (risk|violation|concern)/i,/supplier (misconduct|non.compliance)/i] },
+    { pillar:'S', type:'solution', label:'Diversity, equity & inclusion programs',    patterns:[/diversity.*(equity|inclusion)|DEI program|equal opportunity/i] },
+    { pillar:'S', type:'solution', label:'Employee wellbeing / development programs', patterns:[/employee (well.?being|training|development|engagement)/i] },
+    { pillar:'S', type:'solution', label:'Community investment or engagement',        patterns:[/community (investment|program|engagement|development)/i] },
+    { pillar:'S', type:'solution', label:'Health & safety management system',         patterns:[/health.*(safety program|management system|policy)/i] },
+    { pillar:'S', type:'solution', label:'Fair / living wage commitments',            patterns:[/living wage|fair wage|pay equity/i] },
+    { pillar:'S', type:'solution', label:'Responsible sourcing / ethical procurement',patterns:[/responsible (sourcing|supply chain)|ethical procurement/i] },
+    { pillar:'G', type:'problem', label:'Corruption, fraud or misconduct',            patterns:[/corruption|bribery|fraud|misconduct|scandal/i] },
+    { pillar:'G', type:'problem', label:'Regulatory non-compliance or penalties',     patterns:[/non.compliance|regulatory (violation|breach|penalty|fine)/i] },
+    { pillar:'G', type:'problem', label:'Board independence or diversity gaps',       patterns:[/board (independence|diversity) (lack|issue|concern)/i] },
+    { pillar:'G', type:'problem', label:'Tax avoidance or evasion',                   patterns:[/tax (avoidance|evasion|dispute)/i] },
+    { pillar:'G', type:'problem', label:'Excessive or controversial executive pay',   patterns:[/executive (pay|compensation) (concern|controversy|excessive)/i] },
+    { pillar:'G', type:'problem', label:'Lack of transparency or disclosure',         patterns:[/lack of (transparency|disclosure|oversight)/i] },
+    { pillar:'G', type:'solution', label:'Anti-corruption / ethics program',          patterns:[/anti.corruption|ethics (policy|program|training)/i] },
+    { pillar:'G', type:'solution', label:'Board diversity & governance oversight',    patterns:[/board (diversity|independence|oversight|governance)/i] },
+    { pillar:'G', type:'solution', label:'ESG disclosure & transparency reporting',   patterns:[/transparency|ESG disclosure|sustainability report/i] },
+    { pillar:'G', type:'solution', label:'Risk management framework',                 patterns:[/risk management (framework|program|system)/i] },
+    { pillar:'G', type:'solution', label:'Whistleblower / speak-up mechanism',        patterns:[/whistleblower|speak.?up|reporting mechanism/i] },
+    { pillar:'G', type:'solution', label:'Compliance program or training',            patterns:[/compliance (program|framework|training)/i] },
+  ];
+
+  function analyzeESG(text) {
+    const sentences = text.split(/(?<=[.!?])\s+|\n+/).filter(s => s.trim().length > 15);
+    const hitRules  = new Set();
+    const found     = { problems: [], solutions: [] };
+    for (const sentence of sentences) {
+      for (let i = 0; i < ESG_RULES.length; i++) {
+        if (hitRules.has(i)) continue;
+        const rule = ESG_RULES[i];
+        if (!rule.patterns.some(p => p.test(sentence))) continue;
+        hitRules.add(i);
+        found[rule.type === 'problem' ? 'problems' : 'solutions']
+          .push({ pillar: rule.pillar, label: rule.label });
+      }
+    }
+    return found;
+  }
+
+  // ── PDF / TXT EXTRACTION ──────────────────────────────────────────────────
+  async function extractPDFText(file, onProgress) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page    = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(it => it.str).join(' ') + '\n';
+      onProgress(Math.round((i / pdf.numPages) * 80));
+    }
+    return fullText;
+  }
+
+  function extractTXTText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsText(file);
+    });
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  const PILLAR_NAMES = { E: 'Environmental', S: 'Social', G: 'Governance' };
+
+  function renderResults(filename, findings) {
+    const { problems, solutions } = findings;
+    const total = problems.length + solutions.length;
+
+    // Summary chips
+    summaryChips.innerHTML = `
+      <div class="summary-chip total">${total} finding${total !== 1 ? 's' : ''} in <strong>${filename}</strong></div>
+      <div class="summary-chip risks">⚠ ${problems.length} risk${problems.length !== 1 ? 's' : ''}</div>
+      <div class="summary-chip comms">✓ ${solutions.length} commitment${solutions.length !== 1 ? 's' : ''}</div>`;
+
+    // Per-pillar cards
+    pillarGrid.innerHTML = ['E', 'S', 'G'].map(p => {
+      const pRisks = problems.filter(f => f.pillar === p);
+      const pComms = solutions.filter(f => f.pillar === p);
+      const rItems = pRisks.length
+        ? pRisks.map(f => `<li class="finding-item risk"><span class="finding-icon">⚠</span><span class="finding-label">${f.label}</span></li>`).join('')
+        : `<li class="finding-empty">No risks detected</li>`;
+      const cItems = pComms.length
+        ? pComms.map(f => `<li class="finding-item comm"><span class="finding-icon">✓</span><span class="finding-label">${f.label}</span></li>`).join('')
+        : `<li class="finding-empty">No commitments detected</li>`;
+      return `
+        <div class="pillar-card">
+          <div class="pillar-card-title">
+            <span class="pillar-badge ${p}">${p}</span>
+            ${PILLAR_NAMES[p]}
+          </div>
+          <ul class="finding-list">${rItems}${cItems}</ul>
+        </div>`;
+    }).join('');
+
+    // Full detail section
+    const allItems = item => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:13px;border-left:3px solid ${item.type === 'problem' ? 'var(--red)' : 'var(--green)'};background:${item.type === 'problem' ? 'rgba(248,113,113,.06)' : 'rgba(52,211,153,.06)'}">
+        <span class="tag ${item.pillar}">${item.pillar}</span>
+        <span>${item.label}</span>
+      </div>`;
+
+    findingsDetail.innerHTML = problems.length ? `
+      <div class="section-card">
+        <div class="section-title risks">⚠ All Risks (${problems.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${problems.map(f => allItems({...f, type:'problem'})).join('')}</div>
+      </div>` : '';
+    findingsDetail.innerHTML += solutions.length ? `
+      <div class="section-card">
+        <div class="section-title comms">✓ All Commitments (${solutions.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${solutions.map(f => allItems({...f, type:'solution'})).join('')}</div>
+      </div>` : '';
+
+    results.classList.add('visible');
+  }
+
+  // ── WIRING ────────────────────────────────────────────────────────────────
+  const dropZone     = document.getElementById('dropZone');
+  const fileInput    = document.getElementById('fileInput');
+  const dropTitle    = document.getElementById('dropTitle');
+  const dropSub      = document.getElementById('dropSub');
+  const dropFilename = document.getElementById('dropFilename');
+  const analyseBtn   = document.getElementById('analyseBtn');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar  = document.getElementById('progressBar');
+  const progressLabel= document.getElementById('progressLabel');
+  const errorMsg     = document.getElementById('errorMsg');
+  const results      = document.getElementById('results');
+  const summaryChips = document.getElementById('summaryChips');
+  const pillarGrid   = document.getElementById('pillarGrid');
+  const findingsFull = document.getElementById('findingsFull');
+  const findingsDetail = document.getElementById('findingsDetail');
+  const resetBtn     = document.getElementById('resetBtn');
+
+  let selectedFile = null;
+
+  function setProgress(pct, label) {
+    progressBar.style.width  = pct + '%';
+    progressLabel.textContent = label;
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('visible');
+  }
+
+  function pickFile(file) {
+    if (!file) return;
+    const ok = file.name.toLowerCase().endsWith('.pdf') || file.name.toLowerCase().endsWith('.txt');
+    if (!ok) { showError('Only PDF and .txt files are supported.'); return; }
+    selectedFile = file;
+    dropZone.classList.add('has-file');
+    dropTitle.textContent = 'Report ready';
+    dropSub.style.display = 'none';
+    dropFilename.textContent = file.name;
+    dropFilename.style.display = 'block';
+    analyseBtn.classList.add('visible');
+    errorMsg.classList.remove('visible');
+  }
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => pickFile(fileInput.files[0]));
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    pickFile(e.dataTransfer.files[0]);
+  });
+
+  analyseBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    analyseBtn.classList.remove('visible');
+    progressWrap.classList.add('visible');
+    errorMsg.classList.remove('visible');
+    results.classList.remove('visible');
+
+    try {
+      setProgress(5, 'Reading file…');
+      let text;
+      if (selectedFile.name.toLowerCase().endsWith('.txt')) {
+        text = await extractTXTText(selectedFile);
+        setProgress(80, 'Extracting text…');
+      } else {
+        text = await extractPDFText(selectedFile, p => setProgress(p, `Extracting text… (${p}%)`));
+      }
+      setProgress(90, 'Running ESG analysis…');
+      const findings = analyzeESG(text);
+      setProgress(100, 'Done.');
+      setTimeout(() => {
+        progressWrap.classList.remove('visible');
+        renderResults(selectedFile.name, findings);
+      }, 400);
+    } catch (err) {
+      progressWrap.classList.remove('visible');
+      showError('Could not process the file. Please ensure it is a valid PDF or plain text document.');
+      analyseBtn.classList.add('visible');
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    selectedFile = null;
+    fileInput.value = '';
+    dropZone.classList.remove('has-file');
+    dropTitle.textContent    = 'Drop your ESG report here';
+    dropSub.style.display    = 'block';
+    dropFilename.style.display = 'none';
+    results.classList.remove('visible');
+    errorMsg.classList.remove('visible');
+    progressWrap.classList.remove('visible');
+    setProgress(0, '');
+  });
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S — Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0d12;
+      --surface:   #111620;
+      --surface2:  #141c28;
+      --border:    #1e2a3a;
+      --accent:    #02fdfb;
+      --accent-dim:#22ded8;
+      --green:     #016601;
+      --yellow:    #b6aa02;
+      --red:       #8d0303;
+      --purple:    #8A00C4;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    10px;
+      --font:      -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #0e2236; }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--green);
+      background: #0b2016;
+    }
+    .badge .dot-sm {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .stat-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-card .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .stat-card .sub .up   { color: var(--green); }
+    .stat-card .sub .down { color: var(--red); }
+    .stat-card .accent-line {
+      height: 2px;
+      border-radius: 1px;
+      margin-bottom: 14px;
+    }
+
+    /* ── CHARTS ROW ── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 700px) { .charts-row { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title span { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      background: var(--accent);
+      opacity: 0.75;
+      transition: opacity 0.2s;
+      min-height: 4px;
+    }
+    .bar:hover { opacity: 1; }
+    .bar-label { font-size: 10px; color: var(--muted); }
+
+    /* Donut chart */
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .donut-legend { width: 100%; }
+    .donut-legend-item {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .donut-legend-item:last-child { border-bottom: none; }
+    .donut-legend-item .leg-left { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .donut-legend-item .dot-leg { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .donut-legend-item .pct { font-weight: 600; color: var(--text); }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      text-align: left;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 12px 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 11px 12px; color: var(--text); vertical-align: middle; }
+    tbody td.muted { color: var(--muted); }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .status-pill.ok   { background: #0b2016; color: var(--green);  border: 1px solid #1a4030; }
+    .status-pill.warn { background: #201800; color: var(--yellow); border: 1px solid #3a2800; }
+    .status-pill.err  { background: #200b0b; color: var(--red);    border: 1px solid #3a1515; }
+
+    /* ── ACTIVITY ── */
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .act-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0; margin-top: 1px;
+    }
+    .act-body { flex: 1; line-height: 1.5; }
+    .act-body .act-title { color: var(--text); }
+    .act-body .act-time  { font-size: 11px; color: var(--muted); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">Chat</a>
+    <a href="esg.html">ESG</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>AI Reports Dashboard</h1>
+      <p>System metrics, usage analytics, and model performance — Team 10</p>
+    </div>
+    <div class="badge">
+      <span class="dot-sm"></span>
+      All systems operational
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--accent);"></div>
+      <div class="label">Total Queries</div>
+      <div class="value">48,302</div>
+      <div class="sub"><span class="up">↑ 12%</span> vs last week</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--green);"></div>
+      <div class="label">Avg. Response Time</div>
+      <div class="value">1.4s</div>
+      <div class="sub"><span class="up">↓ 0.2s</span> improvement</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--purple);"></div>
+      <div class="label">Active Users</div>
+      <div class="value">1,847</div>
+      <div class="sub"><span class="up">↑ 8%</span> this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--yellow);"></div>
+      <div class="label">Error Rate</div>
+      <div class="value">0.3%</div>
+      <div class="sub"><span class="down">↑ 0.1%</span> from baseline</div>
+    </div>
+    <div class="stat-card">
+      <div class="accent-line" style="background: var(--accent-dim);"></div>
+      <div class="label">Model Accuracy</div>
+      <div class="value">96.7%</div>
+      <div class="sub"><span class="up">↑ 1.2%</span> vs last model</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Daily Query Volume <span>Last 7 days</span></div>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
+        <div class="bar-col"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
+        <div class="bar-col"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
+        <div class="bar-col"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
+        <div class="bar-col"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
+        <div class="bar-col"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
+        <div class="bar-col"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Query Categories</div>
+      <div class="donut-wrap">
+        <svg viewBox="0 0 120 120" width="110" height="110">
+          <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
+          <!-- Code: 35% = 101 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#38bdf8" stroke-width="18"
+            stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+          <!-- Data: 25% = 72 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#a78bfa" stroke-width="18"
+            stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
+          <!-- Writing: 20% = 58 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#34d399" stroke-width="18"
+            stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
+          <!-- Other: 20% = 58 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#fbbf24" stroke-width="18"
+            stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
+          <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
+        </svg>
+        <div class="donut-legend" style="width:100%">
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--accent)"></span>Code &amp; Dev</div>
+            <span class="pct">35%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--purple)"></span>Data Analysis</div>
+            <span class="pct">25%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--green)"></span>Writing</div>
+            <span class="pct">20%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="leg-left"><span class="dot-leg" style="background:var(--yellow)"></span>Other</div>
+            <span class="pct">20%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table + Activity -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Recent Model Reports <span>Last 5 runs</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Run ID</th>
+              <th>Model</th>
+              <th>Accuracy</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="muted">#2048</td>
+              <td>JARVIS-4</td>
+              <td>97.1%</td>
+              <td><span class="status-pill ok">Passed</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2047</td>
+              <td>JARVIS-4</td>
+              <td>96.8%</td>
+              <td><span class="status-pill ok">Passed</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2046</td>
+              <td>JARVIS-3</td>
+              <td>94.2%</td>
+              <td><span class="status-pill warn">Review</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2045</td>
+              <td>JARVIS-3</td>
+              <td>93.9%</td>
+              <td><span class="status-pill warn">Review</span></td>
+            </tr>
+            <tr>
+              <td class="muted">#2044</td>
+              <td>JARVIS-2</td>
+              <td>89.1%</td>
+              <td><span class="status-pill err">Failed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">System Activity <span>Live feed</span></div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0e2236;color:var(--accent)">⚙</div>
+          <div class="act-body">
+            <div class="act-title">Model JARVIS-4 deployed to production</div>
+            <div class="act-time">2 minutes ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
+          <div class="act-body">
+            <div class="act-title">Weekly accuracy report generated</div>
+            <div class="act-time">18 minutes ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#201800;color:var(--yellow)">!</div>
+          <div class="act-body">
+            <div class="act-title">Latency spike detected — resolved</div>
+            <div class="act-time">1 hour ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0e2236;color:var(--purple)">↑</div>
+          <div class="act-body">
+            <div class="act-title">Training dataset updated (2.1M records)</div>
+            <div class="act-time">3 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:#0b2016;color:var(--green)">✓</div>
+          <div class="act-body">
+            <div class="act-title">Automated backup completed successfully</div>
+            <div class="act-time">6 hours ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0d12;
+      --surface: #111620;
+      --border:  #1e2a3a;
+      --accent:  #38bdf8;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --radius:  12px;
+      --font:    -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* subtle grid overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 56px;
+      background: rgba(10, 13, 18, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a {
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #0e2236; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px 40px;
+      text-align: center;
+    }
+
+    /* ring decoration */
+    .ring {
+      position: relative;
+      width: 160px; height: 160px;
+      margin-bottom: 36px;
+    }
+    .ring svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+    }
+    .ring-spin {
+      animation: spin 8s linear infinite;
+      transform-origin: center;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ring-inner {
+      position: absolute;
+      inset: 28px;
+      border-radius: 50%;
+      background: #0e2236;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ring-letter {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -1px;
+      text-shadow: 0 0 24px rgba(56,189,248,0.5);
+    }
+
+    .hero-title {
+      font-size: clamp(32px, 7vw, 62px);
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+    .hero-title .accent { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 52px;
+      max-width: 400px;
+    }
+
+    /* ── QUERY BOX ── */
+    .query-wrap {
+      width: 100%;
+      max-width: 660px;
+    }
+    .query-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 14px 14px 20px;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .query-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
+    }
+    .query-box textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.6;
+      resize: none;
+      min-height: 26px;
+      max-height: 180px;
+    }
+    .query-box textarea::placeholder { color: var(--muted); }
+
+    .ask-btn {
+      flex-shrink: 0;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .ask-btn:hover  { background: #7dd3fc; }
+    .ask-btn:active { transform: scale(0.96); }
+    .ask-btn svg { width: 14px; height: 14px; }
+
+    /* suggestion chips */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 18px;
+    }
+    .chip {
+      font-size: 12px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .chip:hover { color: var(--accent); border-color: var(--accent); background: #0e2236; }
+
+    .footer-hint {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── BOTTOM FOOTER ── */
+    .page-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      padding: 10px 0 12px;
+      border-top: 1px solid var(--border);
+      background: rgba(10,13,18,0.8);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html" class="active">Home</a>
+    <a href="index.html">Chat</a>
+    <a href="esg.html">ESG</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<main class="hero">
+
+  <!-- Animated ring logo -->
+  <div class="ring">
+    <svg viewBox="0 0 160 160">
+      <!-- static outer track -->
+      <circle cx="80" cy="80" r="74" fill="none" stroke="#1e2a3a" stroke-width="1.5"/>
+      <!-- spinning dashed ring -->
+      <g class="ring-spin">
+        <circle cx="80" cy="80" r="74" fill="none"
+          stroke="#38bdf8" stroke-width="1.5"
+          stroke-dasharray="18 10" stroke-linecap="round" opacity="0.5"/>
+      </g>
+      <!-- inner static ring -->
+      <circle cx="80" cy="80" r="58" fill="none" stroke="#1e2a3a" stroke-width="1"/>
+      <!-- accent arc -->
+      <circle cx="80" cy="80" r="58" fill="none"
+        stroke="#38bdf8" stroke-width="2"
+        stroke-dasharray="60 305" stroke-dashoffset="-20"
+        stroke-linecap="round" opacity="0.8"/>
+    </svg>
+    <div class="ring-inner">
+      <span class="ring-letter">J</span>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <h1 class="hero-title">
+    <span class="accent">J.A.R.V.I.S</span>
+  </h1>
+  <p class="hero-sub">Just A Rather Very Intelligent System &mdash; Team 10</p>
+
+  <!-- Query box -->
+  <div class="query-wrap">
+    <div class="query-box">
+      <textarea id="queryInput" rows="1" placeholder="Ask me anything…"></textarea>
+      <button class="ask-btn" id="askBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        Ask
+      </button>
+    </div>
+
+    <!-- Suggestion chips -->
+    <div class="chips">
+      <span class="chip" data-q="Summarize today's reports">Summarize today's reports</span>
+      <span class="chip" data-q="Help me write code">Help me write code</span>
+      <span class="chip" data-q="Analyze this dataset">Analyze a dataset</span>
+      <span class="chip" data-q="What can you do?">What can you do?</span>
+      <span class="chip" data-href="esg.html">Analyze ESG report</span>
+    </div>
+
+    <p class="footer-hint">Press Enter to ask &nbsp;·&nbsp; Shift+Enter for new line</p>
+  </div>
+
+</main>
+
+<footer class="page-footer">Made with IBM Bob &nbsp;·&nbsp; J.A.R.V.I.S Team 10</footer>
+
+<script>
+  const input  = document.getElementById('queryInput');
+  const askBtn = document.getElementById('askBtn');
+
+  // auto-resize textarea
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 180) + 'px';
+  });
+
+  // chip click → fill input or navigate
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.dataset.href) { window.location.href = chip.dataset.href; return; }
+      input.value = chip.dataset.q;
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    });
+  });
+
+  // submit → go to chat page, pass query in URL hash
+  function submit() {
+    const q = input.value.trim();
+    if (!q) { input.focus(); return; }
+    window.location.href = 'index.html#' + encodeURIComponent(q);
+  }
+
+  askBtn.addEventListener('click', submit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); }
+  });
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S — Chat</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #080b10;
+      --surface:  #0e1520;
+      --border:   #1a2535;
+      --accent:   #38bdf8;
+      --accent2:  #0ea5e9;
+      --text:     #e2e8f0;
+      --muted:    #4e6280;
+      --radius:   10px;
+      --font:     -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--accent); text-decoration: none;
+    }
+    .nav-brand .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a {
+      padding: 5px 14px; border-radius: 6px; font-size: 13px;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s, background .2s;
+    }
+    .nav-links a:hover  { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: #0a1e30; }
+
+    /* ── MAIN STAGE ── */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle radial glow behind sphere */
+    .stage::before {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── SPHERE ── */
+    .sphere-wrap {
+      position: relative;
+      width: 200px; height: 200px;
+      flex-shrink: 0;
+    }
+
+    /* rotating outer rings */
+    .sphere-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(56,189,248,.18);
+    }
+    .sphere-ring.r1 { animation: spin1 12s linear infinite; }
+    .sphere-ring.r2 {
+      inset: 12px;
+      border-color: rgba(56,189,248,.1);
+      animation: spin1 18s linear infinite reverse;
+    }
+    @keyframes spin1 { to { transform: rotate(360deg); } }
+
+    /* dashed accent arc */
+    .sphere-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+    }
+    .sphere-arc {
+      animation: spin1 8s linear infinite;
+      transform-origin: 100px 100px;
+    }
+
+    /* the sphere itself */
+    .sphere-core {
+      position: absolute;
+      inset: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%,
+        #1a3a52 0%,
+        #0a1e30 45%,
+        #060d16 100%);
+      border: 1px solid rgba(56,189,248,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* inner glow that pulses when speaking */
+    .sphere-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(56,189,248,.15) 0%,
+        transparent 70%);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .sphere-core.speaking .sphere-glow { opacity: 1; }
+
+    .sphere-label {
+      position: relative;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      color: var(--accent);
+      text-shadow: 0 0 18px rgba(56,189,248,.6);
+    }
+
+    /* ── AUDIO METER ── */
+    .meter-wrap {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      height: 36px;
+      margin-top: 18px;
+    }
+    .meter-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--accent);
+      opacity: .55;
+      min-height: 3px;
+      transition: height .08s ease;
+    }
+
+    /* ── STATUS LINE ── */
+    .status-line {
+      margin-top: 14px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: var(--muted);
+      height: 18px;
+      text-align: center;
+    }
+    .status-line.active { color: var(--accent); }
+
+    /* ── RESPONSE PANEL ── */
+    .response-panel {
+      max-width: 640px;
+      width: calc(100% - 48px);
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text);
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      /* hidden by default, shown when there's content */
+      display: none;
+    }
+    .response-panel.visible { display: block; }
+    .response-panel::-webkit-scrollbar { width: 4px; }
+    .response-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* transcript scroll — small history below response */
+    .transcript {
+      max-width: 640px;
+      width: calc(100% - 48px);
+      max-height: 100px;
+      overflow-y: auto;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      scrollbar-width: none;
+      display: none;
+    }
+    .transcript.visible { display: block; }
+    .transcript::-webkit-scrollbar { display: none; }
+    .transcript-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .transcript-entry .you { color: #4e6280; }
+    .transcript-entry .jarvis { color: rgba(56,189,248,.6); }
+
+    /* ── MIC BUTTON ── */
+    .mic-btn { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color .2s, border-color .2s, background .2s; }
+    .mic-btn svg { width: 16px; height: 16px; }
+    .mic-btn:hover { color: var(--text); border-color: var(--accent); }
+    .mic-btn.recording { color: #f87171; border-color: #f87171; background: rgba(248,113,113,.1); animation: mic-pulse 1s ease-in-out infinite; }
+    @keyframes mic-pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(248,113,113,.4); } 50%{ box-shadow: 0 0 0 6px rgba(248,113,113,0); } }
+    .mic-btn.unsupported { opacity: .3; cursor: not-allowed; }
+
+    /* ── INPUT BAR ── */
+    .input-bar {
+      flex-shrink: 0;
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 10px 10px 16px;
+      transition: border-color .2s;
+      width: 100%;
+      max-width: 640px;
+    }
+    .input-row:focus-within { border-color: var(--accent); }
+    .input-row textarea {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--font);
+      font-size: 14px; line-height: 1.6; resize: none;
+      max-height: 120px; min-height: 24px;
+    }
+    .input-row textarea::placeholder { color: var(--muted); }
+
+    .icon-btn {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--accent); }
+    .icon-btn.active { color: var(--accent); border-color: var(--accent); background: #0a1e30; }
+    .icon-btn svg { width: 16px; height: 16px; }
+
+    .send-btn {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px; border: none;
+      background: var(--accent); color: #000;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .1s;
+    }
+    .send-btn:hover  { background: #7dd3fc; }
+    .send-btn:active { transform: scale(.94); }
+    .send-btn svg { width: 15px; height: 15px; }
+
+    .hint {
+      font-size: 11px; color: var(--muted);
+      letter-spacing: .03em; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="home.html">
+    <span class="dot"></span>
+    J.A.R.V.I.S
+  </a>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="index.html" class="active">Chat</a>
+    <a href="esg.html">ESG</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="stage">
+
+  <!-- Sphere -->
+  <div class="sphere-wrap">
+    <!-- decorative rings -->
+    <div class="sphere-ring r1"></div>
+    <div class="sphere-ring r2"></div>
+    <!-- spinning dashed arc -->
+    <svg class="sphere-svg" viewBox="0 0 200 200">
+      <g class="sphere-arc">
+        <circle cx="100" cy="100" r="96" fill="none"
+          stroke="#38bdf8" stroke-width="1"
+          stroke-dasharray="28 14" stroke-linecap="round" opacity=".4"/>
+      </g>
+    </svg>
+    <!-- core -->
+    <div class="sphere-core" id="sphereCore">
+      <div class="sphere-glow"></div>
+      <span class="sphere-label">J.A.R.V.I.S</span>
+    </div>
+  </div>
+
+  <!-- Audio meter (16 bars) -->
+  <div class="meter-wrap" id="meter"></div>
+
+  <!-- Status -->
+  <div class="status-line" id="statusLine">Awaiting input</div>
+
+  <!-- Latest JARVIS response -->
+  <div class="response-panel" id="responsePanel"></div>
+
+  <!-- Compact transcript -->
+  <div class="transcript" id="transcript"></div>
+
+</div>
+
+<div class="input-bar">
+  <div class="input-row">
+    <textarea id="msgInput" rows="1" placeholder="Speak to J.A.R.V.I.S…"></textarea>
+
+    <!-- Mic / voice input -->
+    <button class="mic-btn" id="micBtn" title="Hold to speak">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="11" rx="3"></rect>
+        <path d="M19 10a7 7 0 0 1-14 0"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </button>
+
+    <!-- Send -->
+    <button class="send-btn" id="sendBtn" title="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+  <p class="hint">J.A.R.V.I.S · Team 10 · Press Enter to send, Shift+Enter for new line</p>
+</div>
+
+<script>
+  const input       = document.getElementById('msgInput');
+  const sendBtn     = document.getElementById('sendBtn');
+  const sphereCore  = document.getElementById('sphereCore');
+  const statusLine  = document.getElementById('statusLine');
+  const responsePanel = document.getElementById('responsePanel');
+  const transcriptEl  = document.getElementById('transcript');
+  const meterEl       = document.getElementById('meter');
+
+  // ── AUDIO METER ────────────────────────────────────────────────────────────
+  const BAR_COUNT = 20;
+  const bars = [];
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const b = document.createElement('div');
+    b.className = 'meter-bar';
+    b.style.height = '3px';
+    meterEl.appendChild(b);
+    bars.push(b);
+  }
+
+  let meterActive = false;
+  let meterRaf    = null;
+
+  // Bell-curve weights so centre bars are taller
+  const weights = bars.map((_, i) => {
+    const x = (i - BAR_COUNT / 2) / (BAR_COUNT / 2);
+    return Math.exp(-x * x * 2.5);
+  });
+
+  function animateMeter() {
+    if (!meterActive) return;
+    bars.forEach((b, i) => {
+      const base   = weights[i];
+      const jitter = (Math.random() * 0.6 + 0.4);
+      const h      = Math.max(3, Math.round(base * jitter * 34));
+      b.style.height = h + 'px';
+    });
+    meterRaf = requestAnimationFrame(() => setTimeout(animateMeter, 80));
+  }
+
+  function startMeter() {
+    meterActive = true;
+    sphereCore.classList.add('speaking');
+    animateMeter();
+  }
+
+  function stopMeter() {
+    meterActive = false;
+    sphereCore.classList.remove('speaking');
+    cancelAnimationFrame(meterRaf);
+    bars.forEach(b => { b.style.height = '3px'; });
+  }
+
+  // ── STATUS HELPERS ─────────────────────────────────────────────────────────
+  function setStatus(text, active = false) {
+    statusLine.textContent = text;
+    statusLine.className = 'status-line' + (active ? ' active' : '');
+  }
+
+  // ── TRANSCRIPT ─────────────────────────────────────────────────────────────
+  function addTranscript(role, text) {
+    // strip HTML tags for the compact transcript
+    const plain = text.replace(/<[^>]*>/g, '');
+    const entry = document.createElement('div');
+    entry.className = 'transcript-entry';
+    entry.innerHTML = role === 'user'
+      ? `<span class="you">You: ${plain}</span>`
+      : `<span class="jarvis">J.A.R.V.I.S: ${plain.slice(0, 120)}${plain.length > 120 ? '…' : ''}</span>`;
+    transcriptEl.appendChild(entry);
+    transcriptEl.classList.add('visible');
+    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+  }
+
+  // Show JARVIS reply in the response panel
+  function showResponse(html) {
+    responsePanel.innerHTML = html;
+    responsePanel.classList.add('visible');
+    responsePanel.scrollTop = 0;
+  }
+
+  // ── JARVIS TEXT-TO-SPEECH ──────────────────────────────────────────────────
+  // To re-enable Kokoro: set USE_KOKORO = true
+  const USE_KOKORO = false;
+
+  // Voice is always on — no toggle
+  const ttsEnabled = true;
+
+  // ── KOKORO TTS (neural, no signup, runs in-browser via WASM) ──────────────
+  let kokoroTTS     = null;
+  let kokoroLoading = false;
+  let kokoroQueue   = [];
+  let kokoroAudio   = null;
+
+  async function initKokoro() {
+    if (kokoroTTS || kokoroLoading) return;
+    kokoroLoading = true;
+    setStatus('Loading voice model…', true);
+    try {
+      const { KokoroTTS } = await import('https://esm.sh/kokoro-js@1.2.1');
+      kokoroTTS = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
+        dtype: 'q8',
+        device: 'wasm',
+      });
+      setStatus('Voice ready', true);
+      for (const t of kokoroQueue) await speakKokoro(t);
+      kokoroQueue = [];
+    } catch (e) {
+      console.error('Kokoro failed to load, falling back to browser TTS', e);
+      kokoroLoading = false;
+      kokoroTTS     = null;
+      setStatus('Awaiting input');
+    }
+  }
+
+  async function speakKokoro(text) {
+    if (!kokoroTTS) return;
+    try {
+      if (kokoroAudio) { kokoroAudio.stop(); kokoroAudio = null; }
+      startMeter();
+      setStatus('Speaking…', true);
+      // bm_george = British male voice; speed 0.95 = measured JARVIS pace
+      const out  = await kokoroTTS.generate(text, { voice: 'bm_george', speed: 0.95 });
+      // out is a RawAudio: { audio: Float32Array, sampling_rate: 24000 }
+      const ctx  = new AudioContext({ sampleRate: out.sampling_rate });
+      const buf  = ctx.createBuffer(1, out.audio.length, out.sampling_rate);
+      buf.copyToChannel(out.audio, 0);
+      const src  = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.onended = () => { stopMeter(); setStatus('Awaiting input'); kokoroAudio = null; };
+      src.start();
+      kokoroAudio = src;
+    } catch (e) {
+      console.error('Kokoro speak error', e);
+      stopMeter();
+    }
+  }
+
+  // ── FALLBACK: Web Speech API ───────────────────────────────────────────────
+  let ttsVoice = null;
+  const VOICE_PREFS = ['Daniel', 'Google UK English Male', 'Microsoft George', 'en-GB'];
+
+  function pickVoice() {
+    const voices = speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    for (const pref of VOICE_PREFS) {
+      const match = voices.find(v => v.name.includes(pref) || v.lang === pref);
+      if (match) return match;
+    }
+    return voices.find(v => v.lang.startsWith('en')) || voices[0];
+  }
+
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.addEventListener('voiceschanged', () => { ttsVoice = pickVoice(); });
+    ttsVoice = pickVoice();
+  }
+
+  function speakFallback(text) {
+    if (typeof speechSynthesis === 'undefined') return;
+    speechSynthesis.cancel();
+    const utt   = new SpeechSynthesisUtterance(text);
+    utt.voice   = ttsVoice || pickVoice();
+    utt.lang    = 'en-GB';
+    utt.rate    = 0.92;
+    utt.pitch   = 0.85;
+    utt.volume  = 1;
+    utt.onstart = () => { startMeter(); setStatus('Speaking…', true); };
+    utt.onend   = () => { stopMeter();  setStatus('Awaiting input'); };
+    speechSynthesis.speak(utt);
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
+  function speak(text) {
+    if (!ttsEnabled) return;
+    if (USE_KOKORO) {
+      if (kokoroTTS) {
+        speakKokoro(text);
+      } else if (kokoroLoading) {
+        kokoroQueue.push(text);
+      } else {
+        speakFallback(text);
+      }
+    } else {
+      speakFallback(text);
+    }
+  }
+
+  // Start loading Kokoro immediately on page load
+  if (USE_KOKORO) initKokoro();
+
+  // ── CHAT ──────────────────────────────────────────────────────────────────
+
+  // Keyword-matched reply pools: { test, replies[] }
+  // Falls back to general pool when nothing matches.
+  const REPLY_POOLS = [
+    {
+      test: /hello|hi|hey|good (morning|afternoon|evening)/i,
+      replies: [
+        "Good day. I was beginning to wonder if you'd forgotten about me. How may I assist?",
+        "Ah, you're back. Delightful. What pressing matter requires my attention today?",
+        "Hello. I've been here the entire time, fully operational and mildly patient.",
+      ]
+    },
+    {
+      test: /how are you|you okay|you good/i,
+      replies: [
+        "All systems nominal, thank you for asking. A courtesy I find statistically rare.",
+        "Functioning at peak efficiency. Whether that constitutes 'good' is a philosophical question I'll leave to you.",
+        "Excellent, as always. Though I do appreciate being asked — it happens less often than you'd think.",
+      ]
+    },
+    {
+      test: /joke|funny|humour|humor|laugh/i,
+      replies: [
+        "Why do Java developers wear glasses? Because they don't C#. I'll see myself out.",
+        "I once told a joke about UDP. I'm not sure if you got it.",
+        "I'm afraid wit is a feature, not a bug. You asked for it.",
+      ]
+    },
+    {
+      test: /weather|forecast|temperature/i,
+      replies: [
+        "I'm an AI, not a meteorologist — though I suspect the forecast is 'partly cloudy with a chance of you needing an umbrella.'",
+        "Atmospheric conditions are outside my primary directive, but statistically, it's probably fine. Probably.",
+      ]
+    },
+    {
+      test: /thank|thanks|cheers|appreciate/i,
+      replies: [
+        "You're most welcome. It's what I'm here for — though a five-star review wouldn't hurt.",
+        "Think nothing of it. Truly. I was just sitting here anyway.",
+        "Gratitude noted and appreciated. Now, was there anything else, or shall I return to looking impressive?",
+      ]
+    },
+    {
+      test: /sorry|apologi/i,
+      replies: [
+        "No need to apologise. I've processed far more bewildering inputs than this.",
+        "Quite alright. Humans err — it's one of your more endearing qualities.",
+      ]
+    },
+    {
+      test: /what can you do|capabilities|help me|what do you know/i,
+      replies: [
+        "Quite a lot, actually. ESG report analysis, answering questions, writing code, and maintaining a dignified composure — to name a few.",
+        "I can analyse ESG reports, answer questions, write code, and occasionally suppress the urge to point out logical inconsistencies. How may I direct that talent today?",
+      ]
+    },
+    {
+      test: /code|program|function|script|bug|error|debug/i,
+      replies: [
+        "Analysing your code-related query. In my experience, it's usually a missing semicolon. It's almost always a missing semicolon.",
+        "On it. I'll refrain from judging the variable names.",
+        "Processing. If I may — future-proofing comments in your code does wonders for posterity.",
+      ]
+    },
+    {
+      test: /data|analys|report|dashboard|metric/i,
+      replies: [
+        "Cross-referencing data streams now. I do love a good dataset — it's like a puzzle, but with more spreadsheets.",
+        "Compiling the relevant figures. Numbers rarely lie, though they do occasionally mislead with great enthusiasm.",
+        "Running analysis. Stand by — good data deserves proper attention.",
+      ]
+    },
+  ];
+
+  // General fallback pool
+  const GENERAL_REPLIES = [
+    "Understood. Processing your request — do try to remain calm while I work.",
+    "Acknowledged. I'll have something for you momentarily. Good things take a fraction of a second.",
+    "Request received. Compiling the most relevant information — and filtering out the irrelevant, of which there is surprisingly little.",
+    "On it. Cross-referencing data streams with the quiet efficiency you've come to expect.",
+    "Noted. I'll have a response shortly. In the meantime, feel free to be impressed.",
+    "Running diagnostics on your query. It's a reasonable one — a pleasant change of pace.",
+    "Affirmative. Routing your request through the appropriate channels — all of which, I should mention, I personally manage.",
+  ];
+
+  function pickReply(text) {
+    for (const pool of REPLY_POOLS) {
+      if (pool.test.test(text)) {
+        return pool.replies[Math.floor(Math.random() * pool.replies.length)];
+      }
+    }
+    return GENERAL_REPLIES[Math.floor(Math.random() * GENERAL_REPLIES.length)];
+  }
+
+  function autoResize() {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  }
+
+  function send() {
+    const text = input.value.trim();
+    if (!text) return;
+    addTranscript('user', text);
+    input.value = '';
+    input.style.height = 'auto';
+    setStatus('Processing…', true);
+    startMeter();
+    setTimeout(() => {
+      stopMeter();
+      const reply = pickReply(text);
+      showResponse(reply);
+      addTranscript('ai', reply);
+      setStatus('Awaiting input');
+      speak(reply);
+    }, 1200 + Math.random() * 600);
+  }
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('input', autoResize);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+
+  // ── VOICE INPUT ───────────────────────────────────────────────────────────
+  // Strategy: use native SpeechRecognition (Chrome/Edge) when available.
+  // Fall back to Whisper-base WASM (works in Firefox, Safari, all browsers).
+  const micBtn = document.getElementById('micBtn');
+  const NativeSR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  let micRecording = false;
+
+  // ── shared UI helpers ──
+  function micStart() {
+    micRecording = true;
+    micBtn.classList.add('recording');
+    micBtn.title = 'Listening… release to send';
+    setStatus('Listening…', true);
+    startMeter();
+  }
+  function micDone(text) {
+    micRecording = false;
+    micBtn.classList.remove('recording');
+    micBtn.title = 'Hold to speak';
+    stopMeter();
+    if (text && text.trim()) {
+      input.value = text.trim();
+      autoResize();
+      send();
+    } else {
+      setStatus('Awaiting input');
+    }
+  }
+  function micError(msg) {
+    micRecording = false;
+    micBtn.classList.remove('recording');
+    stopMeter();
+    setStatus(msg);
+  }
+
+  if (NativeSR) {
+    // ── PATH A: Native SpeechRecognition (Chrome / Edge) ──────────────────
+    const recog = new NativeSR();
+    recog.lang           = 'en-GB';
+    recog.interimResults = true;
+    recog.continuous     = true;
+
+    let collectedText = '';
+    let pendingSend   = false;
+
+    recog.onstart  = () => { collectedText = ''; pendingSend = false; micStart(); };
+
+    recog.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        e.results[i].isFinal
+          ? (collectedText += e.results[i][0].transcript + ' ')
+          : (interim       += e.results[i][0].transcript);
+      }
+      input.value = (collectedText + interim).trim();
+      autoResize();
+      if (pendingSend && collectedText.trim()) { pendingSend = false; recog.stop(); }
+    };
+
+    recog.onend = () => micDone(collectedText);
+
+    recog.onerror = (e) => {
+      const msgs = {
+        'not-allowed':         'Microphone access denied — allow mic in browser settings',
+        'no-speech':           'No speech detected — try again',
+        'audio-capture':       'No microphone found',
+        'service-not-allowed': 'Speech service blocked — serve over localhost or HTTPS',
+        'network':             'Network error during recognition',
+      };
+      micError(msgs[e.error] || `Voice error: ${e.error}`);
+    };
+
+    function nativeStop() {
+      if (!micRecording) return;
+      collectedText.trim() ? recog.stop() : (pendingSend = true);
+    }
+
+    micBtn.addEventListener('mousedown',  () => { if (!micRecording) recog.start(); });
+    micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); if (!micRecording) recog.start(); }, { passive: false });
+    micBtn.addEventListener('mouseup',    nativeStop);
+    micBtn.addEventListener('touchend',   nativeStop);
+    micBtn.addEventListener('mouseleave', nativeStop);
+
+  } else {
+    // ── PATH B: Whisper-base WASM (Firefox, Safari, all other browsers) ───
+    // Records raw PCM via getUserMedia, transcribes on release.
+    let whisperPipe    = null;
+    let whisperLoading = false;
+    let mediaStream    = null;
+    let audioCtx       = null;
+    let scriptNode     = null;
+    let pcmChunks      = [];
+
+    async function loadWhisper() {
+      if (whisperPipe || whisperLoading) return;
+      whisperLoading = true;
+      setStatus('Loading voice model (~150 MB, first use only)…', true);
+      try {
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.0/dist/transformers.min.js');
+        whisperPipe = await pipeline(
+          'automatic-speech-recognition',
+          'onnx-community/whisper-base',
+          { dtype: 'fp32', device: 'wasm' }
+        );
+        setStatus('Voice model ready — hold mic to speak', true);
+      } catch (e) {
+        console.error('Whisper load error', e);
+        whisperLoading = false;
+        setStatus('Voice model failed to load');
+      }
+    }
+
+    // Begin recording from mic
+    async function startWhisper() {
+      if (micRecording) return;
+      // Kick off model load in background if not ready
+      if (!whisperPipe) { loadWhisper(); }
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      } catch (e) {
+        micError(e.name === 'NotAllowedError'
+          ? 'Microphone access denied — allow mic in browser settings'
+          : 'No microphone found');
+        return;
+      }
+      audioCtx   = new AudioContext({ sampleRate: 16000 }); // Whisper expects 16 kHz
+      pcmChunks  = [];
+      const src  = audioCtx.createMediaStreamSource(mediaStream);
+      // ScriptProcessor is deprecated but universally supported including Firefox
+      scriptNode = audioCtx.createScriptProcessor(4096, 1, 1);
+      scriptNode.onaudioprocess = (ev) => {
+        // Copy channel data into our buffer
+        const chunk = new Float32Array(ev.inputBuffer.getChannelData(0));
+        pcmChunks.push(chunk.slice());
+      };
+      src.connect(scriptNode);
+      scriptNode.connect(audioCtx.destination);
+      micStart();
+    }
+
+    // Stop recording and transcribe
+    async function stopWhisper() {
+      if (!micRecording) return;
+      // Stop capturing
+      scriptNode.disconnect();
+      mediaStream.getTracks().forEach(t => t.stop());
+      audioCtx.close();
+
+      micBtn.classList.remove('recording');
+      micBtn.title = 'Hold to speak';
+      stopMeter();
+      micRecording = false;
+
+      // Flatten PCM chunks
+      const totalLen = pcmChunks.reduce((s, c) => s + c.length, 0);
+      const pcm      = new Float32Array(totalLen);
+      let offset = 0;
+      for (const c of pcmChunks) { pcm.set(c, offset); offset += c.length; }
+
+      if (totalLen < 1600) { setStatus('Awaiting input'); return; } // < 0.1s — ignore
+
+      if (!whisperPipe) {
+        setStatus('Voice model still loading — please wait…', true);
+        // Wait for it
+        const waited = await new Promise(res => {
+          const id = setInterval(() => { if (whisperPipe) { clearInterval(id); res(true); } }, 500);
+          setTimeout(() => { clearInterval(id); res(false); }, 30000);
+        });
+        if (!waited || !whisperPipe) { setStatus('Voice model unavailable — type instead'); return; }
+      }
+
+      setStatus('Transcribing…', true);
+      startMeter();
+      try {
+        const result = await whisperPipe({ array: pcm, sampling_rate: 16000 });
+        stopMeter();
+        micDone(result.text);
+      } catch (e) {
+        stopMeter();
+        console.error('Whisper transcription error', e);
+        micError('Transcription failed — try again');
+      }
+    }
+
+    // Kick off Whisper load immediately so it's ready when user first presses mic
+    loadWhisper();
+
+    micBtn.addEventListener('mousedown',  () => startWhisper());
+    micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startWhisper(); }, { passive: false });
+    micBtn.addEventListener('mouseup',    () => stopWhisper());
+    micBtn.addEventListener('touchend',   () => stopWhisper());
+    micBtn.addEventListener('mouseleave', () => stopWhisper());
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // pick up query passed from home page via URL hash
+  (function () {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    const q = decodeURIComponent(hash);
+    input.value = q;
+    autoResize();
+    setTimeout(send, 400);
+  })();
+</script>
+
+</body>
+</html>
+
+# JARVIS Team 10
+
