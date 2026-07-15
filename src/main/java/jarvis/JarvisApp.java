@@ -2,6 +2,7 @@ package jarvis;
 
 import java.util.List;
 
+import jarvis.EsgGeneratorService.GeneratedReport;
 import jarvis.JarvisData.EsgDataset;
 import jarvis.JarvisData.ForecastPoint;
 import jarvis.JarvisData.ModelRun;
@@ -32,13 +33,16 @@ import jarvis.JarvisData.TrendInsight;
  *   esg              — all ESG metrics with 12-week history + forecast
  *   esg:coverage     — detail for a single ESG metric (any key)
  *   esg:push         — build the Trends payload from default ESG selection
+ *   esg:generate     — generate a full GRI report draft for "Acme Corporation / Technology"
+ *   esg:generate:sasb — generate using a different standard (gri/sasb/tcfd/csrd/sdg)
  */
 public final class JarvisApp {
 
     public static void main(String[] args) {
-        DashboardService dashboard = new DashboardService();
-        TrendsService    trends    = new TrendsService();
-        EsgService       esg       = new EsgService();
+        DashboardService    dashboard = new DashboardService();
+        TrendsService       trends    = new TrendsService();
+        EsgService          esg       = new EsgService();
+        EsgGeneratorService generator = new EsgGeneratorService();
 
         String mode = args.length > 0 ? args[0].toLowerCase() : "all";
 
@@ -145,6 +149,15 @@ public final class JarvisApp {
                     System.out.printf("%nTrend: %s  |  Total change: %+.2f  |  Latest: %.2f%n",
                             ds.forecast.trendLabel(), ds.totalChange(), ds.latestValue());
                 }, () -> System.err.println("Unknown ESG key: " + key));
+            }
+
+            // ── ESG — generate report draft ───────────────────────────────
+            case "esg:generate",
+                 "esg:generate:gri", "esg:generate:sasb", "esg:generate:tcfd",
+                 "esg:generate:csrd", "esg:generate:sdg" -> {
+                String std = mode.contains(":generate:") ? mode.substring(mode.lastIndexOf(':') + 1) : "gri";
+                GeneratedReport report = generator.generateDefault(std, "Acme Corporation", "Technology");
+                System.out.println(report.toPlainText());
             }
 
             // ── ESG — push to Trends (build payload) ──────────────────────
