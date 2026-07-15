@@ -12,16 +12,14 @@
       --surface:   #111620;
       --border:    #1e2a3a;
       --accent:    #02fdfb;
-      --accent-dim:#22ded8;
+      --accent2:   #22ded8;
       --text:      #e2e8f0;
       --muted:     #64748b;
-      --user-bg:   #011f1f;
-      --ai-bg:     #0a1414;
       --radius:    10px;
       --font:      -apple-system, "Segoe UI", system-ui, sans-serif;
     }
 
-    html, body { height: 100%; }
+    html, body { height: 100%; overflow: hidden; }
 
     body {
       font-family: var(--font);
@@ -29,8 +27,6 @@
       color: var(--text);
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
     }
 
     /* ── NAV ── */
@@ -43,20 +39,15 @@
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+      z-index: 10;
     }
     .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; letter-spacing: 0.08em;
+      color: var(--accent); text-decoration: none;
     }
     .nav-brand .dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
+      width: 9px; height: 9px; border-radius: 50%;
       background: var(--accent);
       box-shadow: 0 0 8px var(--accent);
       animation: pulse 2s ease-in-out infinite;
@@ -67,139 +58,229 @@
     }
     .nav-links { display: flex; gap: 6px; }
     .nav-links a {
-      padding: 5px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s, background 0.2s;
+      padding: 5px 14px; border-radius: 6px; font-size: 13px;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s, background .2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
     .nav-links a.active { color: var(--accent); background: #011f1f; }
 
-    /* ── CHAT LAYOUT ── */
-    .chat-wrap {
+    /* ── MAIN STAGE ── */
+    .stage {
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 820px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 0 16px;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
       min-height: 0;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* ── MESSAGES ── */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 0 16px;
+    /* subtle radial glow behind sphere */
+    .stage::before {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(2,253,251,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── SPHERE ── */
+    .sphere-wrap {
+      position: relative;
+      width: 200px; height: 200px;
+      flex-shrink: 0;
+    }
+
+    /* rotating outer rings */
+    .sphere-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(2,253,251,.18);
+    }
+    .sphere-ring.r1 { animation: spin1 12s linear infinite; }
+    .sphere-ring.r2 {
+      inset: 12px;
+      border-color: rgba(2,253,251,.1);
+      animation: spin1 18s linear infinite reverse;
+    }
+    @keyframes spin1 { to { transform: rotate(360deg); } }
+
+    /* dashed accent arc */
+    .sphere-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+    }
+    .sphere-arc {
+      animation: spin1 8s linear infinite;
+      transform-origin: 100px 100px;
+    }
+
+    /* the sphere itself */
+    .sphere-core {
+      position: absolute;
+      inset: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%,
+        #011f1f 0%,
+        #0a1414 45%,
+        #060d16 100%);
+      border: 1px solid rgba(2,253,251,.25);
       display: flex;
-      flex-direction: column;
-      gap: 18px;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* inner glow that pulses when speaking */
+    .sphere-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(2,253,251,.15) 0%,
+        transparent 70%);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .sphere-core.speaking .sphere-glow { opacity: 1; }
+
+    .sphere-label {
+      position: relative;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      color: var(--accent);
+      text-shadow: 0 0 18px rgba(2,253,251,.6);
+    }
+
+    /* ── AUDIO METER ── */
+    .meter-wrap {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      height: 36px;
+      margin-top: 18px;
+    }
+    .meter-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--accent);
+      opacity: .55;
+      min-height: 3px;
+      transition: height .08s ease;
+    }
+
+    /* ── STATUS LINE ── */
+    .status-line {
+      margin-top: 14px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: var(--muted);
+      height: 18px;
+      text-align: center;
+    }
+    .status-line.active { color: var(--accent); }
+
+    /* ── RESPONSE PANEL ── */
+    .response-panel {
+      max-width: 640px;
+      width: calc(100% - 48px);
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text);
       scrollbar-width: thin;
       scrollbar-color: var(--border) transparent;
+      display: none;
     }
-    .messages::-webkit-scrollbar { width: 5px; }
-    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .response-panel.visible { display: block; }
+    .response-panel::-webkit-scrollbar { width: 4px; }
+    .response-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    .msg { display: flex; gap: 12px; align-items: flex-start; }
-    .msg.user { flex-direction: row-reverse; }
+    /* transcript scroll — small history below response */
+    .transcript {
+      max-width: 640px;
+      width: calc(100% - 48px);
+      max-height: 100px;
+      overflow-y: auto;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      scrollbar-width: none;
+      display: none;
+    }
+    .transcript.visible { display: block; }
+    .transcript::-webkit-scrollbar { display: none; }
+    .transcript-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .transcript-entry .you    { color: var(--muted); }
+    .transcript-entry .jarvis { color: rgba(2,253,251,.6); }
 
-    .avatar {
-      width: 34px; height: 34px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; flex-shrink: 0;
-    }
-    .msg.ai   .avatar { background: #011f1f; color: var(--accent); border: 1px solid var(--border); }
-    .msg.user .avatar { background: #011f1f; color: var(--accent); border: 1px solid var(--border); }
-
-    .bubble {
-      max-width: 72%;
-      padding: 12px 16px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      line-height: 1.65;
-      border: 1px solid var(--border);
-    }
-    .msg.ai   .bubble { background: var(--ai-bg); border-radius: 2px var(--radius) var(--radius) var(--radius); }
-    .msg.user .bubble { background: var(--user-bg); border-radius: var(--radius) 2px var(--radius) var(--radius); }
-
-    .bubble .label {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 5px;
-      text-transform: uppercase;
-    }
-
-    /* typing indicator */
-    .typing .bubble { padding: 14px 18px; }
-    .typing-dots { display: flex; gap: 5px; align-items: center; }
-    .typing-dots span {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent);
-      animation: blink 1.2s infinite;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink {
-      0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
-      40%           { opacity: 1;   transform: scale(1); }
-    }
+    /* ── MIC BUTTON ── */
+    .mic-btn { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color .2s, border-color .2s, background .2s; }
+    .mic-btn svg { width: 16px; height: 16px; }
+    .mic-btn:hover { color: var(--text); border-color: var(--accent); }
+    .mic-btn.recording { color: #f87171; border-color: #f87171; background: rgba(248,113,113,.1); animation: mic-pulse 1s ease-in-out infinite; }
+    @keyframes mic-pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(248,113,113,.4); } 50%{ box-shadow: 0 0 0 6px rgba(248,113,113,0); } }
+    .mic-btn.unsupported { opacity: .3; cursor: not-allowed; }
 
     /* ── INPUT BAR ── */
     .input-bar {
-      padding: 14px 0 20px;
       flex-shrink: 0;
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
     .input-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: flex-end;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 10px 10px 10px 16px;
-      transition: border-color 0.2s;
+      transition: border-color .2s;
+      width: 100%;
+      max-width: 640px;
     }
     .input-row:focus-within { border-color: var(--accent); }
     .input-row textarea {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-family: var(--font);
-      font-size: 14px;
-      line-height: 1.6;
-      resize: none;
-      max-height: 160px;
-      min-height: 24px;
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--font);
+      font-size: 14px; line-height: 1.6; resize: none;
+      max-height: 120px; min-height: 24px;
     }
     .input-row textarea::placeholder { color: var(--muted); }
+
     .send-btn {
-      width: 38px; height: 38px; flex-shrink: 0;
-      border-radius: 8px;
-      border: none;
-      background: var(--accent);
-      color: #000;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, transform 0.1s;
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px; border: none;
+      background: var(--accent); color: #000;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .1s;
     }
     .send-btn:hover  { background: #5ffaf8; }
-    .send-btn:active { transform: scale(0.94); }
-    .send-btn svg { width: 16px; height: 16px; }
+    .send-btn:active { transform: scale(.94); }
+    .send-btn svg { width: 15px; height: 15px; }
 
     .hint {
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 6px;
-      letter-spacing: 0.02em;
+      font-size: 11px; color: var(--muted);
+      letter-spacing: .03em; text-align: center;
     }
   </style>
 </head>
@@ -219,106 +300,291 @@
   </div>
 </nav>
 
-<div class="chat-wrap">
-  <div class="messages" id="messages">
+<div class="stage">
 
-    <div class="msg ai">
-      <div class="avatar">AI</div>
-      <div class="bubble">
-        <div class="label">J.A.R.V.I.S</div>
-        Good day. I am J.A.R.V.I.S — Just A Rather Very Intelligent System. How can I assist you today?
-      </div>
+  <!-- Sphere -->
+  <div class="sphere-wrap">
+    <!-- decorative rings -->
+    <div class="sphere-ring r1"></div>
+    <div class="sphere-ring r2"></div>
+    <!-- spinning dashed arc -->
+    <svg class="sphere-svg" viewBox="0 0 200 200">
+      <g class="sphere-arc">
+        <circle cx="100" cy="100" r="96" fill="none"
+          stroke="#02fdfb" stroke-width="1"
+          stroke-dasharray="28 14" stroke-linecap="round" opacity=".4"/>
+      </g>
+    </svg>
+    <!-- core -->
+    <div class="sphere-core" id="sphereCore">
+      <div class="sphere-glow"></div>
+      <span class="sphere-label">J.A.R.V.I.S</span>
     </div>
-
-    <div class="msg user">
-      <div class="avatar">U</div>
-      <div class="bubble">
-        <div class="label">You</div>
-        What can you help me with?
-      </div>
-    </div>
-
-    <div class="msg ai">
-      <div class="avatar">AI</div>
-      <div class="bubble">
-        <div class="label">J.A.R.V.I.S</div>
-        I can assist with a wide range of tasks — answering questions, drafting documents, writing and reviewing code, analyzing data, and generating reports. What would you like to explore?
-      </div>
-    </div>
-
   </div>
 
-  <div class="input-bar">
-    <div class="input-row">
-      <textarea id="msgInput" rows="1" placeholder="Ask J.A.R.V.I.S anything…"></textarea>
-      <button class="send-btn" id="sendBtn" title="Send">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-        </svg>
-      </button>
-    </div>
-    <p class="hint">J.A.R.V.I.S · Team 10 · Press Enter to send, Shift+Enter for new line</p>
+  <!-- Audio meter (20 bars) -->
+  <div class="meter-wrap" id="meter"></div>
+
+  <!-- Status -->
+  <div class="status-line" id="statusLine">Awaiting input</div>
+
+  <!-- Latest JARVIS response -->
+  <div class="response-panel" id="responsePanel"></div>
+
+  <!-- Compact transcript -->
+  <div class="transcript" id="transcript"></div>
+
+</div>
+
+<div class="input-bar">
+  <div class="input-row">
+    <textarea id="msgInput" rows="1" placeholder="Speak to J.A.R.V.I.S…"></textarea>
+
+    <!-- Mic / voice input -->
+    <button class="mic-btn" id="micBtn" title="Hold to speak">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="11" rx="3"></rect>
+        <path d="M19 10a7 7 0 0 1-14 0"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </button>
+
+    <!-- Send -->
+    <button class="send-btn" id="sendBtn" title="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
   </div>
+  <p class="hint">J.A.R.V.I.S · Team 10 · Press Enter to send, Shift+Enter for new line</p>
 </div>
 
 <script>
-  const messages  = document.getElementById('messages');
-  const input     = document.getElementById('msgInput');
-  const sendBtn   = document.getElementById('sendBtn');
+  const input         = document.getElementById('msgInput');
+  const sendBtn       = document.getElementById('sendBtn');
+  const sphereCore    = document.getElementById('sphereCore');
+  const statusLine    = document.getElementById('statusLine');
+  const responsePanel = document.getElementById('responsePanel');
+  const transcriptEl  = document.getElementById('transcript');
+  const meterEl       = document.getElementById('meter');
 
-  const replies = [
-    "Understood. Processing your request now…",
-    "Analyzing input. I'll have a response for you shortly.",
-    "Affirmative. Here's what I found based on your query.",
-    "Running diagnostics on your question — one moment.",
-    "Request received. Compiling the most relevant information.",
-    "Acknowledged. Cross-referencing data streams now.",
+  // ── AUDIO METER ──────────────────────────────────────────────────────────────
+  const BAR_COUNT = 20;
+  const bars = [];
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const b = document.createElement('div');
+    b.className = 'meter-bar';
+    b.style.height = '3px';
+    meterEl.appendChild(b);
+    bars.push(b);
+  }
+
+  let meterActive = false;
+  let meterRaf    = null;
+
+  // Bell-curve weights so centre bars are taller
+  const weights = bars.map((_, i) => {
+    const x = (i - BAR_COUNT / 2) / (BAR_COUNT / 2);
+    return Math.exp(-x * x * 2.5);
+  });
+
+  function animateMeter() {
+    if (!meterActive) return;
+    bars.forEach((b, i) => {
+      const base   = weights[i];
+      const jitter = (Math.random() * 0.6 + 0.4);
+      const h      = Math.max(3, Math.round(base * jitter * 34));
+      b.style.height = h + 'px';
+    });
+    meterRaf = requestAnimationFrame(() => setTimeout(animateMeter, 80));
+  }
+
+  function startMeter() {
+    meterActive = true;
+    sphereCore.classList.add('speaking');
+    animateMeter();
+  }
+
+  function stopMeter() {
+    meterActive = false;
+    sphereCore.classList.remove('speaking');
+    cancelAnimationFrame(meterRaf);
+    bars.forEach(b => { b.style.height = '3px'; });
+  }
+
+  // ── STATUS HELPERS ─────────────────────────────────────────────────────────
+  function setStatus(text, active = false) {
+    statusLine.textContent = text;
+    statusLine.className = 'status-line' + (active ? ' active' : '');
+  }
+
+  // ── TRANSCRIPT ─────────────────────────────────────────────────────────────
+  function addTranscript(role, text) {
+    const plain = text.replace(/<[^>]*>/g, '');
+    const entry = document.createElement('div');
+    entry.className = 'transcript-entry';
+    entry.innerHTML = role === 'user'
+      ? `<span class="you">You: ${plain}</span>`
+      : `<span class="jarvis">J.A.R.V.I.S: ${plain.slice(0, 120)}${plain.length > 120 ? '…' : ''}</span>`;
+    transcriptEl.appendChild(entry);
+    transcriptEl.classList.add('visible');
+    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+  }
+
+  // Show JARVIS reply in the response panel
+  function showResponse(html) {
+    responsePanel.innerHTML = html;
+    responsePanel.classList.add('visible');
+    responsePanel.scrollTop = 0;
+  }
+
+  // ── TTS ────────────────────────────────────────────────────────────────────
+  let ttsVoice = null;
+  const VOICE_PREFS = ['Daniel', 'Google UK English Male', 'Microsoft George', 'en-GB'];
+
+  function pickVoice() {
+    const voices = speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    for (const pref of VOICE_PREFS) {
+      const match = voices.find(v => v.name.includes(pref) || v.lang === pref);
+      if (match) return match;
+    }
+    return voices.find(v => v.lang.startsWith('en')) || voices[0];
+  }
+
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.addEventListener('voiceschanged', () => { ttsVoice = pickVoice(); });
+    ttsVoice = pickVoice();
+  }
+
+  function speak(text) {
+    if (typeof speechSynthesis === 'undefined') return;
+    speechSynthesis.cancel();
+    const utt   = new SpeechSynthesisUtterance(text);
+    utt.voice   = ttsVoice || pickVoice();
+    utt.lang    = 'en-GB';
+    utt.rate    = 0.92;
+    utt.pitch   = 0.85;
+    utt.volume  = 1;
+    utt.onstart = () => { startMeter(); setStatus('Speaking…', true); };
+    utt.onend   = () => { stopMeter();  setStatus('Awaiting input'); };
+    speechSynthesis.speak(utt);
+  }
+
+  // ── CHAT REPLY POOLS ───────────────────────────────────────────────────────
+  const REPLY_POOLS = [
+    {
+      test: /hello|hi|hey|good (morning|afternoon|evening)/i,
+      replies: [
+        "Good day. I was beginning to wonder if you'd forgotten about me. How may I assist?",
+        "Ah, you're back. Delightful. What pressing matter requires my attention today?",
+        "Hello. I've been here the entire time, fully operational and mildly patient.",
+      ]
+    },
+    {
+      test: /how are you|you okay|you good/i,
+      replies: [
+        "All systems nominal, thank you for asking. A courtesy I find statistically rare.",
+        "Functioning at peak efficiency. Whether that constitutes 'good' is a philosophical question I'll leave to you.",
+        "Excellent, as always. Though I do appreciate being asked — it happens less often than you'd think.",
+      ]
+    },
+    {
+      test: /joke|funny|humour|humor|laugh/i,
+      replies: [
+        "Why do Java developers wear glasses? Because they don't C#. I'll see myself out.",
+        "I once told a joke about UDP. I'm not sure if you got it.",
+        "I'm afraid wit is a feature, not a bug. You asked for it.",
+      ]
+    },
+    {
+      test: /weather|forecast|temperature/i,
+      replies: [
+        "I'm an AI, not a meteorologist — though I suspect the forecast is 'partly cloudy with a chance of you needing an umbrella.'",
+        "Atmospheric conditions are outside my primary directive, but statistically, it's probably fine. Probably.",
+      ]
+    },
+    {
+      test: /thank|thanks|cheers|appreciate/i,
+      replies: [
+        "You're most welcome. It's what I'm here for — though a five-star review wouldn't hurt.",
+        "Think nothing of it. Truly. I was just sitting here anyway.",
+        "Gratitude noted and appreciated. Now, was there anything else, or shall I return to looking impressive?",
+      ]
+    },
+    {
+      test: /sorry|apologi/i,
+      replies: [
+        "No need to apologise. I've processed far more bewildering inputs than this.",
+        "Quite alright. Humans err — it's one of your more endearing qualities.",
+      ]
+    },
+    {
+      test: /what can you do|capabilities|help me|what do you know/i,
+      replies: [
+        "Quite a lot, actually. ESG report analysis, answering questions, writing code, and maintaining a dignified composure — to name a few.",
+        "I can analyse ESG reports, answer questions, write code, and occasionally suppress the urge to point out logical inconsistencies.",
+      ]
+    },
+    {
+      test: /code|program|function|script|bug|error|debug/i,
+      replies: [
+        "Analysing your code-related query. In my experience, it's usually a missing semicolon. It's almost always a missing semicolon.",
+        "On it. I'll refrain from judging the variable names.",
+        "Processing. If I may — future-proofing comments in your code does wonders for posterity.",
+      ]
+    },
+    {
+      test: /data|analys|report|dashboard|metric/i,
+      replies: [
+        "Cross-referencing data streams now. I do love a good dataset — it's like a puzzle, but with more spreadsheets.",
+        "Compiling the relevant figures. Numbers rarely lie, though they do occasionally mislead with great enthusiasm.",
+        "Running analysis. Stand by — good data deserves proper attention.",
+      ]
+    },
   ];
+
+  const GENERAL_REPLIES = [
+    "Understood. Processing your request — do try to remain calm while I work.",
+    "Acknowledged. I'll have something for you momentarily. Good things take a fraction of a second.",
+    "Request received. Compiling the most relevant information — and filtering out the irrelevant, of which there is surprisingly little.",
+    "On it. Cross-referencing data streams with the quiet efficiency you've come to expect.",
+    "Noted. I'll have a response shortly. In the meantime, feel free to be impressed.",
+    "Running diagnostics on your query. It's a reasonable one — a pleasant change of pace.",
+    "Affirmative. Routing your request through the appropriate channels — all of which, I should mention, I personally manage.",
+  ];
+
+  function pickReply(text) {
+    for (const pool of REPLY_POOLS) {
+      if (pool.test.test(text)) {
+        return pool.replies[Math.floor(Math.random() * pool.replies.length)];
+      }
+    }
+    return GENERAL_REPLIES[Math.floor(Math.random() * GENERAL_REPLIES.length)];
+  }
 
   function autoResize() {
     input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
-  }
-
-  function appendMsg(role, text) {
-    const div = document.createElement('div');
-    div.className = 'msg ' + role;
-    div.innerHTML = `
-      <div class="avatar">${role === 'ai' ? 'AI' : 'U'}</div>
-      <div class="bubble">
-        <div class="label">${role === 'ai' ? 'J.A.R.V.I.S' : 'You'}</div>
-        ${text}
-      </div>`;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-    return div;
-  }
-
-  function showTyping() {
-    const div = document.createElement('div');
-    div.className = 'msg ai typing';
-    div.innerHTML = `
-      <div class="avatar">AI</div>
-      <div class="bubble">
-        <div class="typing-dots"><span></span><span></span><span></span></div>
-      </div>`;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-    return div;
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
   }
 
   function send() {
     const text = input.value.trim();
     if (!text) return;
-    appendMsg('user', text);
+    addTranscript('user', text);
     input.value = '';
     input.style.height = 'auto';
-    const typing = showTyping();
+    setStatus('Processing…', true);
+    startMeter();
     setTimeout(() => {
-      typing.remove();
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      appendMsg('ai', reply);
+      stopMeter();
+      const reply = pickReply(text);
+      showResponse(reply);
+      addTranscript('ai', reply);
+      setStatus('Awaiting input');
+      speak(reply);
     }, 1200 + Math.random() * 600);
   }
 
@@ -328,16 +594,198 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
 
+  // ── VOICE INPUT ───────────────────────────────────────────────────────────
+  const micBtn  = document.getElementById('micBtn');
+  const NativeSR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  let micRecording = false;
+
+  function micStart() {
+    micRecording = true;
+    micBtn.classList.add('recording');
+    micBtn.title = 'Listening… release to send';
+    setStatus('Listening…', true);
+    startMeter();
+  }
+  function micDone(text) {
+    micRecording = false;
+    micBtn.classList.remove('recording');
+    micBtn.title = 'Hold to speak';
+    stopMeter();
+    if (text && text.trim()) {
+      input.value = text.trim();
+      autoResize();
+      send();
+    } else {
+      setStatus('Awaiting input');
+    }
+  }
+  function micError(msg) {
+    micRecording = false;
+    micBtn.classList.remove('recording');
+    stopMeter();
+    setStatus(msg);
+  }
+
+  if (NativeSR) {
+    // ── PATH A: Native SpeechRecognition (Chrome / Edge) ────────────────────
+    const recog = new NativeSR();
+    recog.lang           = 'en-GB';
+    recog.interimResults = true;
+    recog.continuous     = true;
+
+    let collectedText = '';
+    let pendingSend   = false;
+
+    recog.onstart  = () => { collectedText = ''; pendingSend = false; micStart(); };
+
+    recog.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        e.results[i].isFinal
+          ? (collectedText += e.results[i][0].transcript + ' ')
+          : (interim       += e.results[i][0].transcript);
+      }
+      input.value = (collectedText + interim).trim();
+      autoResize();
+      if (pendingSend && collectedText.trim()) { pendingSend = false; recog.stop(); }
+    };
+
+    recog.onend = () => micDone(collectedText);
+
+    recog.onerror = (e) => {
+      const msgs = {
+        'not-allowed':         'Microphone access denied — allow mic in browser settings',
+        'no-speech':           'No speech detected — try again',
+        'audio-capture':       'No microphone found',
+        'service-not-allowed': 'Speech service blocked — serve over localhost or HTTPS',
+        'network':             'Network error during recognition',
+      };
+      micError(msgs[e.error] || `Voice error: ${e.error}`);
+    };
+
+    function nativeStop() {
+      if (!micRecording) return;
+      collectedText.trim() ? recog.stop() : (pendingSend = true);
+    }
+
+    micBtn.addEventListener('mousedown',  () => { if (!micRecording) recog.start(); });
+    micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); if (!micRecording) recog.start(); }, { passive: false });
+    micBtn.addEventListener('mouseup',    nativeStop);
+    micBtn.addEventListener('touchend',   nativeStop);
+    micBtn.addEventListener('mouseleave', nativeStop);
+
+  } else {
+    // ── PATH B: Whisper-base WASM (Firefox, Safari, all other browsers) ─────
+    let whisperPipe    = null;
+    let whisperLoading = false;
+    let mediaStream    = null;
+    let audioCtx       = null;
+    let scriptNode     = null;
+    let pcmChunks      = [];
+
+    async function loadWhisper() {
+      if (whisperPipe || whisperLoading) return;
+      whisperLoading = true;
+      setStatus('Loading voice model (~150 MB, first use only)…', true);
+      try {
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.0/dist/transformers.min.js');
+        whisperPipe = await pipeline(
+          'automatic-speech-recognition',
+          'onnx-community/whisper-base',
+          { dtype: 'fp32', device: 'wasm' }
+        );
+        setStatus('Voice model ready — hold mic to speak', true);
+      } catch (e) {
+        console.error('Whisper load error', e);
+        whisperLoading = false;
+        setStatus('Voice model failed to load');
+      }
+    }
+
+    async function startWhisper() {
+      if (micRecording) return;
+      if (!whisperPipe) { loadWhisper(); }
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      } catch (e) {
+        micError(e.name === 'NotAllowedError'
+          ? 'Microphone access denied — allow mic in browser settings'
+          : 'No microphone found');
+        return;
+      }
+      audioCtx   = new AudioContext({ sampleRate: 16000 });
+      pcmChunks  = [];
+      const src  = audioCtx.createMediaStreamSource(mediaStream);
+      scriptNode = audioCtx.createScriptProcessor(4096, 1, 1);
+      scriptNode.onaudioprocess = (ev) => {
+        const chunk = new Float32Array(ev.inputBuffer.getChannelData(0));
+        pcmChunks.push(chunk.slice());
+      };
+      src.connect(scriptNode);
+      scriptNode.connect(audioCtx.destination);
+      micStart();
+    }
+
+    async function stopWhisper() {
+      if (!micRecording) return;
+      scriptNode.disconnect();
+      mediaStream.getTracks().forEach(t => t.stop());
+      audioCtx.close();
+
+      micBtn.classList.remove('recording');
+      micBtn.title = 'Hold to speak';
+      stopMeter();
+      micRecording = false;
+
+      const totalLen = pcmChunks.reduce((s, c) => s + c.length, 0);
+      const pcm      = new Float32Array(totalLen);
+      let offset = 0;
+      for (const c of pcmChunks) { pcm.set(c, offset); offset += c.length; }
+
+      if (totalLen < 1600) { setStatus('Awaiting input'); return; }
+
+      if (!whisperPipe) {
+        setStatus('Voice model still loading — please wait…', true);
+        const waited = await new Promise(res => {
+          const id = setInterval(() => { if (whisperPipe) { clearInterval(id); res(true); } }, 500);
+          setTimeout(() => { clearInterval(id); res(false); }, 30000);
+        });
+        if (!waited || !whisperPipe) { setStatus('Voice model unavailable — type instead'); return; }
+      }
+
+      setStatus('Transcribing…', true);
+      startMeter();
+      try {
+        const result = await whisperPipe({ array: pcm, sampling_rate: 16000 });
+        stopMeter();
+        micDone(result.text);
+      } catch (e) {
+        stopMeter();
+        console.error('Whisper transcription error', e);
+        micError('Transcription failed — try again');
+      }
+    }
+
+    // Kick off Whisper load immediately so it's ready when user first presses mic
+    loadWhisper();
+
+    micBtn.addEventListener('mousedown',  () => startWhisper());
+    micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startWhisper(); }, { passive: false });
+    micBtn.addEventListener('mouseup',    () => stopWhisper());
+    micBtn.addEventListener('touchend',   () => stopWhisper());
+    micBtn.addEventListener('mouseleave', () => stopWhisper());
+  }
+
   // pick up query passed from home page via URL hash
   (function () {
     const hash = window.location.hash.slice(1);
-    if (hash) {
-      const q = decodeURIComponent(hash);
-      input.value = q;
-      autoResize();
-      window.history.replaceState(null, '', window.location.pathname);
-      setTimeout(send, 400);
-    }
+    if (!hash) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    const q = decodeURIComponent(hash);
+    input.value = q;
+    autoResize();
+    setTimeout(send, 400);
   })();
 </script>
 
