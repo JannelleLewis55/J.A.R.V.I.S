@@ -13,13 +13,13 @@
       --surface: #0e1520;
       --surface2:#121c2a;
       --border:  #1a2535;
-      --accent:  #38bdf8;
+      --accent:  #0f62fe;
       --text:    #e2e8f0;
       --muted:   #4e6280;
-      --red:     #f87171;
-      --green:   #34d399;
-      --purple:  #a78bfa;
-      --yellow:  #fbbf24;
+      --red:     #da1e28;
+      --green:   #24a148;
+      --purple:  #8a3ffc;
+      --yellow:  #f1c21b;
       --radius:  10px;
       --font:    -apple-system, "Segoe UI", system-ui, sans-serif;
     }
@@ -51,7 +51,7 @@
       color: var(--muted); text-decoration: none; transition: color .2s, background .2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #0a1e30; }
+    .nav-links a.active { color: var(--accent); background: #001133; }
 
     /* ── PAGE ── */
     .page {
@@ -75,8 +75,8 @@
       cursor: pointer; transition: border-color .2s, background .2s;
       text-align: center;
     }
-    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(56,189,248,.04); }
-    .drop-zone.has-file { border-style: solid; border-color: var(--accent); background: rgba(56,189,248,.04); }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(5,48,173,.06); }
+    .drop-zone.has-file { border-style: solid; border-color: var(--accent); background: rgba(5,48,173,.06); }
     .drop-icon { color: var(--muted); }
     .drop-icon svg { width: 40px; height: 40px; }
     .drop-title { font-size: 15px; font-weight: 600; }
@@ -92,7 +92,7 @@
       cursor: pointer; transition: background .2s, transform .1s;
       display: none;
     }
-    .analyse-btn:hover  { background: #7dd3fc; }
+    .analyse-btn:hover  { background: #0f62fe; }
     .analyse-btn:active { transform: scale(.97); }
     .analyse-btn.visible { display: inline-flex; align-items: center; gap: 8px; }
 
@@ -121,9 +121,9 @@
       padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
       border: 1px solid transparent;
     }
-    .summary-chip.total  { background: rgba(56,189,248,.1);  border-color: rgba(56,189,248,.3);  color: var(--accent); }
-    .summary-chip.risks  { background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); color: var(--red); }
-    .summary-chip.comms  { background: rgba(52,211,153,.1);  border-color: rgba(52,211,153,.3);  color: var(--green); }
+    .summary-chip.total  { background: rgba(5,48,173,.12);  border-color: rgba(5,48,173,.3);  color: var(--accent); }
+    .summary-chip.risks  { background: rgba(248,113,113,.1); border-color: rgba(218,30,40,.3); color: var(--red); }
+    .summary-chip.comms  { background: rgba(36,161,72,.10);  border-color: rgba(36,161,72,.3);  color: var(--green); }
 
     .pillar-grid {
       display: grid;
@@ -154,8 +154,8 @@
       font-size: 13px; line-height: 1.5;
       padding: 7px 10px; border-radius: 6px; border-left: 3px solid transparent;
     }
-    .finding-item.risk { background: rgba(248,113,113,.06); border-left-color: var(--red); }
-    .finding-item.comm { background: rgba(52,211,153,.06);  border-left-color: var(--green); }
+    .finding-item.risk { background: rgba(218,30,40,.06); border-left-color: var(--red); }
+    .finding-item.comm { background: rgba(36,161,72,.06);  border-left-color: var(--green); }
     .finding-icon { font-size: 11px; flex-shrink: 0; margin-top: 2px; }
     .finding-label { color: var(--text); }
     .finding-empty { font-size: 12px; color: var(--muted); padding: 4px 0; }
@@ -533,12 +533,13 @@
       --surface:   #111620;
       --surface2:  #141c28;
       --border:    #1e2a3a;
-      --accent:    #02fdfb;
-      --accent-dim:#22ded8;
-      --green:     #016601;
-      --yellow:    #b6aa02;
-      --red:       #8d0303;
-      --purple:    #8A00C4;
+      --accent:    #0f62fe;
+      --accent-dim:#0f62fe;
+      --green:     #24a148;
+      --yellow:    #f1c21b;
+      --red:       #da1e28;
+      --purple:    #8a3ffc;
+      --orange:    #ff832b;
       --text:      #e2e8f0;
       --muted:     #64748b;
       --radius:    10px;
@@ -874,16 +875,16 @@
           <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
           <!-- Code: 35% = 101 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#38bdf8" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#ff832b" stroke-width="18"
             stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
           <!-- Data: 25% = 72 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#a78bfa" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#8a3ffc" stroke-width="18"
             stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
           <!-- Writing: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#34d399" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#24a148" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
           <!-- Other: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#fbbf24" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#f1c21b" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
           <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
         </svg>
@@ -1019,7 +1020,7 @@
       --bg:      #0a0d12;
       --surface: #111620;
       --border:  #1e2a3a;
-      --accent:  #38bdf8;
+      --accent:  #0f62fe;
       --text:    #e2e8f0;
       --muted:   #64748b;
       --radius:  12px;
@@ -1207,7 +1208,7 @@
       display: flex; align-items: center; gap: 8px;
       transition: background 0.2s, transform 0.1s;
     }
-    .ask-btn:hover  { background: #7dd3fc; }
+    .ask-btn:hover  { background: #0f62fe; }
     .ask-btn:active { transform: scale(0.96); }
     .ask-btn svg { width: 14px; height: 14px; }
 
@@ -1278,14 +1279,14 @@
       <!-- spinning dashed ring -->
       <g class="ring-spin">
         <circle cx="80" cy="80" r="74" fill="none"
-          stroke="#38bdf8" stroke-width="1.5"
+          stroke="#0f62fe" stroke-width="1.5"
           stroke-dasharray="18 10" stroke-linecap="round" opacity="0.5"/>
       </g>
       <!-- inner static ring -->
       <circle cx="80" cy="80" r="58" fill="none" stroke="#1e2a3a" stroke-width="1"/>
       <!-- accent arc -->
       <circle cx="80" cy="80" r="58" fill="none"
-        stroke="#38bdf8" stroke-width="2"
+        stroke="#0f62fe" stroke-width="2"
         stroke-dasharray="60 305" stroke-dashoffset="-20"
         stroke-linecap="round" opacity="0.8"/>
     </svg>
@@ -1379,8 +1380,8 @@
       --bg:       #080b10;
       --surface:  #0e1520;
       --border:   #1a2535;
-      --accent:   #38bdf8;
-      --accent2:  #0ea5e9;
+      --accent:   #0f62fe;
+      --accent2:  #0f62fe;
       --text:     #e2e8f0;
       --muted:    #4e6280;
       --radius:   10px;
@@ -1428,7 +1429,7 @@
       transition: color .2s, background .2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #0a1e30; }
+    .nav-links a.active { color: var(--accent); background: #001133; }
 
     /* ── MAIN STAGE ── */
     .stage {
@@ -1599,8 +1600,8 @@
     .mic-btn { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color .2s, border-color .2s, background .2s; }
     .mic-btn svg { width: 16px; height: 16px; }
     .mic-btn:hover { color: var(--text); border-color: var(--accent); }
-    .mic-btn.recording { color: #f87171; border-color: #f87171; background: rgba(248,113,113,.1); animation: mic-pulse 1s ease-in-out infinite; }
-    @keyframes mic-pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(248,113,113,.4); } 50%{ box-shadow: 0 0 0 6px rgba(248,113,113,0); } }
+    .mic-btn.recording { color: #da1e28; border-color: #da1e28; background: rgba(218,30,40,.10); animation: mic-pulse 1s ease-in-out infinite; }
+    @keyframes mic-pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(218,30,40,.4); } 50%{ box-shadow: 0 0 0 6px rgba(218,30,40,0); } }
     .mic-btn.unsupported { opacity: .3; cursor: not-allowed; }
 
     /* ── INPUT BAR ── */
@@ -1641,7 +1642,7 @@
       transition: color .2s, border-color .2s, background .2s;
     }
     .icon-btn:hover { color: var(--text); border-color: var(--accent); }
-    .icon-btn.active { color: var(--accent); border-color: var(--accent); background: #0a1e30; }
+    .icon-btn.active { color: var(--accent); border-color: var(--accent); background: #001133; }
     .icon-btn svg { width: 16px; height: 16px; }
 
     .send-btn {
@@ -1651,7 +1652,7 @@
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       transition: background .2s, transform .1s;
     }
-    .send-btn:hover  { background: #7dd3fc; }
+    .send-btn:hover  { background: #0f62fe; }
     .send-btn:active { transform: scale(.94); }
     .send-btn svg { width: 15px; height: 15px; }
 
@@ -1687,8 +1688,8 @@
     <svg class="sphere-svg" viewBox="0 0 200 200">
       <g class="sphere-arc">
         <circle cx="100" cy="100" r="96" fill="none"
-          stroke="#38bdf8" stroke-width="1"
-          stroke-dasharray="28 14" stroke-linecap="round" opacity=".4"/>
+          stroke="#0f62fe" stroke-width="1"
+          stroke-dasharray="28 14" stroke-linecap="round" opacity=".6"/>
       </g>
     </svg>
     <!-- core -->

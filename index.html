@@ -11,8 +11,9 @@
       --bg:        #0a0d12;
       --surface:   #111620;
       --border:    #1e2a3a;
-      --accent:    #02fdfb;
-      --accent2:   #22ded8;
+      --accent:    #0f62fe;
+      --accent2:   #0f62fe;
+      --red:       #da1e28;
       --text:      #e2e8f0;
       --muted:     #64748b;
       --radius:    10px;
@@ -63,7 +64,7 @@
       transition: color .2s, background .2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #011f1f; }
+    .nav-links a.active { color: var(--accent); background: #001133; }
 
     /* ── MAIN STAGE ── */
     .stage {
@@ -84,7 +85,7 @@
       position: absolute;
       width: 420px; height: 420px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(2,253,251,.07) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(5,48,173,.10) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -100,12 +101,12 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      border: 1px solid rgba(2,253,251,.18);
+      border: 1px solid rgba(5,48,173,.30);
     }
     .sphere-ring.r1 { animation: spin1 12s linear infinite; }
     .sphere-ring.r2 {
       inset: 12px;
-      border-color: rgba(2,253,251,.1);
+      border-color: rgba(5,48,173,.18);
       animation: spin1 18s linear infinite reverse;
     }
     @keyframes spin1 { to { transform: rotate(360deg); } }
@@ -127,10 +128,10 @@
       inset: 24px;
       border-radius: 50%;
       background: radial-gradient(circle at 38% 35%,
-        #011f1f 0%,
-        #0a1414 45%,
+        #000d2e 0%,
+        #060d1e 45%,
         #060d16 100%);
-      border: 1px solid rgba(2,253,251,.25);
+      border: 1px solid rgba(5,48,173,.35);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -143,7 +144,7 @@
       inset: 0;
       border-radius: 50%;
       background: radial-gradient(circle at center,
-        rgba(2,253,251,.15) 0%,
+        rgba(5,48,173,.20) 0%,
         transparent 70%);
       opacity: 0;
       transition: opacity .15s;
@@ -156,7 +157,7 @@
       font-weight: 800;
       letter-spacing: .12em;
       color: var(--accent);
-      text-shadow: 0 0 18px rgba(2,253,251,.6);
+      text-shadow: 0 0 18px rgba(15,98,254,.7);
     }
 
     /* ── AUDIO METER ── */
@@ -227,14 +228,14 @@
     .transcript::-webkit-scrollbar { display: none; }
     .transcript-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
     .transcript-entry .you    { color: var(--muted); }
-    .transcript-entry .jarvis { color: rgba(2,253,251,.6); }
+    .transcript-entry .jarvis { color: rgba(15,98,254,.8); }
 
     /* ── MIC BUTTON ── */
     .mic-btn { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color .2s, border-color .2s, background .2s; }
     .mic-btn svg { width: 16px; height: 16px; }
     .mic-btn:hover { color: var(--text); border-color: var(--accent); }
-    .mic-btn.recording { color: #f87171; border-color: #f87171; background: rgba(248,113,113,.1); animation: mic-pulse 1s ease-in-out infinite; }
-    @keyframes mic-pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(248,113,113,.4); } 50%{ box-shadow: 0 0 0 6px rgba(248,113,113,0); } }
+    .mic-btn.recording { color: #da1e28; border-color: #da1e28; background: rgba(218,30,40,.1); animation: mic-pulse 1s ease-in-out infinite; }
+    @keyframes mic-pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(218,30,40,.4); } 50%{ box-shadow: 0 0 0 6px rgba(218,30,40,0); } }
     .mic-btn.unsupported { opacity: .3; cursor: not-allowed; }
 
     /* ── INPUT BAR ── */
@@ -274,7 +275,7 @@
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       transition: background .2s, transform .1s;
     }
-    .send-btn:hover  { background: #5ffaf8; }
+    .send-btn:hover  { background: #0f62fe; }
     .send-btn:active { transform: scale(.94); }
     .send-btn svg { width: 15px; height: 15px; }
 
@@ -311,8 +312,8 @@
     <svg class="sphere-svg" viewBox="0 0 200 200">
       <g class="sphere-arc">
         <circle cx="100" cy="100" r="96" fill="none"
-          stroke="#02fdfb" stroke-width="1"
-          stroke-dasharray="28 14" stroke-linecap="round" opacity=".4"/>
+          stroke="#0f62fe" stroke-width="1"
+          stroke-dasharray="28 14" stroke-linecap="round" opacity=".6"/>
       </g>
     </svg>
     <!-- core -->

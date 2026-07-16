@@ -12,12 +12,13 @@
       --surface:   #111620;
       --surface2:  #141c28;
       --border:    #1e2a3a;
-      --accent:    #02fdfb;
-      --accent-dim:#22ded8;
-      --green:     #016601;
-      --yellow:    #b6aa02;
-      --red:       #8d0303;
-      --purple:    #8A00C4;
+      --accent:    #0f62fe;
+      --accent-dim:#0f62fe;
+      --green:     #24a148;
+      --yellow:    #f1c21b;
+      --red:       #da1e28;
+      --purple:    #8a3ffc;
+      --orange:    #ff832b;
       --text:      #e2e8f0;
       --muted:     #64748b;
       --radius:    10px;
@@ -77,7 +78,7 @@
       transition: color 0.2s, background 0.2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #011f1f; }
+    .nav-links a.active { color: var(--accent); background: #001133; }
 
     /* ── PAGE ── */
     .page {
@@ -113,7 +114,7 @@
       border-radius: 20px;
       border: 1px solid var(--border);
       color: var(--green);
-      background: #011200;
+      background: #071a0e;
     }
     .badge .dot-sm {
       width: 6px; height: 6px;
@@ -202,7 +203,7 @@
       min-height: 4px;
     }
     .bar-col:hover .bar { opacity: 1; }
-    .bar-col.selected .bar { background: #5ffaf8; opacity: 1; }
+    .bar-col.selected .bar { background: #0f62fe; opacity: 1; }
     .bar-label { font-size: 10px; color: var(--muted); transition: color 0.2s; }
     .bar-col.selected .bar-label { color: var(--accent); }
 
@@ -269,10 +270,10 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .query-cat.code    { background: #061822; color: #0e7fa8; border: 1px solid #0e3a50; }
+    .query-cat.code    { background: #1a0e00; color: var(--orange); border: 1px solid #3a1f00; }
     .query-cat.data    { background: #1a0030; color: var(--purple); border: 1px solid #3a0060; }
-    .query-cat.writing { background: #011200; color: var(--green);  border: 1px solid #023a00; }
-    .query-cat.other   { background: #1a1600; color: var(--yellow); border: 1px solid #3a2e00; }
+    .query-cat.writing { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
+    .query-cat.other   { background: #1f1800; color: var(--yellow); border: 1px solid #3d2e00; }
     .query-text { color: var(--text); line-height: 1.45; flex: 1; }
 
     /* Donut chart */
@@ -314,9 +315,9 @@
       padding: 2px 10px;
       border-radius: 20px;
     }
-    .status-pill.ok   { background: #011200; color: var(--green);  border: 1px solid #023302; }
-    .status-pill.warn { background: #1a1600; color: var(--yellow); border: 1px solid #332b00; }
-    .status-pill.err  { background: #1a0000; color: var(--red);    border: 1px solid #330000; }
+    .status-pill.ok   { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
+    .status-pill.warn { background: #1f1800; color: var(--yellow); border: 1px solid #3d2e00; }
+    .status-pill.err  { background: #1a0000; color: var(--red);    border: 1px solid #3d0009; }
 
     /* ── ACTIVITY ── */
     .activity-list { display: flex; flex-direction: column; gap: 0; }
@@ -365,7 +366,7 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
     }
-    .analyze-btn:hover  { background: #5ffaf8; }
+    .analyze-btn:hover  { background: #0f62fe; }
     .analyze-btn:active { transform: scale(0.96); }
     .analyze-btn svg { width: 14px; height: 14px; }
     .analyze-status {
@@ -494,22 +495,22 @@
           <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
           <!-- Code: 35% = 101 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#0e7fa8" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#ff832b" stroke-width="18"
             stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
           <!-- Data: 25% = 72 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#8A00C4" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#8a3ffc" stroke-width="18"
             stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
           <!-- Writing: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#016601" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#24a148" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
           <!-- Other: 20% = 58 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#b6aa02" stroke-width="18"
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#f1c21b" stroke-width="18"
             stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
           <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
         </svg>
         <div class="donut-legend" style="width:100%">
           <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:#0e7fa8"></span>Code &amp; Dev</div>
+            <div class="leg-left"><span class="dot-leg" style="background:#ff832b"></span>Code &amp; Dev</div>
             <span class="pct">35%</span>
           </div>
           <div class="donut-legend-item">
@@ -583,21 +584,21 @@
       <div class="card-title">System Activity <span>Live feed</span></div>
       <div class="activity-list">
         <div class="activity-item">
-          <div class="act-icon" style="background:#011f1f;color:var(--accent)">⚙</div>
+          <div class="act-icon" style="background:#00092e;color:var(--accent)">⚙</div>
           <div class="act-body">
             <div class="act-title">Model JARVIS-4 deployed to production</div>
             <div class="act-time">2 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#011200;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#071a0e;color:var(--green)">✓</div>
           <div class="act-body">
             <div class="act-title">Weekly accuracy report generated</div>
             <div class="act-time">18 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#1a1600;color:var(--yellow)">!</div>
+          <div class="act-icon" style="background:#1f1800;color:var(--yellow)">!</div>
           <div class="act-body">
             <div class="act-title">Latency spike detected — resolved</div>
             <div class="act-time">1 hour ago</div>
@@ -611,7 +612,7 @@
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#011200;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#071a0e;color:var(--green)">✓</div>
           <div class="act-body">
             <div class="act-title">Automated backup completed successfully</div>
             <div class="act-time">6 hours ago</div>
@@ -822,28 +823,28 @@
     const insights = [
       {
         icon: slope > 0 ? '↑' : slope < 0 ? '↓' : '→',
-        bg: slope > 0 ? '#011200' : slope < 0 ? '#1a0000' : '#011f1f',
+        bg: slope > 0 ? '#071a0e' : slope < 0 ? '#1a0000' : '#00092e',
         col: slope > 0 ? 'var(--green)' : slope < 0 ? 'var(--red)' : 'var(--accent)',
         title: `Overall Accuracy ${slope > 0 ? 'Improving' : slope < 0 ? 'Declining' : 'Stable'}`,
         desc: `Across ${n} report runs, accuracy moved from ${history[0]}% to ${history[n-1]}% — a ${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)} pp change. ${Math.abs(slope).toFixed(2)} pp per run on average.`,
       },
       {
         icon: '◈',
-        bg: '#011f1f',
+        bg: '#00092e',
         col: 'var(--accent)',
         title: `Average Run Accuracy: ${avgAccuracy.toFixed(1)}%`,
         desc: `The mean accuracy across all ${n} report runs is ${avgAccuracy.toFixed(2)}%. Runs on JARVIS-4 lead the pack; JARVIS-2 remains below the 90% baseline.`,
       },
       {
         icon: '!',
-        bg: '#1a1600',
+        bg: '#1f1800',
         col: 'var(--yellow)',
         title: 'Model Transition Gap',
         desc: 'There is a visible accuracy drop at the JARVIS-2 → JARVIS-3 boundary (89.1% → 93.9%). Monitoring accuracy across model rollouts is recommended.',
       },
       {
         icon: '✓',
-        bg: '#011200',
+        bg: '#071a0e',
         col: 'var(--green)',
         title: `4-Run Forecast: ${forecast[forecast.length - 1]}%`,
         desc: `Based on the current trajectory, accuracy is projected to reach ${forecast[forecast.length - 1]}% in 4 runs. Forecast confidence decreases at the 3–4 run horizon.`,

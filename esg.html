@@ -13,13 +13,14 @@
       --surface: #0e1520;
       --surface2:#121c2a;
       --border:  #1a2535;
-      --accent:  #38bdf8;
+      --accent:  #0f62fe;
+      --accent-dim:#0f62fe;
       --text:    #e2e8f0;
       --muted:   #4e6280;
-      --red:     #f87171;
-      --green:   #34d399;
-      --purple:  #a78bfa;
-      --yellow:  #fbbf24;
+      --red:     #da1e28;
+      --green:   #24a148;
+      --purple:  #8a3ffc;
+      --yellow:  #f1c21b;
       --radius:  10px;
       --font:    -apple-system, "Segoe UI", system-ui, sans-serif;
     }
@@ -51,7 +52,7 @@
       color: var(--muted); text-decoration: none; transition: color .2s, background .2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #0a1e30; }
+    .nav-links a.active { color: var(--accent); background: #001133; }
 
     /* ── PAGE ── */
     .page {
@@ -75,8 +76,8 @@
       cursor: pointer; transition: border-color .2s, background .2s;
       text-align: center;
     }
-    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(56,189,248,.04); }
-    .drop-zone.has-file { border-style: solid; border-color: var(--accent); background: rgba(56,189,248,.04); }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(5,48,173,.06); }
+    .drop-zone.has-file { border-style: solid; border-color: var(--accent); background: rgba(5,48,173,.06); }
     .drop-icon { color: var(--muted); }
     .drop-icon svg { width: 40px; height: 40px; }
     .drop-title { font-size: 15px; font-weight: 600; }
@@ -92,7 +93,7 @@
       cursor: pointer; transition: background .2s, transform .1s;
       display: none;
     }
-    .analyse-btn:hover  { background: #7dd3fc; }
+    .analyse-btn:hover  { background: #0f62fe; }
     .analyse-btn:active { transform: scale(.97); }
     .analyse-btn.visible { display: inline-flex; align-items: center; gap: 8px; }
 
@@ -121,9 +122,9 @@
       padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
       border: 1px solid transparent;
     }
-    .summary-chip.total  { background: rgba(56,189,248,.1);  border-color: rgba(56,189,248,.3);  color: var(--accent); }
-    .summary-chip.risks  { background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); color: var(--red); }
-    .summary-chip.comms  { background: rgba(52,211,153,.1);  border-color: rgba(52,211,153,.3);  color: var(--green); }
+    .summary-chip.total  { background: rgba(5,48,173,.12);   border-color: rgba(5,48,173,.3);    color: var(--accent); }
+    .summary-chip.risks  { background: rgba(218,30,40,.10);  border-color: rgba(218,30,40,.30);  color: var(--red); }
+    .summary-chip.comms  { background: rgba(36,161,72,.10);  border-color: rgba(36,161,72,.30);  color: var(--green); }
 
     .pillar-grid {
       display: grid;
@@ -144,9 +145,9 @@
       width: 22px; height: 22px; border-radius: 6px;
       font-size: 11px; font-weight: 800;
     }
-    .pillar-badge.E { background: #0b2016; color: var(--green); }
-    .pillar-badge.S { background: #1a1040; color: var(--purple); }
-    .pillar-badge.G { background: #201800; color: var(--yellow); }
+    .pillar-badge.E { background: #071a0e; color: var(--green); }
+    .pillar-badge.S { background: #1a0040; color: var(--purple); }
+    .pillar-badge.G { background: #201400; color: var(--yellow); }
 
     .finding-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
     .finding-item {
@@ -154,8 +155,8 @@
       font-size: 13px; line-height: 1.5;
       padding: 7px 10px; border-radius: 6px; border-left: 3px solid transparent;
     }
-    .finding-item.risk { background: rgba(248,113,113,.06); border-left-color: var(--red); }
-    .finding-item.comm { background: rgba(52,211,153,.06);  border-left-color: var(--green); }
+    .finding-item.risk { background: rgba(218,30,40,.06);  border-left-color: var(--red); }
+    .finding-item.comm { background: rgba(36,161,72,.06);  border-left-color: var(--green); }
     .finding-icon { font-size: 11px; flex-shrink: 0; margin-top: 2px; }
     .finding-label { color: var(--text); }
     .finding-empty { font-size: 12px; color: var(--muted); padding: 4px 0; }
@@ -186,9 +187,9 @@
       letter-spacing: .06em; padding: 1px 7px; border-radius: 10px;
       margin-right: 6px; vertical-align: middle; flex-shrink: 0;
     }
-    .tag.E { background: #0b2016; color: var(--green); }
-    .tag.S { background: #1a1040; color: var(--purple); }
-    .tag.G { background: #201800; color: var(--yellow); }
+    .tag.E { background: #071a0e; color: var(--green); }
+    .tag.S { background: #1a0040; color: var(--purple); }
+    .tag.G { background: #201400; color: var(--yellow); }
 
     /* ── RESET ── */
     .reset-btn {

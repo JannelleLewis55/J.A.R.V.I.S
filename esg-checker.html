@@ -13,15 +13,16 @@
       --surface:   #111620;
       --surface2:  #141c28;
       --border:    #1e2a3a;
-      --accent:    #02fdfb;
-      --accent-dim:#22ded8;
-      --green:     #016601;
-      --green-bright: #22c55e;
-      --yellow:    #b6aa02;
-      --yellow-bright: #eab308;
-      --red:       #8d0303;
-      --red-bright:#ef4444;
-      --purple:    #8A00C4;
+      --accent:    #0f62fe;
+      --accent-dim:#0f62fe;
+      --green:     #24a148;
+      --green-bright: #24a148;
+      --yellow:    #f1c21b;
+      --yellow-bright: #f1c21b;
+      --red:       #da1e28;
+      --red-bright:#da1e28;
+      --purple:    #8a3ffc;
+      --orange:    #ff832b;
       --text:      #e2e8f0;
       --muted:     #64748b;
       --radius:    10px;
@@ -72,7 +73,7 @@
       transition: color 0.2s, background 0.2s;
     }
     .nav-links a:hover  { color: var(--text); background: var(--border); }
-    .nav-links a.active { color: var(--accent); background: #011f1f; }
+    .nav-links a.active { color: var(--accent); background: #001133; }
 
     /* ── PAGE ── */
     .page {
@@ -121,10 +122,10 @@
     }
     .hub-card-icon svg { width: 22px; height: 22px; }
 
-    .hub-card-icon.check   { background: #011f1f; color: var(--accent); }
-    .hub-card-icon.generate { background: #0f1a2e; color: #60a5fa; }
-    .hub-card-icon.trends  { background: #1a1000; color: var(--yellow-bright); }
-    .hub-card-icon.view    { background: #0d1a10; color: var(--green-bright); }
+    .hub-card-icon.check   { background: #00092e; color: var(--accent); }
+    .hub-card-icon.generate { background: #001133; color: var(--accent-dim); }
+    .hub-card-icon.trends  { background: #201400; color: var(--yellow-bright); }
+    .hub-card-icon.view    { background: #071a0e; color: var(--green-bright); }
 
     .hub-card h2 { font-size: 16px; font-weight: 600; color: var(--text); }
     .hub-card p  { font-size: 13px; color: var(--muted); line-height: 1.55; flex: 1; }
@@ -147,9 +148,9 @@
       letter-spacing: 0.06em;
       padding: 2px 7px;
       border-radius: 20px;
-      background: #1a1000;
+      background: #201400;
       color: var(--yellow-bright);
-      border: 1px solid #332200;
+      border: 1px solid #3d2800;
       align-self: flex-start;
     }
 
@@ -202,18 +203,18 @@
       font-family: var(--font);
     }
     .std-btn:hover  { color: var(--text); border-color: var(--accent-dim); }
-    .std-btn.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
+    .std-btn.active { color: var(--accent); border-color: var(--accent); background: #001133; }
 
     .std-btn.auto-detect {
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
-    .std-btn.auto-detect:hover { background: #011f1f; color: var(--accent); border-color: var(--accent); }
+    .std-btn.auto-detect:hover { background: #001133; color: var(--accent); border-color: var(--accent); }
     .std-btn.auto-detect.active {
       color: var(--accent);
       border-color: var(--accent);
-      background: #011f1f;
+      background: #001133;
     }
 
     .detect-banner {
@@ -231,7 +232,7 @@
     .detect-banner-icon {
       width: 32px; height: 32px;
       border-radius: 8px;
-      background: #011f1f;
+      background: #00092e;
       color: var(--accent);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
@@ -255,7 +256,7 @@
       color: var(--muted);
     }
     .detect-score-pill.top {
-      background: #011f1f;
+      background: #001133;
       border-color: var(--accent);
       color: var(--accent);
       font-weight: 600;
@@ -282,7 +283,7 @@
     }
     .upload-zone:hover, .upload-zone.drag-over {
       border-color: var(--accent-dim);
-      background: #011f1f22;
+      background: rgba(5,48,173,0.08);
     }
     .upload-zone input[type="file"] {
       position: absolute;
@@ -355,7 +356,7 @@
       font-family: var(--font);
       letter-spacing: 0.01em;
     }
-    .check-btn:hover  { background: #5ffaf8; }
+    .check-btn:hover  { background: #0f62fe; }
     .check-btn:active { transform: scale(0.96); }
     .check-btn:disabled { opacity: 0.4; cursor: default; transform: none; background: var(--accent); }
     .check-btn svg { width: 15px; height: 15px; }
@@ -445,7 +446,7 @@
       font-family: var(--font);
     }
     .cat-tab:hover  { color: var(--text); border-color: var(--accent-dim); }
-    .cat-tab.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
+    .cat-tab.active { color: var(--accent); border-color: var(--accent); background: #001133; }
 
     .finding-list { display: flex; flex-direction: column; gap: 0; }
     .finding-item {
@@ -467,10 +468,10 @@
       flex-shrink: 0;
       margin-top: 1px;
     }
-    .sev-badge.critical { background: #1a0000; color: var(--red-bright);    border: 1px solid #330000; }
-    .sev-badge.major    { background: #1a0e00; color: var(--yellow-bright);  border: 1px solid #332200; }
-    .sev-badge.minor    { background: #001220; color: #60a5fa;               border: 1px solid #002040; }
-    .sev-badge.ok       { background: #011200; color: var(--green-bright);   border: 1px solid #023302; }
+    .sev-badge.critical { background: #1a0000; color: var(--red-bright);    border: 1px solid #3d0009; }
+    .sev-badge.major    { background: #201400; color: var(--yellow-bright);  border: 1px solid #3d2800; }
+    .sev-badge.minor    { background: #001133; color: var(--accent-dim);     border: 1px solid #002266; }
+    .sev-badge.ok       { background: #071a0e; color: var(--green-bright);   border: 1px solid #0e3a1c; }
 
     .finding-body { flex: 1; }
     .finding-title { color: var(--text); font-weight: 500; margin-bottom: 3px; }
@@ -544,9 +545,105 @@
       letter-spacing: 0.06em;
       padding: 3px 10px;
       border-radius: 20px;
-      background: #1a1000;
+      background: #201400;
       color: var(--yellow-bright);
-      border: 1px solid #332200;
+      border: 1px solid #3d2800;
+    }
+
+    /* ── VIEW RUNS ── */
+    .view-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .view-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .view-header p  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    .clear-btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .clear-btn:hover { color: var(--red-bright); border-color: var(--red-bright); }
+
+    .runs-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+    .runs-empty p { margin-top: 8px; font-size: 12px; line-height: 1.6; }
+
+    .runs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .run-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+    }
+    .run-row:hover { border-color: var(--accent-dim); background: var(--surface2); }
+    .run-score-ring {
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      border: 2px solid;
+    }
+    .run-body { flex: 1; min-width: 0; }
+    .run-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .run-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .run-chips { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .run-chip {
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 10px; border: 1px solid transparent;
+    }
+    .run-chip.critical { background: rgba(218,30,40,.10);  border-color: rgba(218,30,40,.30); color: var(--red-bright); }
+    .run-chip.major    { background: rgba(241,194,27,.10); border-color: rgba(241,194,27,.30); color: var(--yellow-bright); }
+    .run-chip.passed   { background: rgba(36,161,72,.10);  border-color: rgba(36,161,72,.30); color: var(--green-bright); }
+    .run-arrow { color: var(--muted); flex-shrink: 0; }
+    .run-arrow svg { width: 16px; height: 16px; }
+
+    /* Run detail panel */
+    #viewDetail { display: none; }
+    .detail-back-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+    }
+    .detail-title { font-size: 18px; font-weight: 700; color: var(--text); }
+    .detail-meta  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .detail-scores {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .detail-score-chip {
+      padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .detail-score-chip.completeness { background: rgba(5,48,173,.12);  border-color: rgba(5,48,173,.30);  color: var(--accent); }
+    .detail-score-chip.coverage     { background: rgba(15,98,254,.08); border-color: rgba(15,98,254,.20); color: var(--accent-dim); }
+    .detail-findings-header {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px; margin-top: 20px;
     }
 
     /* ── INSERT INTO TRENDS ── */
@@ -573,7 +670,7 @@
       gap: 12px;
     }
     .metric-toggle:hover { border-color: var(--accent-dim); }
-    .metric-toggle.on { border-color: var(--accent); background: #011f1f; }
+    .metric-toggle.on { border-color: var(--accent); background: #001133; }
     .metric-toggle input[type="checkbox"] { display: none; }
     .mt-check {
       width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
@@ -632,7 +729,7 @@
       letter-spacing: 0.04em; cursor: pointer;
       transition: background 0.2s, transform 0.1s;
     }
-    .push-btn:hover  { background: #5ffaf8; }
+    .push-btn:hover  { background: #0f62fe; }
     .push-btn:active { transform: scale(0.96); }
     .push-btn:disabled { opacity: 0.4; cursor: default; transform: none; background: var(--accent); }
     .push-btn svg { width: 14px; height: 14px; }
@@ -689,7 +786,7 @@
       transition: color 0.15s, border-color 0.15s, background 0.15s;
     }
     .gen-std-btn:hover  { color: var(--text); border-color: var(--accent-dim); }
-    .gen-std-btn.active { color: var(--accent); border-color: var(--accent); background: #011f1f; }
+    .gen-std-btn.active { color: var(--accent); border-color: var(--accent); background: #001133; }
 
     .section-picker {
       background: var(--surface);
@@ -717,7 +814,7 @@
       font-size: 10px; color: transparent;
       transition: border-color 0.15s, background 0.15s, color 0.15s;
     }
-    .section-check.on .sc-box { border-color: var(--accent); background: var(--accent); color: #000; }
+    .section-check.on .sc-box { border-color: var(--accent); background: var(--accent); color: #fff; }
     .sc-text { font-size: 13px; color: var(--text); line-height: 1.4; }
     .sc-weight { font-size: 11px; color: var(--muted); }
 
@@ -732,7 +829,7 @@
       letter-spacing: 0.04em; cursor: pointer;
       transition: background 0.2s, transform 0.1s;
     }
-    .gen-btn:hover  { background: #5ffaf8; }
+    .gen-btn:hover  { background: #0f62fe; }
     .gen-btn:active { transform: scale(0.96); }
     .gen-btn:disabled { opacity: 0.4; cursor: default; transform: none; background: var(--accent); }
     .gen-btn svg { width: 14px; height: 14px; }
@@ -1132,7 +1229,7 @@
     </div>
   </div>
 
-  <!-- ══ VIEW (stub) ══ -->
+  <!-- ══ VIEW RUNS ══ -->
   <div id="viewView">
     <button class="back-btn" id="backBtnView">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1140,15 +1237,47 @@
       </svg>
       Back to ESG
     </button>
-    <div class="stub-wrap">
-      <div class="stub-icon" style="background:#0d1a10;color:var(--green-bright)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-        </svg>
+
+    <!-- Run list -->
+    <div id="viewList">
+      <div class="view-header">
+        <div>
+          <h1>ESG Run History</h1>
+          <p>Previously analysed reports — click any run to review its findings.</p>
+        </div>
+        <button class="clear-btn" id="clearHistoryBtn">Clear history</button>
       </div>
-      <h2>View ESG Reports</h2>
-      <p>Browse previously analysed ESG reports, compare runs side-by-side, and review historical gap findings and coverage trends.</p>
-      <span class="stub-soon">Coming soon</span>
+      <div id="runsList"></div>
+    </div>
+
+    <!-- Run detail -->
+    <div id="viewDetail">
+      <div class="detail-back-row">
+        <div>
+          <div class="detail-title" id="detailTitle"></div>
+          <div class="detail-meta"  id="detailMeta"></div>
+        </div>
+        <button class="back-btn" id="backBtnDetail" style="margin-bottom:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          All runs
+        </button>
+      </div>
+      <div class="detail-scores" id="detailScores"></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Findings <span id="detailFindingCount"></span></div>
+          <div class="finding-list" id="detailFindingList"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Section Coverage <span id="detailCoverageStd"></span></div>
+          <table class="section-table">
+            <thead><tr><th>Section</th><th>Coverage</th></tr></thead>
+            <tbody id="detailCoverageBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1173,7 +1302,7 @@
   document.getElementById('hubCheck').addEventListener('click', () => showView('checker'));
   document.getElementById('hubGenerate').addEventListener('click', () => { showView('generate'); initGenerateView(); });
   document.getElementById('hubInsert').addEventListener('click', () => { showView('insert'); initInsertView(); });
-  document.getElementById('hubView2').addEventListener('click', () => showView('view'));
+  document.getElementById('hubView2').addEventListener('click', () => { showView('view'); initViewRuns(); });
 
   // Back buttons
   document.getElementById('backBtn').addEventListener('click', () => showView('hub'));
@@ -1751,6 +1880,28 @@
         });
       });
     });
+    // ── SAVE RUN TO HISTORY ──────────────────────────────────────────────────
+    const runRecord = {
+      id:           Date.now(),
+      date:         new Date().toISOString(),
+      files:        uploadedFiles.map(f => f.name),
+      stdKey,
+      stdName:      std.name,
+      completeness,
+      coverage:     overallCoverage,
+      critCount,
+      majCount,
+      minCount,
+      passCount,
+      triggered:    triggered.map(c => ({ id: c.id, cat: c.cat, sev: c.sev, title: c.title, desc: c.desc, ref: c.ref })),
+      passed:       passed.map(c => ({ id: c.id, cat: c.cat, sev: c.sev, title: c.title, ref: c.ref })),
+      sections:     sections.map((s, i) => ({ name: s.name, pct: covScores[i] })),
+    };
+    try {
+      const existing = JSON.parse(localStorage.getItem('jarvis_esg_runs') || '[]');
+      existing.unshift(runRecord);
+      localStorage.setItem('jarvis_esg_runs', JSON.stringify(existing.slice(0, 30)));
+    } catch (_) {}
   }
 
   function scoreColor(n) {
@@ -1768,7 +1919,7 @@
       label: 'Section Coverage Score',
       desc: 'Overall % of ESG standard sections with adequate disclosure',
       unit: '% coverage',
-      color: '#02fdfb',
+      color: '#0f62fe',
       seed: 101,
       baseVal: 52, trend: 2.1,
       fmt: v => v.toFixed(1) + '%',
@@ -1778,7 +1929,7 @@
       label: 'Report Completeness',
       desc: 'Composite completeness score (0–100) adjusted for gap severity',
       unit: 'score /100',
-      color: '#22c55e',
+      color: '#24a148',
       seed: 202,
       baseVal: 48, trend: 1.8,
       fmt: v => v.toFixed(0),
@@ -1788,7 +1939,7 @@
       label: 'Critical Gaps',
       desc: 'Number of critical disclosure gaps detected per analysis run',
       unit: 'critical gaps',
-      color: '#ef4444',
+      color: '#da1e28',
       seed: 303,
       baseVal: 6, trend: -0.35,
       fmt: v => Math.max(0, Math.round(v)),
@@ -1798,7 +1949,7 @@
       label: 'Major Gaps',
       desc: 'Number of major disclosure gaps detected per analysis run',
       unit: 'major gaps',
-      color: '#eab308',
+      color: '#f1c21b',
       seed: 404,
       baseVal: 5, trend: -0.28,
       fmt: v => Math.max(0, Math.round(v)),
@@ -1808,7 +1959,7 @@
       label: 'GHG Emissions Intensity',
       desc: 'Reported Scope 1+2 emissions intensity (tCO₂e per $M revenue)',
       unit: 'tCO₂e / $M rev',
-      color: '#8A00C4',
+      color: '#8a3ffc',
       seed: 505,
       baseVal: 38.4, trend: -1.2,
       fmt: v => v.toFixed(1),
@@ -1818,7 +1969,7 @@
       label: 'Social Coverage Score',
       desc: 'Percentage of Social pillar disclosure requirements met',
       unit: '% social coverage',
-      color: '#60a5fa',
+      color: '#0f62fe',
       seed: 606,
       baseVal: 44, trend: 2.4,
       fmt: v => v.toFixed(1) + '%',
@@ -1963,7 +2114,7 @@
     const insights = [
       {
         icon: slope > 0.01 ? '↑' : slope < -0.01 ? '↓' : '→',
-        bg:   slope > 0.01 ? '#011200' : slope < -0.01 ? '#1a0000' : '#011f1f',
+        bg:   slope > 0.01 ? '#071a0e' : slope < -0.01 ? '#1a0000' : '#00092e',
         col:  slope > 0.01 ? 'var(--green-bright)' : slope < -0.01 ? 'var(--red-bright)' : 'var(--accent)',
         title: `${primary.label}: ${trendWord} trend`,
         desc: `Over the last 12 weeks, ${primary.label.toLowerCase()} moved from ${primary.fmt(history[0])} to ${primary.fmt(history[n-1])}. ` +
@@ -1971,21 +2122,21 @@
       },
       {
         icon: '◈',
-        bg:   '#011f1f', col: 'var(--accent)',
+        bg:   '#00092e', col: 'var(--accent)',
         title: `4-Week Forecast: ${primary.fmt(forecast[3])}`,
         desc: `Based on the 12-week ESG history, J.A.R.V.I.S projects ${primary.label.toLowerCase()} to reach ` +
               `${primary.fmt(forecast[3])} within 4 periods. Confidence narrows at the 3–4 week horizon.`,
       },
       {
         icon: '!',
-        bg:   '#1a1600', col: 'var(--yellow-bright)',
+        bg:   '#1f1800', col: 'var(--yellow-bright)',
         title: `${active.length > 1 ? active.length + ' ESG metrics pushed' : '1 ESG metric pushed'} from ESG Checker`,
         desc: `Metrics pushed: ${active.map(m => m.label).join(', ')}. ` +
               `Switch the dataset selector in Trends to view each metric's individual forecast.`,
       },
       {
         icon: '✓',
-        bg:   '#011200', col: 'var(--green-bright)',
+        bg:   '#071a0e', col: 'var(--green-bright)',
         title: 'Data sourced from ESG Report Analysis',
         desc: 'This dataset reflects ESG metric performance derived from your uploaded report files. ' +
               'Re-run the ESG Checker and push again to update the trend history.',
@@ -2450,6 +2601,141 @@
     a.download = company.replace(/\s+/g, '-') + '-ESG-Disclosure.txt';
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  /* ══ VIEW RUNS ══════════════════════════════════════════════════════════ */
+
+  function loadRuns() {
+    try { return JSON.parse(localStorage.getItem('jarvis_esg_runs') || '[]'); }
+    catch (_) { return []; }
+  }
+
+  function initViewRuns() {
+    const listEl  = document.getElementById('viewList');
+    const detailEl = document.getElementById('viewDetail');
+    listEl.style.display  = 'block';
+    detailEl.style.display = 'none';
+    renderRunsList();
+  }
+
+  function renderRunsList() {
+    const runs    = loadRuns();
+    const runsEl  = document.getElementById('runsList');
+
+    if (runs.length === 0) {
+      runsEl.innerHTML = `
+        <div class="runs-empty">
+          No runs saved yet.
+          <p>Complete an analysis in the <strong>Check it</strong> tool and results will appear here automatically.</p>
+        </div>`;
+      return;
+    }
+
+    runsEl.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'runs-list';
+    runs.forEach(run => {
+      const col   = scoreColor(run.completeness);
+      const date  = new Date(run.date).toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      const names = run.files.join(', ');
+      const row   = document.createElement('div');
+      row.className = 'run-row';
+      row.innerHTML = `
+        <div class="run-score-ring" style="color:${col};border-color:${col}">${run.completeness}</div>
+        <div class="run-body">
+          <div class="run-name" title="${names}">${names}</div>
+          <div class="run-meta">${run.stdName} &nbsp;·&nbsp; ${date}</div>
+          <div class="run-chips">
+            ${run.critCount > 0 ? `<span class="run-chip critical">⚠ ${run.critCount} critical</span>` : ''}
+            ${run.majCount  > 0 ? `<span class="run-chip major">${run.majCount} major</span>` : ''}
+            <span class="run-chip passed">✓ ${run.passCount} passed</span>
+          </div>
+        </div>
+        <div class="run-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>`;
+      row.addEventListener('click', () => openRunDetail(run));
+      list.appendChild(row);
+    });
+    runsEl.appendChild(list);
+  }
+
+  function openRunDetail(run) {
+    document.getElementById('viewList').style.display   = 'none';
+    document.getElementById('viewDetail').style.display = 'block';
+
+    const date = new Date(run.date).toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    document.getElementById('detailTitle').textContent = run.files.join(', ');
+    document.getElementById('detailMeta').textContent  = `${run.stdName}  ·  ${date}`;
+
+    // Score chips
+    document.getElementById('detailScores').innerHTML = `
+      <div class="detail-score-chip completeness">Completeness: ${run.completeness} / 100</div>
+      <div class="detail-score-chip coverage">Coverage: ${run.coverage}%</div>
+      ${run.critCount > 0 ? `<span class="run-chip critical" style="padding:8px 14px;font-size:13px">⚠ ${run.critCount} critical gap${run.critCount!==1?'s':''}</span>` : ''}
+      ${run.majCount  > 0 ? `<span class="run-chip major"    style="padding:8px 14px;font-size:13px">${run.majCount} major gap${run.majCount!==1?'s':''}</span>` : ''}
+      <span class="run-chip passed" style="padding:8px 14px;font-size:13px">✓ ${run.passCount} passed</span>`;
+
+    // Findings list
+    document.getElementById('detailFindingCount').textContent =
+      `${run.triggered.length} gap${run.triggered.length!==1?'s':''}, ${run.passCount} passed`;
+
+    const findEl = document.getElementById('detailFindingList');
+    findEl.innerHTML = '';
+    [...run.triggered, ...run.passed].forEach(c => {
+      const isIssue = run.triggered.some(t => t.id === c.id);
+      const item = document.createElement('div');
+      item.className = 'finding-item';
+      if (!isIssue) {
+        item.innerHTML = `
+          <span class="sev-badge ok">PASS</span>
+          <div class="finding-body">
+            <div class="finding-title">${c.title}</div>
+            <div class="finding-desc">Disclosure found and meets minimum standard requirements.</div>
+            <div class="finding-ref">${c.ref}</div>
+          </div>`;
+      } else {
+        item.innerHTML = `
+          <span class="sev-badge ${c.sev}">${c.sev.toUpperCase()}</span>
+          <div class="finding-body">
+            <div class="finding-title">${c.title}</div>
+            <div class="finding-desc">${c.desc || ''}</div>
+            <div class="finding-ref">${c.ref}</div>
+          </div>`;
+      }
+      findEl.appendChild(item);
+    });
+
+    // Section coverage
+    document.getElementById('detailCoverageStd').textContent = run.stdName;
+    const covEl = document.getElementById('detailCoverageBody');
+    covEl.innerHTML = '';
+    (run.sections || []).forEach(s => {
+      const col = scoreColor(s.pct);
+      const tr  = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.name}</td>
+        <td>
+          <div class="prog-wrap">
+            <div class="prog-bg"><div class="prog-fill" style="width:${s.pct}%;background:${col}"></div></div>
+            <span class="prog-pct">${s.pct}%</span>
+          </div>
+        </td>`;
+      covEl.appendChild(tr);
+    });
+  }
+
+  document.getElementById('backBtnDetail').addEventListener('click', () => {
+    document.getElementById('viewDetail').style.display = 'none';
+    document.getElementById('viewList').style.display   = 'block';
+  });
+
+  document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+    if (!confirm('Clear all saved run history? This cannot be undone.')) return;
+    try { localStorage.removeItem('jarvis_esg_runs'); } catch (_) {}
+    renderRunsList();
   });
 
 </script>
