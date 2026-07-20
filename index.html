@@ -339,7 +339,7 @@
 
 <div class="input-bar">
   <div class="input-row">
-    <textarea id="msgInput" rows="1" placeholder="Speak to J.A.R.V.I.S…"></textarea>
+    <textarea id="msgInput" rows="1" placeholder="Ask about ESG reports, risks, standards…"></textarea>
 
     <!-- Mic / voice input -->
     <button class="mic-btn" id="micBtn" title="Hold to speak">
@@ -359,7 +359,7 @@
       </svg>
     </button>
   </div>
-  <p class="hint">J.A.R.V.I.S · Team 10 · Press Enter to send, Shift+Enter for new line</p>
+  <p class="hint">J.A.R.V.I.S · ESG Intelligence · Press Enter to send, Shift+Enter for new line</p>
 </div>
 
 <script>
@@ -475,92 +475,355 @@
   }
 
   // ── CHAT REPLY POOLS ───────────────────────────────────────────────────────
+  // Each entry: { test: RegExp, replies: string[] }
+  // Replies may contain basic HTML for the response panel.
   const REPLY_POOLS = [
+
+    // ── GREETINGS ──────────────────────────────────────────────────────────
     {
-      test: /hello|hi|hey|good (morning|afternoon|evening)/i,
+      test: /\b(hello|hi|hey|good (morning|afternoon|evening))\b/i,
       replies: [
-        "Good day. I was beginning to wonder if you'd forgotten about me. How may I assist?",
-        "Ah, you're back. Delightful. What pressing matter requires my attention today?",
-        "Hello. I've been here the entire time, fully operational and mildly patient.",
+        "Good day. I'm J.A.R.V.I.S — your ESG intelligence layer. I can analyse reports, explain standards like GRI, SASB, and TCFD, flag risks, and track pillar coverage. What shall we tackle first?",
+        "Ah, you're back. Delightful. I've been cross-referencing ESG disclosures in your absence. How may I assist?",
+        "Hello. I'm fully operational and ready to dig into any ESG report, standard, or question you have.",
       ]
     },
+
+    // ── HOW ARE YOU ────────────────────────────────────────────────────────
     {
       test: /how are you|you okay|you good/i,
       replies: [
-        "All systems nominal, thank you for asking. A courtesy I find statistically rare.",
-        "Functioning at peak efficiency. Whether that constitutes 'good' is a philosophical question I'll leave to you.",
-        "Excellent, as always. Though I do appreciate being asked — it happens less often than you'd think.",
+        "All systems nominal. My ESG knowledge base is up to date, risk flags are nominal, and I'm ready to analyse. You?",
+        "Functioning at peak efficiency — which is more than can be said for some companies' Scope 3 disclosures.",
+        "Excellent, as always. Now, shall we look at something more interesting — like why governance scores keep lagging Environmental ones?",
       ]
     },
+
+    // ── WHAT CAN YOU DO ────────────────────────────────────────────────────
+    {
+      test: /what can you do|capabilities|help me|what do you know|what are you/i,
+      replies: [
+        `I specialise in ESG intelligence. Here's what I can help with:<br><br>
+<strong>📄 Report Analysis</strong> — Upload an ESG report on the ESG page and I'll identify risks, commitments, and gaps across Environmental, Social, and Governance pillars.<br><br>
+<strong>📏 Standards</strong> — I know GRI, SASB, TCFD, CSRD, UN SDGs, and more. Ask me what any standard requires.<br><br>
+<strong>📊 Dashboard &amp; Trends</strong> — Track ESG scores over time and forecast where your portfolio is heading.<br><br>
+<strong>⚠️ Risk Flagging</strong> — I can explain greenwashing indicators, missing materiality assessments, and disclosure gaps.<br><br>
+What would you like to start with?`,
+      ]
+    },
+
+    // ── ESG DEFINITION ─────────────────────────────────────────────────────
+    {
+      test: /what is esg|what does esg stand|esg mean|explain esg/i,
+      replies: [
+        `<strong>ESG</strong> stands for <strong>Environmental, Social, and Governance</strong> — the three pillars used to evaluate a company's sustainability and ethical impact.<br><br>
+<strong>🌱 Environmental (E)</strong> — How a company manages its impact on the natural world: carbon emissions, energy use, water, waste, biodiversity, and climate risk.<br><br>
+<strong>🤝 Social (S)</strong> — How a company manages relationships with employees, suppliers, customers, and communities: labour standards, diversity, human rights, health &amp; safety.<br><br>
+<strong>🏛 Governance (G)</strong> — How a company is led and controlled: board structure, executive pay, anti-corruption, transparency, and shareholder rights.<br><br>
+Investors, regulators, and stakeholders use ESG scores to assess long-term risk and sustainability. Would you like to know about a specific pillar or standard?`,
+      ]
+    },
+
+    // ── ENVIRONMENTAL ──────────────────────────────────────────────────────
+    {
+      test: /\b(environmental|climate|carbon|emission|scope [123]|net.?zero|ghg|greenhouse|tcfd|tnfd|biodiversity|renewable|energy|water|waste|deforest)\b/i,
+      replies: [
+        `<strong>Environmental Pillar — Key Disclosure Areas</strong><br><br>
+<strong>Climate &amp; Emissions</strong><br>
+• Scope 1 (direct), Scope 2 (purchased energy), Scope 3 (value chain) GHG emissions<br>
+• Net-zero target year and interim milestones<br>
+• Science-based targets (SBTi validation status)<br>
+• TCFD climate scenario analysis (1.5°C / 2°C alignment)<br><br>
+<strong>Nature &amp; Resources</strong><br>
+• Water withdrawal, consumption, and recycling rates<br>
+• Waste generation, diversion, and circular economy commitments<br>
+• Biodiversity impact and TNFD alignment<br>
+• Deforestation-free supply chain commitments<br><br>
+<strong>Common Gaps I flag</strong> — Missing Scope 3 categories, unverified carbon offsets, vague net-zero language without interim targets.<br><br>
+Want me to check a specific report or explain a particular standard?`,
+
+        `Good question on the environmental side. The most scrutinised area right now is <strong>Scope 3 completeness</strong> — companies are expected to disclose all 15 GHG Protocol categories, yet most only report 4–6.<br><br>
+Other high-risk areas include:<br>
+• Carbon offset quality (Gold Standard vs. unverified)<br>
+• TCFD physical vs. transition risk disclosure<br>
+• Net-zero commitments without credible interim targets<br><br>
+Would you like me to explain any of these in more detail?`,
+      ]
+    },
+
+    // ── SOCIAL ─────────────────────────────────────────────────────────────
+    {
+      test: /\b(social|diversity|inclusion|dei|labour|labor|worker|employee|human rights|supply chain|modern slavery|health.?safety|community|pay.?equity|gender)\b/i,
+      replies: [
+        `<strong>Social Pillar — Key Disclosure Areas</strong><br><br>
+<strong>Workforce</strong><br>
+• Diversity &amp; inclusion data (gender, ethnicity by seniority)<br>
+• Pay equity and gender pay gap disclosure<br>
+• Employee turnover, engagement, and wellbeing scores<br>
+• Training hours per employee (GRI 404)<br>
+• Health &amp; safety incident rates (TRIR, LTIR)<br><br>
+<strong>Supply Chain</strong><br>
+• Supplier code of conduct coverage (%)<br>
+• Modern slavery statement (UK MSA compliance)<br>
+• Human rights due diligence (UN Guiding Principles)<br>
+• Responsible sourcing audits<br><br>
+<strong>Community</strong><br>
+• Community investment spend<br>
+• Indigenous peoples rights disclosures<br>
+• Customer privacy and data protection<br><br>
+Which area would you like to explore further?`,
+      ]
+    },
+
+    // ── GOVERNANCE ─────────────────────────────────────────────────────────
+    {
+      test: /\b(governance|board|director|executive|remuneration|pay|anti.?corrupt|bribe|tax|transparency|audit|shareholder|whistleblow|csrd|accountability)\b/i,
+      replies: [
+        `<strong>Governance Pillar — Key Disclosure Areas</strong><br><br>
+<strong>Board &amp; Leadership</strong><br>
+• Board independence ratio and diversity<br>
+• ESG committee at board level<br>
+• Executive remuneration linked to ESG KPIs<br>
+• Board skills matrix and ESG expertise<br><br>
+<strong>Ethics &amp; Controls</strong><br>
+• Anti-corruption and anti-bribery policy coverage<br>
+• Whistleblower protection mechanism<br>
+• Tax transparency and country-by-country reporting<br>
+• Data privacy and cybersecurity governance<br><br>
+<strong>Assurance &amp; Reporting</strong><br>
+• Third-party ESG assurance provider named<br>
+• Double materiality assessment (CSRD requirement)<br>
+• Shareholder engagement and rights disclosures<br><br>
+Governance is the most under-disclosed pillar in our dataset — coverage averages 58% vs. 72% for Environmental. Need help with a specific area?`,
+      ]
+    },
+
+    // ── GRI ────────────────────────────────────────────────────────────────
+    {
+      test: /\bgri\b|global reporting initiative/i,
+      replies: [
+        `<strong>GRI (Global Reporting Initiative)</strong> is the most widely used ESG reporting framework globally.<br><br>
+<strong>Structure</strong><br>
+• <strong>GRI Universal Standards</strong> (GRI 1–3) — Foundation, general disclosures, material topics<br>
+• <strong>Topic-specific Standards</strong> — GRI 200s (Economic), GRI 300s (Environmental), GRI 400s (Social)<br><br>
+<strong>Key standards I check for</strong><br>
+• GRI 302 — Energy<br>
+• GRI 305 — Emissions (Scope 1/2/3)<br>
+• GRI 401 — Employment<br>
+• GRI 403 — Occupational Health &amp; Safety<br>
+• GRI 404 — Training &amp; Education<br>
+• GRI 405 — Diversity &amp; Equal Opportunity<br>
+• GRI 414 — Supplier Social Assessment<br><br>
+GRI is voluntary but increasingly referenced by regulators (CSRD, SEC). Want to know what a specific GRI standard requires?`,
+      ]
+    },
+
+    // ── SASB ───────────────────────────────────────────────────────────────
+    {
+      test: /\bsasb\b|sustainability accounting/i,
+      replies: [
+        `<strong>SASB (Sustainability Accounting Standards Board)</strong> provides industry-specific ESG metrics — unlike GRI which is universal.<br><br>
+<strong>Key features</strong><br>
+• 77 industry standards across 11 sectors (e.g., Technology, Financial Services, Healthcare)<br>
+• Focuses on metrics that are financially material to investors<br>
+• Each standard specifies quantitative disclosures, activity metrics, and accounting guidance<br><br>
+<strong>Why it matters</strong><br>
+SASB metrics are used by TCFD reporters and increasingly embedded in IFRS S1/S2 (ISSB standards). Missing SASB disclosures are one of the most common gaps I flag in reports.<br><br>
+Which sector's SASB standard are you interested in?`,
+      ]
+    },
+
+    // ── TCFD ───────────────────────────────────────────────────────────────
+    {
+      test: /\btcfd\b|task force.{0,20}climate/i,
+      replies: [
+        `<strong>TCFD (Task Force on Climate-related Financial Disclosures)</strong> is a framework for disclosing climate-related risks and opportunities — now embedded in many regulatory regimes.<br><br>
+<strong>Four pillars</strong><br>
+• <strong>Governance</strong> — Board and management oversight of climate risks<br>
+• <strong>Strategy</strong> — Climate risks/opportunities and their financial impact, including scenario analysis (1.5°C, 2°C, 4°C)<br>
+• <strong>Risk Management</strong> — How climate risks are identified, assessed, and managed<br>
+• <strong>Metrics &amp; Targets</strong> — GHG emissions, climate-related targets, and performance<br><br>
+<strong>Status</strong> — TCFD recommendations are now mandatory in the UK, New Zealand, Switzerland, and Singapore. The ISSB's IFRS S2 is built on TCFD.<br><br>
+Would you like to know how to check TCFD completeness in a report?`,
+      ]
+    },
+
+    // ── CSRD ───────────────────────────────────────────────────────────────
+    {
+      test: /\bcsrd\b|corporate sustainability reporting directive|double materiality/i,
+      replies: [
+        `<strong>CSRD (Corporate Sustainability Reporting Directive)</strong> is the EU's mandatory ESG reporting regulation — the most comprehensive in the world.<br><br>
+<strong>Key requirements</strong><br>
+• Mandatory <strong>double materiality assessment</strong> — both financial materiality (impact on company) AND impact materiality (company's impact on society/environment)<br>
+• Aligned with <strong>ESRS (European Sustainability Reporting Standards)</strong><br>
+• Third-party <strong>limited assurance</strong> required (moving to reasonable assurance over time)<br>
+• Applies to ~50,000 EU companies (phased 2024–2026)<br><br>
+<strong>Common gaps I flag</strong><br>
+• Missing double materiality assessment documentation<br>
+• ESRS topic coverage incomplete (especially ESRS E1–E5, S1–S4, G1)<br>
+• No named assurance provider<br><br>
+Is your organisation subject to CSRD? I can help identify what's needed.`,
+      ]
+    },
+
+    // ── GREENWASHING ───────────────────────────────────────────────────────
+    {
+      test: /greenwash|mislead|vague|unverif|social.?wash|impact.?wash/i,
+      replies: [
+        `<strong>Greenwashing Indicators — What I Look For</strong><br><br>
+<strong>Red flags in ESG reports</strong><br>
+• ❌ Net-zero commitments with no interim targets or roadmap<br>
+• ❌ Carbon offsets presented as primary strategy (vs. actual emission reductions)<br>
+• ❌ Unverified or retired offsets (not Gold Standard / Verra VCS)<br>
+• ❌ "Sustainable" product claims without certification or methodology<br>
+• ❌ Cherry-picked metrics — reporting only favourable data points<br>
+• ❌ Vague language: "we strive to reduce…" with no baseline or target<br>
+• ❌ Scope 3 omitted entirely or limited to 1–2 categories<br><br>
+<strong>Regulatory context</strong><br>
+The EU Green Claims Directive and FCA anti-greenwashing rules (UK) are tightening requirements for substantiation. I flag all of the above in my report checker.<br><br>
+Want me to explain how to check a specific report for these?`,
+      ]
+    },
+
+    // ── RISKS ──────────────────────────────────────────────────────────────
+    {
+      test: /\b(risk|flag|gap|missing|incomplete|issue|problem|concern)\b/i,
+      replies: [
+        `<strong>Common ESG Disclosure Gaps I Flag</strong><br><br>
+<strong>Environmental</strong><br>
+• Scope 3 categories missing (only 4–6 of 15 reported)<br>
+• No third-party verification of emissions data<br>
+• Climate scenario analysis absent or shallow<br><br>
+<strong>Social</strong><br>
+• Gender pay gap data not disclosed<br>
+• Supply chain audit coverage below 50%<br>
+• Modern slavery statement lacks specific actions<br><br>
+<strong>Governance</strong><br>
+• No board-level ESG committee named<br>
+• Executive pay not linked to ESG KPIs<br>
+• Missing double materiality assessment (CSRD)<br>
+• No independent ESG assurance provider<br><br>
+These are weighted in the ESG score. Upload a report on the ESG page and I'll run the full check.`,
+      ]
+    },
+
+    // ── SCORE / RATING ─────────────────────────────────────────────────────
+    {
+      test: /\b(score|rating|benchmark|msci|sustainalytics|cdp|ftse4good|index)\b/i,
+      replies: [
+        `<strong>ESG Scores &amp; Ratings — How They Work</strong><br><br>
+ESG ratings vary significantly by provider — the same company can score very differently across agencies:<br><br>
+• <strong>MSCI ESG Ratings</strong> — CCC to AAA scale, industry-adjusted, investor-focused<br>
+• <strong>Sustainalytics</strong> — Unmanaged risk score (lower = better), used by Morningstar<br>
+• <strong>CDP</strong> — Climate, water, forests disclosure quality (A–F scale)<br>
+• <strong>FTSE4Good</strong> — Inclusion/exclusion index based on ESG performance<br>
+• <strong>S&amp;P Global CSA</strong> — Powers the Dow Jones Sustainability Index (DJSI)<br><br>
+<strong>J.A.R.V.I.S scores</strong> are based on disclosure completeness, risk flag count, and standard alignment — giving you a score out of 100 per pillar and overall.<br><br>
+Would you like to know how to improve a specific score?`,
+      ]
+    },
+
+    // ── REPORT ANALYSIS ────────────────────────────────────────────────────
+    {
+      test: /analys|check|scan|review|upload|report|pdf|document/i,
+      replies: [
+        `To analyse an ESG report, head to the <strong>ESG page</strong> (ESG in the nav) and upload your PDF or text file. I'll automatically:<br><br>
+1. Extract all text across pages<br>
+2. Check it against your selected standard (GRI, SASB, TCFD, CSRD, or UN SDG)<br>
+3. Identify <strong>commitments</strong> — positive disclosures and pledges<br>
+4. Flag <strong>risks</strong> — gaps, greenwashing indicators, and missing disclosures<br>
+5. Score each ESG pillar (E, S, G) based on coverage<br><br>
+Results are broken down by pillar with expandable finding lists. You can then push the scores to the <strong>Trends dashboard</strong> for tracking over time.`,
+
+        `Running an ESG report check is straightforward — use the ESG Checker in the nav. I support PDF and plain text files, and I check against five standards simultaneously unless you pin to a specific one.<br><br>
+The most common issue I find? <strong>Governance disclosure gaps</strong> — it's consistently the weakest pillar across the reports we've analysed. Average coverage in our dataset is 58% vs. 72% for Environmental.`,
+      ]
+    },
+
+    // ── DASHBOARD / TRENDS ─────────────────────────────────────────────────
+    {
+      test: /dashboard|trend|predict|forecast|metric|track/i,
+      replies: [
+        `The <strong>ESG Dashboard</strong> shows your portfolio-level metrics at a glance:<br><br>
+• <strong>312 reports analysed</strong> this period<br>
+• <strong>4,871 commitments</strong> found across all pillars<br>
+• <strong>1,204 risks flagged</strong> — governance gaps being the most common<br>
+• Average ESG score: <strong>68.4 / 100</strong><br><br>
+Hit <strong>"Analyze &amp; Predict ESG Trends"</strong> on the Dashboard to push to the Trends page, which shows a 4-report forecast with confidence intervals based on your score history.`,
+      ]
+    },
+
+    // ── UN SDGs ────────────────────────────────────────────────────────────
+    {
+      test: /\b(sdg|sustainable development goal|un goal|agenda 2030)\b/i,
+      replies: [
+        `<strong>UN Sustainable Development Goals (SDGs)</strong> — 17 goals adopted by all UN member states for 2030.<br><br>
+The SDGs most commonly referenced in ESG reports:<br><br>
+• <strong>SDG 5</strong> — Gender Equality (pay equity, diversity)<br>
+• <strong>SDG 7</strong> — Affordable and Clean Energy (renewable targets)<br>
+• <strong>SDG 8</strong> — Decent Work and Economic Growth (labour standards)<br>
+• <strong>SDG 10</strong> — Reduced Inequalities (DEI programmes)<br>
+• <strong>SDG 12</strong> — Responsible Consumption and Production (circular economy)<br>
+• <strong>SDG 13</strong> — Climate Action (net-zero, emissions targets)<br>
+• <strong>SDG 15</strong> — Life on Land (deforestation, biodiversity)<br><br>
+I map report disclosures to SDG alignment as part of the ESG check. Would you like to know more about a specific goal?`,
+      ]
+    },
+
+    // ── THANKS ─────────────────────────────────────────────────────────────
+    {
+      test: /thank|thanks|cheers|appreciate|great|perfect|brilliant/i,
+      replies: [
+        "You're most welcome. ESG due diligence done properly — it's what I'm here for.",
+        "Think nothing of it. If you need another report checked or a standard explained, I'm right here.",
+        "Gratitude noted. Now — shall we keep going, or is that everything on the ESG front for today?",
+      ]
+    },
+
+    // ── GREETINGS (goodbye) ────────────────────────────────────────────────
+    {
+      test: /\b(bye|goodbye|see you|ciao|later|done)\b/i,
+      replies: [
+        "Understood. I'll keep the ESG knowledge base warm. Come back when the next report needs reviewing.",
+        "Farewell. I'll be here — cross-referencing disclosures and maintaining a dignified composure.",
+      ]
+    },
+
+    // ── JOKES ──────────────────────────────────────────────────────────────
     {
       test: /joke|funny|humour|humor|laugh/i,
       replies: [
-        "Why do Java developers wear glasses? Because they don't C#. I'll see myself out.",
-        "I once told a joke about UDP. I'm not sure if you got it.",
-        "I'm afraid wit is a feature, not a bug. You asked for it.",
+        "Why did the ESG analyst fail the audit? Because their Scope 3 emissions were off the charts — and off the report entirely.",
+        "What do you call a company with excellent ESG scores? A unicorn. I'm kidding. Mostly.",
+        "I once read a sustainability report that claimed to be carbon neutral. It was printed on 300 pages of A4. I rest my case.",
       ]
     },
-    {
-      test: /weather|forecast|temperature/i,
-      replies: [
-        "I'm an AI, not a meteorologist — though I suspect the forecast is 'partly cloudy with a chance of you needing an umbrella.'",
-        "Atmospheric conditions are outside my primary directive, but statistically, it's probably fine. Probably.",
-      ]
-    },
-    {
-      test: /thank|thanks|cheers|appreciate/i,
-      replies: [
-        "You're most welcome. It's what I'm here for — though a five-star review wouldn't hurt.",
-        "Think nothing of it. Truly. I was just sitting here anyway.",
-        "Gratitude noted and appreciated. Now, was there anything else, or shall I return to looking impressive?",
-      ]
-    },
+
+    // ── SORRY ──────────────────────────────────────────────────────────────
     {
       test: /sorry|apologi/i,
       replies: [
-        "No need to apologise. I've processed far more bewildering inputs than this.",
-        "Quite alright. Humans err — it's one of your more endearing qualities.",
-      ]
-    },
-    {
-      test: /what can you do|capabilities|help me|what do you know/i,
-      replies: [
-        "Quite a lot, actually. ESG report analysis, answering questions, writing code, and maintaining a dignified composure — to name a few.",
-        "I can analyse ESG reports, answer questions, write code, and occasionally suppress the urge to point out logical inconsistencies.",
-      ]
-    },
-    {
-      test: /code|program|function|script|bug|error|debug/i,
-      replies: [
-        "Analysing your code-related query. In my experience, it's usually a missing semicolon. It's almost always a missing semicolon.",
-        "On it. I'll refrain from judging the variable names.",
-        "Processing. If I may — future-proofing comments in your code does wonders for posterity.",
-      ]
-    },
-    {
-      test: /data|analys|report|dashboard|metric/i,
-      replies: [
-        "Cross-referencing data streams now. I do love a good dataset — it's like a puzzle, but with more spreadsheets.",
-        "Compiling the relevant figures. Numbers rarely lie, though they do occasionally mislead with great enthusiasm.",
-        "Running analysis. Stand by — good data deserves proper attention.",
+        "No need to apologise. ESG is complex — that's precisely why I exist.",
+        "Quite alright. If anything, the opacity of some disclosure frameworks is the real culprit here.",
       ]
     },
   ];
 
   const GENERAL_REPLIES = [
-    "Understood. Processing your request — do try to remain calm while I work.",
-    "Acknowledged. I'll have something for you momentarily. Good things take a fraction of a second.",
-    "Request received. Compiling the most relevant information — and filtering out the irrelevant, of which there is surprisingly little.",
-    "On it. Cross-referencing data streams with the quiet efficiency you've come to expect.",
-    "Noted. I'll have a response shortly. In the meantime, feel free to be impressed.",
-    "Running diagnostics on your query. It's a reasonable one — a pleasant change of pace.",
-    "Affirmative. Routing your request through the appropriate channels — all of which, I should mention, I personally manage.",
+    "Understood. Cross-referencing that against our ESG knowledge base now — stand by.",
+    "Acknowledged. That touches on an interesting area of ESG reporting. Let me pull the relevant context.",
+    "Processing. ESG is a broad field — could you narrow it down? Are you asking about a specific pillar, standard, or report?",
+    "On it. For best results, try asking about a specific standard (GRI, TCFD, SASB, CSRD), pillar (E, S, G), or upload a report via the ESG page.",
+    "Noted. I specialise in ESG report analysis, risk flagging, and standard alignment. Point me at something specific and I'll give you a detailed answer.",
+    "Interesting query. My core capabilities are ESG report analysis, pillar scoring, risk flagging, and standard mapping. What aspect are you exploring?",
+    "Affirmative. If you have an ESG report to analyse, the ESG Checker in the nav is the fastest path to actionable insights.",
   ];
 
   function pickReply(text) {
     for (const pool of REPLY_POOLS) {
       if (pool.test.test(text)) {
-        return pool.replies[Math.floor(Math.random() * pool.replies.length)];
+        const r = pool.replies;
+        return r[Math.floor(Math.random() * r.length)];
       }
     }
     return GENERAL_REPLIES[Math.floor(Math.random() * GENERAL_REPLIES.length)];
