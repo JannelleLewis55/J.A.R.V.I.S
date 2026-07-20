@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>J.A.R.V.I.S — Dashboard</title>
+  <title>J.A.R.V.I.S — ESG Dashboard</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -162,6 +162,54 @@
       margin-bottom: 14px;
     }
 
+    /* ── PILLAR BAND ── */
+    .pillar-band {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 600px) { .pillar-band { grid-template-columns: 1fr; } }
+
+    .pillar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .pillar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .pillar-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .pillar-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 10px;
+      letter-spacing: 0.05em;
+    }
+    .pillar-tag.E { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
+    .pillar-tag.S { background: #1a0040; color: var(--purple); border: 1px solid #3a0080; }
+    .pillar-tag.G { background: #201400; color: var(--yellow); border: 1px solid #3d2800; }
+
+    .pillar-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 8px; }
+    .pillar-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+    .pillar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pillar-meta strong { color: var(--text); }
+
     /* ── CHARTS ROW ── */
     .charts-row {
       display: grid;
@@ -197,7 +245,7 @@
     .bar {
       width: 100%;
       border-radius: 4px 4px 0 0;
-      background: var(--accent);
+      background: var(--green);
       opacity: 0.75;
       transition: opacity 0.2s, background 0.2s;
       min-height: 4px;
@@ -270,10 +318,10 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .query-cat.code    { background: #1a0e00; color: var(--orange); border: 1px solid #3a1f00; }
-    .query-cat.data    { background: #1a0030; color: var(--purple); border: 1px solid #3a0060; }
-    .query-cat.writing { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
-    .query-cat.other   { background: #1f1800; color: var(--yellow); border: 1px solid #3d2e00; }
+    .query-cat.env     { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
+    .query-cat.social  { background: #1a0040; color: var(--purple); border: 1px solid #3a0080; }
+    .query-cat.gov     { background: #201400; color: var(--yellow); border: 1px solid #3d2800; }
+    .query-cat.risk    { background: #1a0000; color: var(--red);    border: 1px solid #3d0009; }
     .query-text { color: var(--text); line-height: 1.45; flex: 1; }
 
     /* Donut chart */
@@ -318,6 +366,19 @@
     .status-pill.ok   { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
     .status-pill.warn { background: #1f1800; color: var(--yellow); border: 1px solid #3d2e00; }
     .status-pill.err  { background: #1a0000; color: var(--red);    border: 1px solid #3d0009; }
+
+    .pillar-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0.04em;
+      margin-right: 3px;
+    }
+    .pillar-pill.E { background: #071a0e; color: var(--green);  border: 1px solid #0e3a1c; }
+    .pillar-pill.S { background: #1a0040; color: var(--purple); border: 1px solid #3a0080; }
+    .pillar-pill.G { background: #201400; color: var(--yellow); border: 1px solid #3d2800; }
 
     /* ── ACTIVITY ── */
     .activity-list { display: flex; flex-direction: column; gap: 0; }
@@ -411,7 +472,7 @@
            stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      Analyze &amp; Predict Reports
+      Analyze &amp; Predict ESG Trends
     </button>
     <span class="analyze-status" id="analyzeStatus"></span>
   </div>
@@ -419,12 +480,12 @@
   <!-- Header -->
   <div class="page-header">
     <div>
-      <h1>AI Reports Dashboard</h1>
-      <p>System metrics, usage analytics, and model performance — Team 10</p>
+      <h1>ESG Reports Dashboard</h1>
+      <p>ESG report analysis metrics, pillar coverage, findings, and activity — Team 10</p>
     </div>
     <div class="badge">
       <span class="dot-sm"></span>
-      All systems operational
+      ESG engine operational
     </div>
   </div>
 
@@ -432,48 +493,91 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="accent-line" style="background: var(--accent);"></div>
-      <div class="label">Total Queries</div>
-      <div class="value">48,302</div>
-      <div class="sub"><span class="up">↑ 12%</span> vs last week</div>
+      <div class="label">Reports Analysed</div>
+      <div class="value">312</div>
+      <div class="sub"><span class="up">↑ 18%</span> vs last month</div>
     </div>
     <div class="stat-card">
       <div class="accent-line" style="background: var(--green);"></div>
-      <div class="label">Avg. Response Time</div>
-      <div class="value">1.4s</div>
-      <div class="sub"><span class="up">↓ 0.2s</span> improvement</div>
+      <div class="label">Commitments Found</div>
+      <div class="value">4,871</div>
+      <div class="sub"><span class="up">↑ 9%</span> across all pillars</div>
     </div>
     <div class="stat-card">
-      <div class="accent-line" style="background: var(--purple);"></div>
-      <div class="label">Active Users</div>
-      <div class="value">1,847</div>
-      <div class="sub"><span class="up">↑ 8%</span> this month</div>
+      <div class="accent-line" style="background: var(--red);"></div>
+      <div class="label">Risks Flagged</div>
+      <div class="value">1,204</div>
+      <div class="sub"><span class="down">↑ 3%</span> needs attention</div>
     </div>
     <div class="stat-card">
       <div class="accent-line" style="background: var(--yellow);"></div>
-      <div class="label">Error Rate</div>
-      <div class="value">0.3%</div>
-      <div class="sub"><span class="down">↑ 0.1%</span> from baseline</div>
+      <div class="label">Avg. ESG Score</div>
+      <div class="value">68.4</div>
+      <div class="sub"><span class="up">↑ 4.1 pts</span> from last quarter</div>
     </div>
     <div class="stat-card">
-      <div class="accent-line" style="background: var(--accent-dim);"></div>
-      <div class="label">Model Accuracy</div>
-      <div class="value">96.7%</div>
-      <div class="sub"><span class="up">↑ 1.2%</span> vs last model</div>
+      <div class="accent-line" style="background: var(--purple);"></div>
+      <div class="label">Standards Covered</div>
+      <div class="value">7</div>
+      <div class="sub">GRI · SASB · TCFD · UN SDG · more</div>
+    </div>
+  </div>
+
+  <!-- Pillar Band -->
+  <div class="pillar-band">
+    <div class="pillar-card">
+      <div class="pillar-header">
+        <span class="pillar-name">Environmental</span>
+        <span class="pillar-tag E">E</span>
+      </div>
+      <div class="pillar-bar-wrap">
+        <div class="pillar-bar-fill" style="width:72%; background: var(--green);"></div>
+      </div>
+      <div class="pillar-meta">
+        <span>Coverage <strong>72%</strong></span>
+        <span><strong>1,842</strong> findings</span>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-header">
+        <span class="pillar-name">Social</span>
+        <span class="pillar-tag S">S</span>
+      </div>
+      <div class="pillar-bar-wrap">
+        <div class="pillar-bar-fill" style="width:61%; background: var(--purple);"></div>
+      </div>
+      <div class="pillar-meta">
+        <span>Coverage <strong>61%</strong></span>
+        <span><strong>1,563</strong> findings</span>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-header">
+        <span class="pillar-name">Governance</span>
+        <span class="pillar-tag G">G</span>
+      </div>
+      <div class="pillar-bar-wrap">
+        <div class="pillar-bar-fill" style="width:58%; background: var(--yellow);"></div>
+      </div>
+      <div class="pillar-meta">
+        <span>Coverage <strong>58%</strong></span>
+        <span><strong>1,466</strong> findings</span>
+      </div>
     </div>
   </div>
 
   <!-- Charts -->
   <div class="charts-row">
     <div class="card">
-      <div class="card-title">Daily Query Volume <span>Last 7 days — click a bar to drill in</span></div>
+      <div class="card-title">Daily ESG Reports Submitted <span>Last 7 days — click a bar to drill in</span></div>
       <div class="bar-chart" id="barChart">
-        <div class="bar-col" data-day="Mon"><div class="bar" style="height:52%"></div><div class="bar-label">Mon</div></div>
-        <div class="bar-col" data-day="Tue"><div class="bar" style="height:68%"></div><div class="bar-label">Tue</div></div>
-        <div class="bar-col" data-day="Wed"><div class="bar" style="height:61%"></div><div class="bar-label">Wed</div></div>
+        <div class="bar-col" data-day="Mon"><div class="bar" style="height:48%"></div><div class="bar-label">Mon</div></div>
+        <div class="bar-col" data-day="Tue"><div class="bar" style="height:63%"></div><div class="bar-label">Tue</div></div>
+        <div class="bar-col" data-day="Wed"><div class="bar" style="height:57%"></div><div class="bar-label">Wed</div></div>
         <div class="bar-col" data-day="Thu"><div class="bar" style="height:80%"></div><div class="bar-label">Thu</div></div>
         <div class="bar-col" data-day="Fri"><div class="bar" style="height:74%"></div><div class="bar-label">Fri</div></div>
-        <div class="bar-col" data-day="Sat"><div class="bar" style="height:40%"></div><div class="bar-label">Sat</div></div>
-        <div class="bar-col" data-day="Sun"><div class="bar" style="height:35%"></div><div class="bar-label">Sun</div></div>
+        <div class="bar-col" data-day="Sat"><div class="bar" style="height:32%"></div><div class="bar-label">Sat</div></div>
+        <div class="bar-col" data-day="Sun"><div class="bar" style="height:27%"></div><div class="bar-label">Sun</div></div>
       </div>
       <!-- Day detail panel -->
       <div class="day-detail" id="dayDetail">
@@ -489,41 +593,34 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Query Categories</div>
+      <div class="card-title">Findings by Pillar</div>
       <div class="donut-wrap">
+        <!-- circumference of r=46 ≈ 289 -->
         <svg viewBox="0 0 120 120" width="110" height="110">
-          <!-- donut slices via stroke-dasharray on a circle r=46 circumference≈289 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#1e2a3a" stroke-width="18"/>
-          <!-- Code: 35% = 101 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#ff832b" stroke-width="18"
-            stroke-dasharray="101 188" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
-          <!-- Data: 25% = 72 -->
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#8a3ffc" stroke-width="18"
-            stroke-dasharray="72 217" stroke-dashoffset="-101" transform="rotate(-90 60 60)"/>
-          <!-- Writing: 20% = 58 -->
+          <!-- E: 38% ≈ 110 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#24a148" stroke-width="18"
-            stroke-dasharray="58 231" stroke-dashoffset="-173" transform="rotate(-90 60 60)"/>
-          <!-- Other: 20% = 58 -->
+            stroke-dasharray="110 179" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+          <!-- S: 32% ≈ 92 -->
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#8a3ffc" stroke-width="18"
+            stroke-dasharray="92 197" stroke-dashoffset="-110" transform="rotate(-90 60 60)"/>
+          <!-- G: 30% ≈ 87 -->
           <circle cx="60" cy="60" r="46" fill="none" stroke="#f1c21b" stroke-width="18"
-            stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
-          <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">48k</text>
+            stroke-dasharray="87 202" stroke-dashoffset="-202" transform="rotate(-90 60 60)"/>
+          <text x="60" y="64" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">4.8k</text>
         </svg>
         <div class="donut-legend" style="width:100%">
           <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:#ff832b"></span>Code &amp; Dev</div>
-            <span class="pct">35%</span>
+            <div class="leg-left"><span class="dot-leg" style="background:var(--green)"></span>Environmental</div>
+            <span class="pct">38%</span>
           </div>
           <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:var(--purple)"></span>Data Analysis</div>
-            <span class="pct">25%</span>
+            <div class="leg-left"><span class="dot-leg" style="background:var(--purple)"></span>Social</div>
+            <span class="pct">32%</span>
           </div>
           <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:var(--green)"></span>Writing</div>
-            <span class="pct">20%</span>
-          </div>
-          <div class="donut-legend-item">
-            <div class="leg-left"><span class="dot-leg" style="background:var(--yellow)"></span>Other</div>
-            <span class="pct">20%</span>
+            <div class="leg-left"><span class="dot-leg" style="background:var(--yellow)"></span>Governance</div>
+            <span class="pct">30%</span>
           </div>
         </div>
       </div>
@@ -533,47 +630,62 @@
   <!-- Table + Activity -->
   <div class="two-col">
     <div class="card">
-      <div class="card-title">Recent Model Reports <span>Last 5 runs</span></div>
+      <div class="card-title">Recent ESG Reports <span>Last 5 scans</span></div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Run ID</th>
-              <th>Model</th>
-              <th>Accuracy</th>
+              <th>Report</th>
+              <th>Pillars</th>
+              <th>Score</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td class="muted">#2048</td>
-              <td>JARVIS-4</td>
-              <td>97.1%</td>
-              <td><span class="status-pill ok">Passed</span></td>
+              <td class="muted">IBM-ESG-2024</td>
+              <td>
+                <span class="pillar-pill E">E</span>
+                <span class="pillar-pill S">S</span>
+                <span class="pillar-pill G">G</span>
+              </td>
+              <td>81.3</td>
+              <td><span class="status-pill ok">Complete</span></td>
             </tr>
             <tr>
-              <td class="muted">#2047</td>
-              <td>JARVIS-4</td>
-              <td>96.8%</td>
-              <td><span class="status-pill ok">Passed</span></td>
+              <td class="muted">ClientCo-Q3</td>
+              <td>
+                <span class="pillar-pill E">E</span>
+                <span class="pillar-pill S">S</span>
+              </td>
+              <td>74.0</td>
+              <td><span class="status-pill ok">Complete</span></td>
             </tr>
             <tr>
-              <td class="muted">#2046</td>
-              <td>JARVIS-3</td>
-              <td>94.2%</td>
+              <td class="muted">SupplierX-Annual</td>
+              <td>
+                <span class="pillar-pill E">E</span>
+                <span class="pillar-pill G">G</span>
+              </td>
+              <td>61.5</td>
               <td><span class="status-pill warn">Review</span></td>
             </tr>
             <tr>
-              <td class="muted">#2045</td>
-              <td>JARVIS-3</td>
-              <td>93.9%</td>
+              <td class="muted">PartnerY-2024</td>
+              <td>
+                <span class="pillar-pill S">S</span>
+                <span class="pillar-pill G">G</span>
+              </td>
+              <td>58.2</td>
               <td><span class="status-pill warn">Review</span></td>
             </tr>
             <tr>
-              <td class="muted">#2044</td>
-              <td>JARVIS-2</td>
-              <td>89.1%</td>
-              <td><span class="status-pill err">Failed</span></td>
+              <td class="muted">Legacy-Report-22</td>
+              <td>
+                <span class="pillar-pill E">E</span>
+              </td>
+              <td>42.7</td>
+              <td><span class="status-pill err">Flagged</span></td>
             </tr>
           </tbody>
         </table>
@@ -581,40 +693,40 @@
     </div>
 
     <div class="card">
-      <div class="card-title">System Activity <span>Live feed</span></div>
+      <div class="card-title">ESG Activity <span>Live feed</span></div>
       <div class="activity-list">
         <div class="activity-item">
-          <div class="act-icon" style="background:#00092e;color:var(--accent)">⚙</div>
+          <div class="act-icon" style="background:#071a0e;color:var(--green)">E</div>
           <div class="act-body">
-            <div class="act-title">Model JARVIS-4 deployed to production</div>
-            <div class="act-time">2 minutes ago</div>
+            <div class="act-title">IBM-ESG-2024 environmental scan complete</div>
+            <div class="act-time">4 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#071a0e;color:var(--green)">✓</div>
+          <div class="act-icon" style="background:#1a0000;color:var(--red)">!</div>
           <div class="act-body">
-            <div class="act-title">Weekly accuracy report generated</div>
-            <div class="act-time">18 minutes ago</div>
+            <div class="act-title">3 governance risks flagged in PartnerY-2024</div>
+            <div class="act-time">22 minutes ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#1f1800;color:var(--yellow)">!</div>
+          <div class="act-icon" style="background:#1a0040;color:var(--purple)">S</div>
           <div class="act-body">
-            <div class="act-title">Latency spike detected — resolved</div>
+            <div class="act-title">ClientCo-Q3 social pillar: 12 new commitments</div>
             <div class="act-time">1 hour ago</div>
           </div>
         </div>
         <div class="activity-item">
-          <div class="act-icon" style="background:#1a0030;color:var(--purple)">↑</div>
+          <div class="act-icon" style="background:#201400;color:var(--yellow)">G</div>
           <div class="act-body">
-            <div class="act-title">Training dataset updated (2.1M records)</div>
+            <div class="act-title">TCFD alignment check run on SupplierX-Annual</div>
             <div class="act-time">3 hours ago</div>
           </div>
         </div>
         <div class="activity-item">
           <div class="act-icon" style="background:#071a0e;color:var(--green)">✓</div>
           <div class="act-body">
-            <div class="act-title">Automated backup completed successfully</div>
+            <div class="act-title">Weekly ESG trend report generated</div>
             <div class="act-time">6 hours ago</div>
           </div>
         </div>
@@ -625,149 +737,132 @@
 </div>
 
 <script>
-  // ── DAILY QUERY DATA ─────────────────────────────────────────────────────
+  // ── DAILY ESG REPORT DATA ────────────────────────────────────────────────────
   const DAILY_QUERIES = {
     Mon: {
-      count: 6420,
+      count: 38,
       queries: [
-        { cat: 'code',    text: 'How do I reverse a linked list in Python?' },
-        { cat: 'data',    text: 'Analyze the sales dataset and show me weekly trends' },
-        { cat: 'writing', text: 'Draft an executive summary for the Q3 report' },
-        { cat: 'code',    text: 'Fix the null pointer exception in my Java service' },
-        { cat: 'other',   text: 'What is the capital of New Zealand?' },
-        { cat: 'data',    text: 'Generate a bar chart from this CSV data' },
-        { cat: 'code',    text: 'Explain the difference between async/await and promises' },
-        { cat: 'writing', text: 'Rewrite this paragraph to sound more professional' },
-        { cat: 'other',   text: 'Summarize the latest AI news' },
-        { cat: 'code',    text: 'Write a SQL query to find duplicate rows' },
+        { cat: 'env',    text: 'Scan IBM-ESG-2024 for carbon emission targets' },
+        { cat: 'social', text: 'Extract workforce diversity commitments from ClientCo-Q3' },
+        { cat: 'gov',    text: 'Check board independence disclosures in PartnerY-2024' },
+        { cat: 'risk',   text: 'Flag greenwashing indicators in SupplierX-Annual' },
+        { cat: 'env',    text: 'Map TCFD climate risk disclosures' },
+        { cat: 'social', text: 'Identify human rights policy gaps' },
+        { cat: 'gov',    text: 'Verify anti-corruption controls section' },
       ],
     },
     Tue: {
-      count: 8391,
+      count: 51,
       queries: [
-        { cat: 'code',    text: 'Build a REST API endpoint in Node.js for user authentication' },
-        { cat: 'data',    text: 'What are the top 5 products by revenue this quarter?' },
-        { cat: 'code',    text: 'Why is my Docker container crashing on startup?' },
-        { cat: 'writing', text: 'Write a LinkedIn post announcing our product launch' },
-        { cat: 'data',    text: 'Compare model accuracy across the last 5 training runs' },
-        { cat: 'code',    text: 'Implement binary search in TypeScript' },
-        { cat: 'other',   text: 'Translate this email to Spanish' },
-        { cat: 'writing', text: 'Generate meeting notes from this transcript' },
-        { cat: 'code',    text: 'How do I debounce a search input in React?' },
-        { cat: 'data',    text: 'Show me a pivot table of user signups by region' },
-        { cat: 'code',    text: 'Explain SOLID principles with examples' },
-        { cat: 'other',   text: 'What is the weather like in London today?' },
+        { cat: 'env',    text: 'Analyse Scope 1, 2, 3 emissions breakdown' },
+        { cat: 'social', text: 'Check GRI 401 employment disclosures' },
+        { cat: 'gov',    text: 'Identify executive pay vs ESG metric linkage' },
+        { cat: 'env',    text: 'Water usage targets — benchmark against sector' },
+        { cat: 'risk',   text: 'Flag missing SASB industry-specific metrics' },
+        { cat: 'social', text: 'Community investment spend — YoY comparison' },
+        { cat: 'gov',    text: 'Audit committee ESG oversight language scan' },
+        { cat: 'env',    text: 'Net-zero pathway commitments extracted' },
+        { cat: 'social', text: 'Health and safety incident rate disclosures' },
       ],
     },
     Wed: {
-      count: 7532,
+      count: 45,
       queries: [
-        { cat: 'data',    text: 'Run anomaly detection on the latency logs' },
-        { cat: 'code',    text: 'Convert this class component to a React hook' },
-        { cat: 'writing', text: 'Create a project status update for stakeholders' },
-        { cat: 'code',    text: 'Set up a CI/CD pipeline with GitHub Actions' },
-        { cat: 'data',    text: 'Cluster these customer records by purchase behaviour' },
-        { cat: 'other',   text: 'What does ESG stand for and why does it matter?' },
-        { cat: 'code',    text: 'Add rate limiting to my Express API' },
-        { cat: 'writing', text: 'Proofread and improve this technical specification' },
-        { cat: 'data',    text: 'Forecast next month\'s server costs based on usage trends' },
-        { cat: 'code',    text: 'Explain the CAP theorem in simple terms' },
+        { cat: 'gov',    text: 'Verify TCFD governance pillar completeness' },
+        { cat: 'env',    text: 'Biodiversity impact disclosures identified' },
+        { cat: 'social', text: 'Supply chain labour standards — risk rating' },
+        { cat: 'risk',   text: 'Identify vague or unverifiable ESG claims' },
+        { cat: 'env',    text: 'Renewable energy percentage targets extracted' },
+        { cat: 'gov',    text: 'Whistleblower policy coverage assessed' },
+        { cat: 'social', text: 'Pay equity data disclosed?' },
+        { cat: 'env',    text: 'Waste reduction commitments mapped to UN SDGs' },
       ],
     },
     Thu: {
-      count: 9874,
+      count: 67,
       queries: [
-        { cat: 'code',    text: 'Design a microservices architecture for an e-commerce platform' },
-        { cat: 'data',    text: 'Identify which features have the highest correlation with churn' },
-        { cat: 'code',    text: 'Debug this memory leak in my Go service' },
-        { cat: 'writing', text: 'Write a proposal for migrating to a cloud-native stack' },
-        { cat: 'code',    text: 'Implement a JWT refresh token strategy' },
-        { cat: 'data',    text: 'Build a dashboard showing real-time query volume' },
-        { cat: 'other',   text: 'What are the best practices for remote team management?' },
-        { cat: 'code',    text: 'Optimise this slow PostgreSQL query' },
-        { cat: 'data',    text: 'Generate a heatmap of user activity by hour of day' },
-        { cat: 'writing', text: 'Draft an incident post-mortem for the Tuesday outage' },
-        { cat: 'code',    text: 'Add OpenAPI documentation to my Flask endpoints' },
-        { cat: 'data',    text: 'What is the 90th percentile response time this week?' },
-        { cat: 'other',   text: 'Explain transformer architecture for a non-technical audience' },
+        { cat: 'env',    text: 'Climate scenario analysis — 1.5°C alignment check' },
+        { cat: 'social', text: 'Training hours per employee disclosure found' },
+        { cat: 'gov',    text: 'Tax transparency and country-by-country reporting' },
+        { cat: 'risk',   text: 'Social washing risk detected in supplier claims' },
+        { cat: 'env',    text: 'GHG intensity per revenue unit extracted' },
+        { cat: 'social', text: 'Modern slavery statement completeness check' },
+        { cat: 'gov',    text: 'Data privacy and cybersecurity governance section' },
+        { cat: 'env',    text: 'Circular economy commitments benchmarked' },
+        { cat: 'social', text: 'Customer satisfaction and product quality KPIs' },
+        { cat: 'gov',    text: 'Shareholder rights and engagement disclosures' },
+        { cat: 'risk',   text: 'Regulatory compliance gaps in CSRD context' },
       ],
     },
     Fri: {
-      count: 9132,
+      count: 62,
       queries: [
-        { cat: 'writing', text: 'Write the weekly engineering update email' },
-        { cat: 'code',    text: 'Create a Python script to automate the report generation' },
-        { cat: 'data',    text: 'Compare this week\'s KPIs against last week' },
-        { cat: 'code',    text: 'Fix the race condition in the task queue worker' },
-        { cat: 'other',   text: 'What are some team-building activities for remote teams?' },
-        { cat: 'data',    text: 'Predict weekend traffic based on historical patterns' },
-        { cat: 'code',    text: 'Write unit tests for the authentication module' },
-        { cat: 'writing', text: 'Summarize this research paper on LLM fine-tuning' },
-        { cat: 'data',    text: 'Show error rate breakdown by endpoint for today' },
-        { cat: 'code',    text: 'How do I implement retry logic with exponential backoff?' },
-        { cat: 'other',   text: 'Generate ideas for the Q4 product roadmap' },
+        { cat: 'env',    text: 'Carbon offset credibility check — Gold Standard?' },
+        { cat: 'social', text: 'Employee engagement score trend extracted' },
+        { cat: 'gov',    text: 'ESG incentive link to short-term remuneration' },
+        { cat: 'env',    text: 'Deforestation commitments — TNFD alignment' },
+        { cat: 'risk',   text: 'Missing double materiality assessment flagged' },
+        { cat: 'social', text: 'Indigenous peoples rights disclosures assessed' },
+        { cat: 'env',    text: 'Scope 3 category completeness — 15 categories?' },
+        { cat: 'gov',    text: 'Independent ESG assurance provider named?' },
+        { cat: 'social', text: 'Supplier code of conduct coverage rate' },
+        { cat: 'env',    text: 'Science-based targets — SBTi validation status' },
       ],
     },
     Sat: {
-      count: 4939,
+      count: 22,
       queries: [
-        { cat: 'other',   text: 'What are some weekend side project ideas in AI?' },
-        { cat: 'code',    text: 'Build a simple chatbot with Python and Ollama' },
-        { cat: 'data',    text: 'Explore the open NYC taxi dataset and find patterns' },
-        { cat: 'writing', text: 'Write a blog post about building AI-powered tools' },
-        { cat: 'code',    text: 'How do I deploy a model to Hugging Face Spaces?' },
-        { cat: 'other',   text: 'Recommend books on systems design' },
-        { cat: 'data',    text: 'What machine learning model is best for time-series forecasting?' },
+        { cat: 'env',    text: 'Quick scan: energy transition roadmap language' },
+        { cat: 'gov',    text: 'Board-level ESG committee — exists?' },
+        { cat: 'social', text: 'Charitable giving and community programmes' },
+        { cat: 'risk',   text: 'Compliance red flags in legacy report identified' },
       ],
     },
     Sun: {
-      count: 4314,
+      count: 18,
       queries: [
-        { cat: 'other',   text: 'Plan my week using the Eisenhower matrix' },
-        { cat: 'writing', text: 'Write a personal OKR template for Q4' },
-        { cat: 'code',    text: 'Explain how large language models are trained' },
-        { cat: 'data',    text: 'Show a summary of my activity from this week' },
-        { cat: 'other',   text: 'What productivity tools do top engineers recommend?' },
-        { cat: 'code',    text: 'Create a Markdown cheat sheet' },
+        { cat: 'env',    text: 'Overview of environmental commitments this week' },
+        { cat: 'gov',    text: 'Governance score summary across all reports' },
+        { cat: 'social', text: 'Social pillar gap analysis — batch run' },
+        { cat: 'risk',   text: 'Weekly risk register from ESG scans compiled' },
       ],
     },
   };
 
-  // ── BAR CHART CLICK HANDLER ───────────────────────────────────────────────
+  // ── BAR CHART CLICK HANDLER ─────────────────────────────────────────────────
   const detail      = document.getElementById('dayDetail');
   const detailTitle = document.getElementById('dayDetailTitle');
   const detailCount = document.getElementById('dayDetailCount');
   const queryList   = document.getElementById('queryList');
 
+  const CAT_LABEL = { env: 'Environmental', social: 'Social', gov: 'Governance', risk: 'Risk' };
+
   function openDay(day) {
     const data = DAILY_QUERIES[day];
     if (!data) return;
 
-    // Highlight the selected bar
     document.querySelectorAll('.bar-col').forEach(c =>
       c.classList.toggle('selected', c.dataset.day === day)
     );
 
-    detailTitle.textContent = day + ' — Query Breakdown';
-    detailCount.innerHTML   = `<strong>${data.count.toLocaleString()}</strong> queries submitted`;
+    detailTitle.textContent = day + ' — ESG Report Activity';
+    detailCount.innerHTML   = `<strong>${data.count}</strong> reports / queries submitted`;
 
     queryList.innerHTML = data.queries.map((q, i) => `
       <div class="query-item">
         <span class="query-num">${i + 1}.</span>
-        <span class="query-cat ${q.cat}">${q.cat === 'code' ? 'Code & Dev' : q.cat === 'data' ? 'Data' : q.cat === 'writing' ? 'Writing' : 'Other'}</span>
+        <span class="query-cat ${q.cat}">${CAT_LABEL[q.cat] || q.cat}</span>
         <span class="query-text">${q.text}</span>
       </div>
     `).join('');
 
     detail.classList.add('open');
-    // Smooth scroll to the detail panel
     detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   document.getElementById('barChart').addEventListener('click', e => {
     const col = e.target.closest('.bar-col');
     if (!col) return;
-    // If already open and same day clicked, close it
     if (col.classList.contains('selected') && detail.classList.contains('open')) {
       detail.classList.remove('open');
       col.classList.remove('selected');
@@ -781,13 +876,13 @@
     document.querySelectorAll('.bar-col').forEach(c => c.classList.remove('selected'));
   });
 
-  // ── REPORT DATA (mirrors the table in this page) ──────────────────────────
-  const REPORT_RUNS = [
-    { id: '#2048', model: 'JARVIS-4', accuracy: 97.1 },
-    { id: '#2047', model: 'JARVIS-4', accuracy: 96.8 },
-    { id: '#2046', model: 'JARVIS-3', accuracy: 94.2 },
-    { id: '#2045', model: 'JARVIS-3', accuracy: 93.9 },
-    { id: '#2044', model: 'JARVIS-2', accuracy: 89.1 },
+  // ── ESG REPORT DATA (mirrors table) ─────────────────────────────────────────
+  const ESG_REPORTS = [
+    { id: 'IBM-ESG-2024',      score: 81.3 },
+    { id: 'ClientCo-Q3',       score: 74.0 },
+    { id: 'SupplierX-Annual',  score: 61.5 },
+    { id: 'PartnerY-2024',     score: 58.2 },
+    { id: 'Legacy-Report-22',  score: 42.7 },
   ];
 
   document.getElementById('analyzeBtn').addEventListener('click', () => {
@@ -796,75 +891,70 @@
 
     btn.disabled = true;
     btn.style.opacity = '0.6';
-    status.innerHTML = 'Preparing report data<span class="dots"><span></span><span></span><span></span></span>';
+    status.innerHTML = 'Preparing ESG trend data<span class="dots"><span></span><span></span><span></span></span>';
     status.classList.add('show');
 
-    // Build a time-series of accuracy values from oldest → newest run
-    const history = [...REPORT_RUNS].reverse().map(r => r.accuracy);
-
-    // Simple linear extrapolation for forecast
+    const history = [...ESG_REPORTS].reverse().map(r => r.score);
     const n = history.length;
     const slope = (history[n - 1] - history[0]) / (n - 1);
     const forecast = [1, 2, 3, 4].map(i =>
       parseFloat((history[n - 1] + slope * i).toFixed(2))
     );
-    const confMargin = [0.5, 0.8, 1.1, 1.5];
+    const confMargin = [0.6, 1.0, 1.4, 2.0];
     const confLow  = forecast.map((v, i) => parseFloat((v - confMargin[i]).toFixed(2)));
     const confHigh = forecast.map((v, i) => parseFloat((v + confMargin[i]).toFixed(2)));
 
-    const labels = [...REPORT_RUNS].reverse().map(r => r.id);
-
-    // Derive insights from the data
-    const avgAccuracy = history.reduce((a, b) => a + b, 0) / n;
-    const totalGain   = history[n - 1] - history[0];
-    const trend       = slope > 0 ? 'upward' : slope < 0 ? 'downward' : 'flat';
-    const trendLabel  = slope > 0 ? 'Improving ↑' : slope < 0 ? 'Declining ↓' : 'Stable →';
+    const labels = [...ESG_REPORTS].reverse().map(r => r.id);
+    const avgScore   = history.reduce((a, b) => a + b, 0) / n;
+    const totalGain  = history[n - 1] - history[0];
+    const trendLabel = slope > 0 ? 'Improving ↑' : slope < 0 ? 'Declining ↓' : 'Stable →';
+    const trend      = slope > 0 ? 'upward' : slope < 0 ? 'downward' : 'flat';
 
     const insights = [
       {
         icon: slope > 0 ? '↑' : slope < 0 ? '↓' : '→',
-        bg: slope > 0 ? '#071a0e' : slope < 0 ? '#1a0000' : '#00092e',
+        bg:  slope > 0 ? '#071a0e' : slope < 0 ? '#1a0000' : '#00092e',
         col: slope > 0 ? 'var(--green)' : slope < 0 ? 'var(--red)' : 'var(--accent)',
-        title: `Overall Accuracy ${slope > 0 ? 'Improving' : slope < 0 ? 'Declining' : 'Stable'}`,
-        desc: `Across ${n} report runs, accuracy moved from ${history[0]}% to ${history[n-1]}% — a ${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)} pp change. ${Math.abs(slope).toFixed(2)} pp per run on average.`,
+        title: `ESG Score ${slope > 0 ? 'Improving' : slope < 0 ? 'Declining' : 'Stable'}`,
+        desc: `Across ${n} reports, scores moved from ${history[0]} to ${history[n-1]} — a ${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)} pt change. ${Math.abs(slope).toFixed(2)} pts per report on average.`,
       },
       {
         icon: '◈',
         bg: '#00092e',
         col: 'var(--accent)',
-        title: `Average Run Accuracy: ${avgAccuracy.toFixed(1)}%`,
-        desc: `The mean accuracy across all ${n} report runs is ${avgAccuracy.toFixed(2)}%. Runs on JARVIS-4 lead the pack; JARVIS-2 remains below the 90% baseline.`,
+        title: `Average ESG Score: ${avgScore.toFixed(1)}`,
+        desc: `The mean ESG score across all ${n} reports is ${avgScore.toFixed(1)}. IBM-ESG-2024 leads at 81.3; Legacy-Report-22 requires remediation at 42.7.`,
       },
       {
         icon: '!',
         bg: '#1f1800',
         col: 'var(--yellow)',
-        title: 'Model Transition Gap',
-        desc: 'There is a visible accuracy drop at the JARVIS-2 → JARVIS-3 boundary (89.1% → 93.9%). Monitoring accuracy across model rollouts is recommended.',
+        title: 'Governance Coverage Gap',
+        desc: 'Governance pillar coverage (58%) lags Environmental (72%) and Social (61%). Targeted governance disclosure improvements are recommended across the portfolio.',
       },
       {
         icon: '✓',
         bg: '#071a0e',
         col: 'var(--green)',
-        title: `4-Run Forecast: ${forecast[forecast.length - 1]}%`,
-        desc: `Based on the current trajectory, accuracy is projected to reach ${forecast[forecast.length - 1]}% in 4 runs. Forecast confidence decreases at the 3–4 run horizon.`,
+        title: `4-Report Forecast: ${forecast[forecast.length - 1]}`,
+        desc: `Based on current trajectory, the average ESG score is projected to reach ${forecast[forecast.length - 1]} within 4 report cycles. Confidence narrows at the 3–4 report horizon.`,
       },
     ];
 
     const payload = {
-      label: 'Report Accuracy',
-      unit: '% accuracy',
-      chartTitle: 'Model Report Accuracy — Run History + 4-Run Forecast',
+      label: 'ESG Score',
+      unit: 'score',
+      chartTitle: 'ESG Report Scores — History + 4-Report Forecast',
       history,
       weeks: labels,
       forecast,
       confLow,
       confHigh,
       stats: [
-        { label: 'Latest Run',      val: `${history[n-1]}%`, sub: REPORT_RUNS[0].id },
-        { label: '4-Run Forecast',  val: `${forecast[3]}%`,  sub: 'projected',    cls: 'pred' },
-        { label: 'Total Change',    val: `${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)}pp`, sub: `across ${n} runs`, cls: totalGain >= 0 ? 'up' : 'down' },
-        { label: 'Trend Signal',    val: trendLabel,          sub: trend + ' trend', cls: totalGain >= 0 ? 'up' : 'down' },
+        { label: 'Latest Report', val: `${history[n-1]}`,         sub: ESG_REPORTS[0].id },
+        { label: '4-Report Forecast', val: `${forecast[3]}`,       sub: 'projected', cls: 'pred' },
+        { label: 'Total Change',   val: `${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)} pts`, sub: `across ${n} reports`, cls: totalGain >= 0 ? 'up' : 'down' },
+        { label: 'Trend Signal',   val: trendLabel,                 sub: trend + ' trend', cls: totalGain >= 0 ? 'up' : 'down' },
       ],
       insights,
       fromReports: true,
